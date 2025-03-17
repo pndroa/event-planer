@@ -1,0 +1,16 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Dummy Lint Step
+        run: echo "Linting passed"
