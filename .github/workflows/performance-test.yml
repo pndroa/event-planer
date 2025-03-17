@@ -1,4 +1,4 @@
-name: Test
+name: Performance
 
 on:
   push:
@@ -9,11 +9,11 @@ on:
       - develop
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Dummy Test Step
-        run: echo "Tests successful"
+      - name: Dummy Performance Test
+        run: echo "Dummy Performance passed"

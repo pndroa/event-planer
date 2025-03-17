@@ -1,4 +1,4 @@
-name: Build
+name: E2E-Tests
 
 on:
   push:
@@ -9,11 +9,11 @@ on:
       - develop
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Dummy Build Step
-        run: echo "Build successful"
+      - name: Dummy E2E Test
+        run: echo "Dummy E2E passed"
