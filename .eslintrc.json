@@ -7,9 +7,8 @@
   ],
   "plugins": ["prettier"],
   "rules": {
-    "prettier/prettier": ["error"],
-    "no-console": "warn",
-    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "prettier/prettier": ["warning"],
+    "no-unused-vars": ["error"],
     "camelcase": ["error", { "properties": "always" }]
   }
 }
