@@ -1,4 +1,3 @@
-
 // Prisma Client
 generator client {
   provider = "prisma-client-js"
@@ -8,4 +7,110 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// Entities
+model Users {
+  userId   BigInt @id @default(autoincrement())
+  username String @db.VarChar(25)
+  email    String @unique @db.VarChar(254)
+
+  wishes              Wishes[]
+  wishUpvotes         WishUpvote[]
+  events              Events[]
+  eventParticipations EventParticipation[]
+  userAnswers         UserAnswer[]
+}
+
+model Wishes {
+  wishId             BigInt   @id @default(autoincrement())
+  userId             BigInt
+  title              String   @db.VarChar(100)
+  description        String
+  currentUpvotes     Int      @default(0)
+  createdAt          DateTime @default(now())
+  isConvertedToEvent Boolean  @default(false)
+
+  user    Users        @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  upvotes WishUpvote[]
+  event   Events?      @relation("WishEvent")
+}
+
+model Events {
+  eventId             BigInt    @id @default(autoincrement())
+  userId              BigInt
+  wishId              BigInt?   @unique
+  title               String    @db.VarChar(100)
+  description         String
+  room                String?   @db.VarChar(50)
+  duration            String?   @db.VarChar(50)
+  startDate           DateTime?
+  endDate             DateTime?
+  currentParticipants Int       @default(0)
+  createdAt           DateTime  @default(now())
+
+  user         Users                @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  wish         Wishes?              @relation("WishEvent", fields: [wishId], references: [wishId], onDelete: SetNull)
+  surveys      Surveys[]
+  participants EventParticipation[]
+}
+
+model WishUpvote {
+  userId BigInt
+  wishId BigInt
+
+  user Users  @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  wish Wishes @relation(fields: [wishId], references: [wishId], onDelete: Cascade)
+
+  @@id([userId, wishId])
+}
+
+model EventParticipation {
+  userId   BigInt
+  eventId  BigInt
+  joinedAt DateTime @default(now())
+
+  user  Users  @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  event Events @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
+
+  @@id([userId, eventId])
+}
+
+model Surveys {
+  surveyId  BigInt   @id @default(autoincrement())
+  eventId   BigInt
+  title     String?  @db.VarChar(50)
+  createdAt DateTime @default(now())
+
+  event     Events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
+  questions SurveyQuestions[]
+}
+
+model SurveyQuestions {
+  questionId       BigInt  @id @default(autoincrement())
+  surveyId         BigInt
+  questionText     String
+  isMultipleChoice Boolean @default(false)
+
+  survey  Surveys         @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade)
+  answers SurveyAnswers[]
+}
+
+model SurveyAnswers {
+  answerId   BigInt @id @default(autoincrement())
+  questionId BigInt
+  answerText String
+
+  question    SurveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
+  userAnswers UserAnswer[]
+}
+
+model UserAnswer {
+  userId   BigInt
+  answerId BigInt
+
+  user   Users         @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  answer SurveyAnswers @relation(fields: [answerId], references: [answerId], onDelete: Cascade)
+
+  @@id([userId, answerId])
 }
