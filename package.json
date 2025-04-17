@@ -6,12 +6,16 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@mui/material": "^6.4.7",
+    "@next/eslint-plugin-next": "^15.3.1",
     "@prisma/client": "^6.5.0",
     "axios": "^1.8.3",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "joi": "^17.13.3",
     "next": "^15.3.0",
     "react": "^19.1.0",
@@ -21,8 +25,11 @@
     "@types/node": "^20",
     "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
-    "eslint": "^8",
-    "eslint-config-next": "15.2.3",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.2.3",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "prettier": "^3.5.3",
     "prisma": "^6.5.0",
     "typescript": "^5"
   },
