@@ -1,3 +1,3 @@
 export default function Home() {
-  return <div>Event Planer new test</div>
+  return <div>Route Page</div>
 }

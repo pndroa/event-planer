@@ -12,9 +12,9 @@
     "@mui/material": "^6.4.7",
     "axios": "^1.8.3",
     "joi": "^17.13.3",
-    "next": "15.2.3",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "next": "^15.3.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^20",
