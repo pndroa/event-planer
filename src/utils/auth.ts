@@ -3,6 +3,12 @@ import { createClientForServer } from '@/utils/supabase/server'
 import { Provider } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 
+export const providers = [
+  { id: 'google', name: 'Google' },
+  { id: 'azure', name: 'Microsoft' },
+  { id: 'github', name: 'GitHub' },
+]
+
 async function signInWith(provider: Provider) {
   const supabase = await createClientForServer()
   const authCallbackUrl = `${process.env.SITE_URL}/auth/callback`
@@ -18,7 +24,15 @@ async function signInWith(provider: Provider) {
 }
 
 function signInWithGoogle() {
-  return signInWith('google')
+  return signInWith(providers[0].id as Provider)
+}
+
+function signInWithAzure() {
+  return signInWith(providers[1].id as Provider)
+}
+
+function signInWithGitHub() {
+  return signInWith(providers[2].id as Provider)
 }
 
 async function signOut() {
@@ -27,4 +41,4 @@ async function signOut() {
   redirect('/signIn')
 }
 
-export { signInWithGoogle, signOut }
+export { signInWithGoogle, signInWithAzure, signInWithGitHub, signOut }

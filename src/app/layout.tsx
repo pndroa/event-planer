@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { NextAppProvider } from '@toolpad/core/nextjs'
 import React from 'react'
 
 export const metadata: Metadata = {
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NextAppProvider>{children}</NextAppProvider>
+      </body>
     </html>
   )
 }

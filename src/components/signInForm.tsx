@@ -1,6 +1,6 @@
 'use client'
 import { signInWithGoogle } from '@/utils/auth'
-
+/*
 const SignIn = () => {
   return (
     <div>
@@ -9,6 +9,11 @@ const SignIn = () => {
       </form>
     </div>
   )
+}
+*/
+
+const SignIn = () => {
+  return <div>hello</div>
 }
 
 export default SignIn
