@@ -1,5 +1,11 @@
+import SignOutButton from '@/components/signOutButton'
+
 const Page = () => {
-  return <div>Event Page</div>
+  return (
+    <div>
+      <SignOutButton />
+    </div>
+  )
 }
 
 export default Page
