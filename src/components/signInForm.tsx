@@ -59,30 +59,35 @@ const SignIn = () => {
             </Button>
             <Divider />
             <Grid display='flex' gap='4.5rem'>
-              <Image
-                src='/icons/googleIcon.svg'
-                alt='Google Icon'
-                width={40}
-                height={40}
-                style={{ marginTop: '1rem' }}
-                onClick={signInWithGoogle}
-              />
-              <Image
-                src='/icons/microsoftIcon.svg'
-                alt='Microsoft Icon'
-                width={40}
-                height={40}
-                style={{ marginTop: '1rem' }}
-                //onClick={signInWithAzure}
-              />
-              <Image
-                src='/icons/githubIcon.svg'
-                alt='Github Icon'
-                width={40}
-                height={40}
-                style={{ marginTop: '1rem' }}
-                //onClick={signInWithGitHub}
-              />
+              <Button sx={{ marginTop: '1rem' }}>
+                <Image
+                  src='/icons/googleIcon.svg'
+                  alt='Google Icon'
+                  width={40}
+                  height={40}
+                  onClick={signInWithGoogle}
+                />
+              </Button>
+              <Button sx={{ marginTop: '1rem' }}>
+                <Image
+                  src='/icons/microsoftIcon.svg'
+                  alt='Microsoft Icon'
+                  width={40}
+                  height={40}
+                  style={{ marginTop: '1rem' }}
+                  //onClick={signInWithAzure}
+                />
+              </Button>
+              <Button sx={{ marginTop: '1rem' }}>
+                <Image
+                  src='/icons/githubIcon.svg'
+                  alt='Github Icon'
+                  width={40}
+                  height={40}
+                  style={{ marginTop: '1rem' }}
+                  //onClick={signInWithGitHub}
+                />
+              </Button>
             </Grid>
           </FormControl>
         </Grid>

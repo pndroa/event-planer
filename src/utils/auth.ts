@@ -21,12 +21,12 @@ function signInWithGoogle() {
   return signInWith('google' as Provider)
 }
 
-//TO: Setup in Supabase
+//TODO: Setup in Supabase
 function signInWithAzure() {
   return signInWith('azure' as Provider)
 }
 
-//TO: Setup in Supabase
+//TODO: Setup in Supabase
 function signInWithGitHub() {
   return signInWith('github' as Provider)
 }
