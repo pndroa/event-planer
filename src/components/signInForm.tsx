@@ -74,7 +74,6 @@ const SignIn = () => {
                   alt='Microsoft Icon'
                   width={40}
                   height={40}
-                  style={{ marginTop: '1rem' }}
                   //onClick={signInWithAzure}
                 />
               </Button>
@@ -84,7 +83,6 @@ const SignIn = () => {
                   alt='Github Icon'
                   width={40}
                   height={40}
-                  style={{ marginTop: '1rem' }}
                   //onClick={signInWithGitHub}
                 />
               </Button>
