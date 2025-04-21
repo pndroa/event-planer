@@ -1,25 +1,28 @@
 import type { Metadata } from 'next'
 import React from 'react'
-import Navbar1 from '@/components/Navbar1'
-import Navbar2 from '@/components/Navbar2'
 import Navbar from '@/components/Navbar'
-
+import { createClientForServer } from '@/utils/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Event Planer',
   description: 'Pep Digital - Event Planer',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const client = await createClientForServer()
+  const {
+    data: { session },
+  } = await client.auth.getSession()
+
   return (
-    <html lang="en">
+    <html lang='en'>
       <body>
-      <Navbar/>
-      {children}
+        {session && <Navbar />}
+        {children}
       </body>
     </html>
   )

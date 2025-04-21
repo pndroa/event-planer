@@ -21,7 +21,9 @@ import HomeIcon from '@mui/icons-material/Home'
 import StarBorderIcon from '@mui/icons-material/StarBorder'
 import SettingsIcon from '@mui/icons-material/Settings'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import LogoutIcon from '@mui/icons-material/Logout'
 import { usePathname } from 'next/navigation'
+import { signOut } from '@/utils/auth'
 
 const navLinks = [
   { label: 'Events', href: '/event', icon: <HomeIcon /> },
@@ -42,13 +44,13 @@ const Navbar = () => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position='static'>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* Left Section */}
           <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
             {/* Mobile Menu */}
             <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-              <IconButton edge="start" onClick={() => setDrawerOpen(true)} sx={{ color: 'white' }}>
+              <IconButton edge='start' onClick={() => setDrawerOpen(true)} sx={{ color: 'white' }}>
                 <MenuIcon />
               </IconButton>
             </Box>
@@ -71,25 +73,28 @@ const Navbar = () => {
 
           {/* Center Section */}
           <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-            <Typography variant="h6" sx={{ color: 'white', textAlign: 'center' }}>
+            <Typography variant='h6' sx={{ color: 'white', textAlign: 'center' }}>
               Event Planner
             </Typography>
           </Box>
 
           {/* Right Section */}
           <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <IconButton component={Link} href="/notification" sx={{ color: 'white' }}>
+            <IconButton component={Link} href='/notification' sx={{ color: 'white' }}>
               <NotificationsIcon />
             </IconButton>
-            <IconButton component={Link} href="/profile" sx={{ color: 'white' }}>
+            <IconButton component={Link} href='/profile' sx={{ color: 'white' }}>
               <AccountCircleIcon />
+            </IconButton>
+            <IconButton onClick={signOut} sx={{ color: 'white' }}>
+              <LogoutIcon />
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
 
       {/* Mobile Drawer */}
-      <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+      <Drawer anchor='left' open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box sx={{ width: 250, height: '100%', display: 'flex', flexDirection: 'column' }}>
           <List>
             {navLinks
