@@ -79,6 +79,10 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
+      - name: Verify lockfile consistency
+        run: |
+          npm install --package-lock-only
+          git diff --exit-code package-lock.json
 
   # Deployment job
   deploy:
