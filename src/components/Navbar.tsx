@@ -24,7 +24,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications'
 import { usePathname } from 'next/navigation'
 
 const navLinks = [
-  { label: 'Events', href: '/', icon: <HomeIcon /> },
+  { label: 'Events', href: '/event', icon: <HomeIcon /> },
   { label: 'Wishes', href: '/wish', icon: <StarBorderIcon /> },
   { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
 ]
@@ -48,11 +48,7 @@ const Navbar = () => {
           <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
             {/* Mobile Menu */}
             <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-              <IconButton
-                edge="start"
-                onClick={() => setDrawerOpen(true)}
-                sx={{ color: 'white' }}
-              >
+              <IconButton edge="start" onClick={() => setDrawerOpen(true)} sx={{ color: 'white' }}>
                 <MenuIcon />
               </IconButton>
             </Box>
