@@ -18,6 +18,17 @@ export default async function RootLayout({
     data: { session },
   } = await client.auth.getSession()
 
+  if (process.env.NODE_ENV === 'development') {
+    return (
+      <html lang='en'>
+        <body>
+          <Navbar />
+          {children}
+        </body>
+      </html>
+    )
+  }
+
   return (
     <html lang='en'>
       <body>
