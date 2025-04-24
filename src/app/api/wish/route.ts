@@ -6,6 +6,7 @@ export async function GET() {
     const wishes = await prisma.wishes.findMany({
       include: {
         wishUpvote: true,
+        users: true,
       },
     })
 

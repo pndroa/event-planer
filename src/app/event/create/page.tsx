@@ -10,6 +10,8 @@ import { api } from '@/lib/api'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { PostEvents } from '@/lib/types'
+import { useErrorBoundary } from 'react-error-boundary'
+import { useQueryState } from 'nuqs'
 
 interface PostResponseEvent extends PostEvents {
   event: PostEvents & { eventId: string }
@@ -18,6 +20,7 @@ interface PostResponseEvent extends PostEvents {
 const Page = () => {
   //Constants
   const router = useRouter()
+  const { showBoundary } = useErrorBoundary()
 
   //States
   const [startDate, setStartDate] = useState<Date | null>(null)
@@ -56,7 +59,7 @@ const Page = () => {
       console.log('Response = ', event)
     } catch (error) {
       if (error instanceof AxiosError) {
-        console.error(error)
+        showBoundary(error)
       }
     }
   }
@@ -76,7 +79,7 @@ const Page = () => {
 
         setUser(user)
       } catch (error) {
-        console.error(error)
+        showBoundary(error)
       }
     }
     fetchUser()
@@ -153,7 +156,6 @@ const Page = () => {
         </FormCard>
       </Grid>
 
-      {/* Snackbar für die Erfolgsnachricht */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={2000}
