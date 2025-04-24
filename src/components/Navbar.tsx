@@ -5,34 +5,29 @@ import { useState, useEffect } from 'react'
 import {
   AppBar,
   Toolbar,
-  Button,
-  Box,
   IconButton,
-  Drawer,
+  Typography,
+  Box,
   List,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  Typography,
-  ListItemButton,
 } from '@mui/material'
-import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
-import HomeIcon from '@mui/icons-material/Home'
-import StarBorderIcon from '@mui/icons-material/StarBorder'
-import SettingsIcon from '@mui/icons-material/Settings'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import LogoutIcon from '@mui/icons-material/Logout'
+import HomeIcon from '@mui/icons-material/Home'
+import StarIcon from '@mui/icons-material/Star'
+import SettingsIcon from '@mui/icons-material/Settings'
 import { usePathname } from 'next/navigation'
 import { signOut } from '@/utils/auth'
 
 const navLinks = [
   { label: 'Events', href: '/event', icon: <HomeIcon /> },
-  { label: 'Wishes', href: '/wish', icon: <StarBorderIcon /> },
-  { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
+  { label: 'Wishes', href: '/wish', icon: <StarIcon /> },
 ]
 
 const Navbar = () => {
-  const [drawerOpen, setDrawerOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const pathname = usePathname()
 
@@ -44,42 +39,14 @@ const Navbar = () => {
 
   return (
     <>
-      <AppBar position='static'>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          {/* Left Section */}
-          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-            {/* Mobile Menu */}
-            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-              <IconButton edge='start' onClick={() => setDrawerOpen(true)} sx={{ color: 'white' }}>
-                <MenuIcon />
-              </IconButton>
-            </Box>
+      {/* AppBar */}
+      <AppBar position='fixed' sx={{ zIndex: 1300, paddingLeft: 20 }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography variant='h6' sx={{ flexGrow: 1, textAlign: 'center', color: 'white' }}>
+            Event Planner
+          </Typography>
 
-            {/* Desktop Nav Links */}
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-              {navLinks.map((link) => (
-                <Button
-                  key={link.href}
-                  component={Link}
-                  href={link.href}
-                  startIcon={link.icon}
-                  sx={{ color: 'white' }}
-                >
-                  {link.label}
-                </Button>
-              ))}
-            </Box>
-          </Box>
-
-          {/* Center Section */}
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-            <Typography variant='h6' sx={{ color: 'white', textAlign: 'center' }}>
-              Event Planner
-            </Typography>
-          </Box>
-
-          {/* Right Section */}
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton component={Link} href='/notification' sx={{ color: 'white' }}>
               <NotificationsIcon />
             </IconButton>
@@ -93,45 +60,50 @@ const Navbar = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Mobile Drawer */}
-      <Drawer anchor='left' open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 250, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Sidebar */}
+      <Box
+        sx={{
+          width: 200,
+          position: 'fixed',
+          top: 64, // AppBar height
+          left: 0,
+          bottom: 0,
+          bgcolor: '#F4F5F7',
+          borderRight: '1px solid #dcdcdc',
+          pt: 2,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Navigationsbereich */}
+        <Box sx={{ flexGrow: 1 }}>
           <List>
-            {navLinks
-              .filter((link) => link.label !== 'Settings')
-              .map((link) => (
-                <ListItemButton
-                  key={link.href}
-                  component={Link}
-                  href={link.href}
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <ListItemIcon>{link.icon}</ListItemIcon>
-                  <ListItemText primary={link.label} />
-                </ListItemButton>
-              ))}
+            {navLinks.map((link) => (
+              <ListItemButton
+                key={link.href}
+                component={Link}
+                href={link.href}
+                selected={pathname.startsWith(link.href)}
+              >
+                <ListItemIcon>{link.icon}</ListItemIcon>
+                <ListItemText primary={link.label} />
+              </ListItemButton>
+            ))}
           </List>
-
-          {/* Settings */}
-          <Box sx={{ mt: 'auto' }}>
-            <List>
-              {navLinks
-                .filter((link) => link.label === 'Settings')
-                .map((link) => (
-                  <ListItemButton
-                    key={link.href}
-                    component={Link}
-                    href={link.href}
-                    onClick={() => setDrawerOpen(false)}
-                  >
-                    <ListItemIcon>{link.icon}</ListItemIcon>
-                    <ListItemText primary={link.label} />
-                  </ListItemButton>
-                ))}
-            </List>
-          </Box>
         </Box>
-      </Drawer>
+
+        {/* Settings ganz unten */}
+        <Box>
+          <List>
+            <ListItemButton component={Link} href='/settings'>
+              <ListItemIcon>
+                <SettingsIcon />
+              </ListItemIcon>
+              <ListItemText primary='Settings' />
+            </ListItemButton>
+          </List>
+        </Box>
+      </Box>
     </>
   )
 }
