@@ -7,7 +7,16 @@ import { de } from 'date-fns/locale/de'
 const DatePicker = (props: DatePickerProps) => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={de}>
-      <MuiDatePicker slotProps={{ field: { clearable: true } }} {...props} sx={{ width: '100%' }} />
+      <MuiDatePicker
+        slotProps={{
+          field: { clearable: true },
+          textField: {
+            required: true,
+          },
+        }}
+        {...props}
+        sx={{ width: '100%' }}
+      />
     </LocalizationProvider>
   )
 }
