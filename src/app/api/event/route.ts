@@ -4,7 +4,6 @@ import Joi from 'joi'
 import { NextResponse } from 'next/server'
 import { GetEvents, PostEvents } from '@/lib/types'
 
-/*
 export async function GET() {
   try {
     const events = await prisma.events.findMany()
@@ -24,7 +23,7 @@ export async function GET() {
     return NextResponse.json({ error }, { status: 500 })
   }
 }
-*/
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()

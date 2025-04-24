@@ -34,7 +34,13 @@ export default async function RootLayout({
     <html lang='en'>
       <body>
         {session && <Navbar />}
-        <NuqsAdapter>{children}</NuqsAdapter>
+        <div
+          style={{
+            paddingTop: '64px', // Platz für AppBar
+          }}
+        >
+          <NuqsAdapter>{children}</NuqsAdapter>
+        </div>
       </body>
     </html>
   )

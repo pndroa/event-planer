@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
-import { serializeWish } from '@/utils/serializeWish'
 
 export async function GET() {
   try {
     const wishes = await prisma.wishes.findMany({
       include: {
-        user: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
+        wishUpvote: true,
       },
     })
 
