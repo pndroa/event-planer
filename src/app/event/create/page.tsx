@@ -1,21 +1,33 @@
 'use client'
 import FormCard from '@/components/formCard'
-import { TextField, Grid, Button, Box } from '@mui/material'
+import { TextField, Grid, Button, Box, Snackbar, Alert } from '@mui/material'
 import DatePicker from '@/components/datePicker'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
-import { redirect } from 'next/navigation'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
+import { PostEvents } from '@/lib/types'
+
+interface PostResponseEvent extends PostEvents {
+  event: PostEvents & { eventId: string }
+}
 
 const Page = () => {
+  //Constants
+  const router = useRouter()
+
+  //States
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
   const [isClient, setIsClient] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
 
+  //Functions
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.target as HTMLFormElement)
@@ -29,19 +41,27 @@ const Page = () => {
       endDate: format(endDate as Date, 'yyyy-MM-dd'),
     }
 
-    console.log(event)
-
     try {
-      const res = await api.post('/event', event)
-      if (res.status == 200) {
-        redirect('/event')
+      const res = await api.post<PostResponseEvent>('/event', event)
+      if (res.status === 200) {
+        setSuccessMessage('Event erfolgreich erstellt!')
+        setOpenSnackbar(true)
+
+        const { eventId } = res.data.event
+
+        setTimeout(() => {
+          router.push(`/event/create/${eventId}/survey`)
+        }, 1500)
       }
+      console.log('Response = ', event)
     } catch (error) {
       if (error instanceof AxiosError) {
         console.error(error)
       }
     }
   }
+
+  //Effects
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -67,7 +87,6 @@ const Page = () => {
   }, [])
 
   if (!isClient) {
-    //return null
     return <Box>Loading...</Box>
   }
 
@@ -127,12 +146,24 @@ const Page = () => {
             </Grid>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
               <Button type='submit' color='primary' variant='contained'>
-                create Event
+                Create Event
               </Button>
             </Box>
           </Box>
         </FormCard>
       </Grid>
+
+      {/* Snackbar für die Erfolgsnachricht */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setOpenSnackbar(false)} severity='success' sx={{ width: '100%' }}>
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Grid>
   )
 }
