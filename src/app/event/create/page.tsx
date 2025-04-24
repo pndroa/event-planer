@@ -2,7 +2,7 @@
 import FormCard from '@/components/formCard'
 import { TextField, Grid, Button, Box, Snackbar, Alert } from '@mui/material'
 import DatePicker from '@/components/datePicker'
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { AxiosError } from 'axios'
@@ -22,9 +22,17 @@ const Page = () => {
   const router = useRouter()
   const { showBoundary } = useErrorBoundary()
 
+  const dateQueryOptions = useMemo(
+    () => ({
+      parse: (value: string | null) => (value ? new Date(value) : null),
+      serialize: (value: Date | null) => (value ? format(value, 'yyyy-MM-dd') : ''),
+    }),
+    []
+  )
+
   //States
-  const [startDate, setStartDate] = useState<Date | null>(null)
-  const [endDate, setEndDate] = useState<Date | null>(null)
+  const [startDate, setStartDate] = useQueryState<Date | null>('startDate', dateQueryOptions)
+  const [endDate, setEndDate] = useQueryState<Date | null>('enddate', dateQueryOptions)
   const [isClient, setIsClient] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -43,6 +51,8 @@ const Page = () => {
       startDate: format(startDate as Date, 'yyyy-MM-dd'),
       endDate: format(endDate as Date, 'yyyy-MM-dd'),
     }
+
+    console.log('Event startDate = ', event.startDate, ' Event Enddate = ', event.endDate)
 
     try {
       const res = await api.post<PostResponseEvent>('/event', event)
