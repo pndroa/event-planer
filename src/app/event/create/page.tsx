@@ -35,8 +35,8 @@ const Page = () => {
     const event = {
       trainerId: user?.id as string,
       title: formData.get('title') as string,
-      description: formData.get('description') as string,
-      room: formData.get('room') as string,
+      description: (formData.get('description') as string) || null,
+      room: (formData.get('room') as string) || null,
       startDate: format(startDate as Date, 'yyyy-MM-dd'),
       endDate: format(endDate as Date, 'yyyy-MM-dd'),
     }
@@ -100,7 +100,7 @@ const Page = () => {
       margin='auto'
     >
       <Grid>
-        <FormCard variant='Event'>
+        <FormCard title='Create Event'>
           <Box component='form' onSubmit={handleSubmit}>
             <TextField
               label='Title'
