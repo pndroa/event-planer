@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import React from 'react'
 import Navbar from '@/components/Navbar'
 import { createClientForServer } from '@/utils/supabase/server'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 export const metadata: Metadata = {
   title: 'Event Planer',
@@ -23,7 +24,7 @@ export default async function RootLayout({
       <html lang='en'>
         <body>
           <Navbar />
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
         </body>
       </html>
     )
@@ -33,7 +34,7 @@ export default async function RootLayout({
     <html lang='en'>
       <body>
         {session && <Navbar />}
-        {children}
+        <NuqsAdapter>{children}</NuqsAdapter>
       </body>
     </html>
   )
