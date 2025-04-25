@@ -1,116 +1,106 @@
-// Prisma Client
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
-// DB Config
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["auth", "erguen"]
 }
 
-// Entities
-model Users {
-  userId   BigInt @id @default(autoincrement())
-  username String @db.VarChar(25)
-  email    String @unique @db.VarChar(254)
+model users {
+  userid     String       @id @db.Uuid
+  email      String
+  name       String?
+  Events     Events[]
+  Wishes     Wishes[]
+  users      auth_users   @relation(fields: [userid], references: [id], onDelete: Cascade)
+  wishUpvote wishUpvote[]
 
-  wishes              Wishes[]
-  wishUpvotes         WishUpvote[]
-  events              Events[]
-  eventParticipations EventParticipation[]
-  userAnswers         UserAnswer[]
-}
-
-model Wishes {
-  wishId             BigInt   @id @default(autoincrement())
-  userId             BigInt
-  title              String   @db.VarChar(100)
-  description        String
-  currentUpvotes     Int      @default(0)
-  createdAt          DateTime @default(now())
-  isConvertedToEvent Boolean  @default(false)
-
-  user    Users        @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  upvotes WishUpvote[]
-  event   Events?      @relation("WishEvent")
+  @@map("users")
+  @@schema("erguen")
 }
 
 model Events {
-  eventId             BigInt    @id @default(autoincrement())
-  userId              BigInt
-  wishId              BigInt?   @unique
-  title               String    @db.VarChar(100)
-  description         String
-  room                String?   @db.VarChar(50)
-  duration            String?   @db.VarChar(50)
-  startDate           DateTime?
-  endDate             DateTime?
-  currentParticipants Int       @default(0)
-  createdAt           DateTime  @default(now())
+  eventId     String   @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String?
+  room        String?
+  startDate   DateTime @db.Date
+  endDate     DateTime @db.Date
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  trainerId   String?  @db.Uuid
+  Users       users?   @relation(fields: [trainerId], references: [userid])
 
-  user         Users                @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  wish         Wishes?              @relation("WishEvent", fields: [wishId], references: [wishId], onDelete: SetNull)
-  surveys      Surveys[]
-  participants EventParticipation[]
+  @@schema("erguen")
 }
 
-model WishUpvote {
-  userId BigInt
-  wishId BigInt
+model Wishes {
+  wishId             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String
+  description        String?
+  isConvertedToEvent Boolean      @default(false)
+  createdAt          DateTime     @default(now()) @db.Timestamptz(6)
+  wishCreator        String?      @db.Uuid
+  users              users?       @relation(fields: [wishCreator], references: [userid])
+  wishUpvote         wishUpvote[]
 
-  user Users  @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  wish Wishes @relation(fields: [wishId], references: [wishId], onDelete: Cascade)
-
-  @@id([userId, wishId])
+  @@schema("erguen")
 }
 
-model EventParticipation {
-  userId   BigInt
-  eventId  BigInt
-  joinedAt DateTime @default(now())
+model wishUpvote {
+  upvoteId   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @default(dbgenerated("auth.uid()")) @db.Uuid
+  wishid     String   @default(dbgenerated("auth.uid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users    @relation(fields: [userId], references: [userid], onDelete: Cascade)
+  Wishes     Wishes   @relation(fields: [wishid], references: [wishId], onDelete: Cascade)
 
-  user  Users  @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  event Events @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
-
-  @@id([userId, eventId])
+  @@schema("erguen")
 }
 
-model Surveys {
-  surveyId  BigInt   @id @default(autoincrement())
-  eventId   BigInt
-  title     String?  @db.VarChar(50)
-  createdAt DateTime @default(now())
+model auth_users {
+  instance_id                 String?           @db.Uuid
+  id                          String            @id @db.Uuid
+  aud                         String?           @db.VarChar(255)
+  role                        String?           @db.VarChar(255)
+  email                       String?           @db.VarChar(255)
+  encrypted_password          String?           @db.VarChar(255)
+  email_confirmed_at          DateTime?         @db.Timestamptz(6)
+  invited_at                  DateTime?         @db.Timestamptz(6)
+  confirmation_token          String?           @db.VarChar(255)
+  confirmation_sent_at        DateTime?         @db.Timestamptz(6)
+  recovery_token              String?           @db.VarChar(255)
+  recovery_sent_at            DateTime?         @db.Timestamptz(6)
+  email_change_token_new      String?           @db.VarChar(255)
+  email_change                String?           @db.VarChar(255)
+  email_change_sent_at        DateTime?         @db.Timestamptz(6)
+  last_sign_in_at             DateTime?         @db.Timestamptz(6)
+  raw_app_meta_data           Json?
+  raw_user_meta_data          Json?
+  is_super_admin              Boolean?
+  created_at                  DateTime?         @db.Timestamptz(6)
+  updated_at                  DateTime?         @db.Timestamptz(6)
+  phone                       String?           @unique
+  phone_confirmed_at          DateTime?         @db.Timestamptz(6)
+  phone_change                String?           @default("")
+  phone_change_token          String?           @default("") @db.VarChar(255)
+  phone_change_sent_at        DateTime?         @db.Timestamptz(6)
+  confirmed_at                DateTime?         @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  email_change_token_current  String?           @default("") @db.VarChar(255)
+  email_change_confirm_status Int?              @default(0) @db.SmallInt
+  banned_until                DateTime?         @db.Timestamptz(6)
+  reauthentication_token      String?           @default("") @db.VarChar(255)
+  reauthentication_sent_at    DateTime?         @db.Timestamptz(6)
+  is_sso_user                 Boolean           @default(false)
+  deleted_at                  DateTime?         @db.Timestamptz(6)
+  is_anonymous                Boolean           @default(false)
+  users                       users?
 
-  event     Events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
-  questions SurveyQuestions[]
+  @@index([instance_id])
+  @@index([is_anonymous])
+  @@map("users")
+  @@schema("auth")
 }
 
-model SurveyQuestions {
-  questionId       BigInt  @id @default(autoincrement())
-  surveyId         BigInt
-  questionText     String
-  isMultipleChoice Boolean @default(false)
-
-  survey  Surveys         @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade)
-  answers SurveyAnswers[]
-}
-
-model SurveyAnswers {
-  answerId   BigInt @id @default(autoincrement())
-  questionId BigInt
-  answerText String
-
-  question    SurveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
-  userAnswers UserAnswer[]
-}
-
-model UserAnswer {
-  userId   BigInt
-  answerId BigInt
-
-  user   Users         @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  answer SurveyAnswers @relation(fields: [answerId], references: [answerId], onDelete: Cascade)
-
-  @@id([userId, answerId])
-}
