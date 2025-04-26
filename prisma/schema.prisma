@@ -10,55 +10,116 @@ datasource db {
 }
 
 model users {
-  userid     String       @id @db.Uuid
-  email      String
-  name       String?
-  Events     Events[]
-  Wishes     Wishes[]
-  users      auth_users   @relation(fields: [userid], references: [id], onDelete: Cascade)
-  wishUpvote wishUpvote[]
+  userId             String               @id @db.Uuid
+  email              String
+  name               String?
+  eventParticipation eventParticipation[]
+  events             events[]
+  userAnswer         userAnswer[]
+  users              auth_users           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  wishUpvote         wishUpvote[]
+  wishes             wishes[]
 
   @@map("users")
   @@schema("erguen")
 }
 
-model Events {
-  eventId     String   @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title       String
-  description String?
-  room        String?
-  startDate   DateTime @db.Date
-  endDate     DateTime @db.Date
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
-  trainerId   String?  @db.Uuid
-  Users       users?   @relation(fields: [trainerId], references: [userid])
+model events {
+  eventId            String               @id(map: "Events_pkey") @unique(map: "Events_eventId_key") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String
+  description        String?
+  room               String?
+  startDate          DateTime             @db.Date
+  endDate            DateTime             @db.Date
+  createdAt          DateTime             @default(now()) @db.Timestamptz(6)
+  trainerId          String               @db.Uuid
+  eventParticipation eventParticipation[]
+  users              users                @relation(fields: [trainerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Events_trainerId_fkey")
+  surveys            surveys?
 
   @@schema("erguen")
 }
 
-model Wishes {
-  wishId             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+model wishes {
+  wishId             String       @id(map: "Wishes_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title              String
   description        String?
   isConvertedToEvent Boolean      @default(false)
   createdAt          DateTime     @default(now()) @db.Timestamptz(6)
-  wishCreator        String?      @db.Uuid
-  users              users?       @relation(fields: [wishCreator], references: [userid])
+  wishCreator        String       @db.Uuid
   wishUpvote         wishUpvote[]
+  users              users        @relation(fields: [wishCreator], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Wishes_wishCreator_fkey")
 
   @@schema("erguen")
 }
 
 model wishUpvote {
   upvoteId   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId     String   @default(dbgenerated("auth.uid()")) @db.Uuid
-  wishid     String   @default(dbgenerated("auth.uid()")) @db.Uuid
+  userId     String   @db.Uuid
+  wishId     String   @db.Uuid
   created_at DateTime @default(now()) @db.Timestamptz(6)
-  users      users    @relation(fields: [userId], references: [userid], onDelete: Cascade)
-  Wishes     Wishes   @relation(fields: [wishid], references: [wishId], onDelete: Cascade)
+  users      users    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  wishes     wishes   @relation(fields: [wishId], references: [wishId], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("erguen")
 }
+
+model eventParticipation {
+  eventParticipationId String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  participantId        String   @db.Uuid
+  eventId              String   @db.Uuid
+  Events               events   @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
+  users                users    @relation(fields: [participantId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("erguen")
+}
+
+model surveyAnswerOptions {
+  answerId        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  questionId      String          @db.Uuid
+  answerText      String
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  surveyQuestions surveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade, onUpdate: NoAction)
+  userAnswer      userAnswer[]
+
+  @@schema("erguen")
+}
+
+model surveyQuestions {
+  questionId          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  surveyId            String                @db.Uuid
+  questionText        String
+  isMultipleChoice    Boolean               @default(false)
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  surveyAnswerOptions surveyAnswerOptions[]
+  surveys             surveys               @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("erguen")
+}
+
+model surveys {
+  surveyId        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId         String            @unique @db.Uuid
+  title           String
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  surveyQuestions surveyQuestions[]
+  Events          events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("erguen")
+}
+
+model userAnswer {
+  userAnswerId        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String              @db.Uuid
+  answerId            String              @db.Uuid
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  surveyAnswerOptions surveyAnswerOptions @relation(fields: [answerId], references: [answerId], onDelete: Cascade, onUpdate: NoAction)
+  users               users               @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("erguen")
+}
+
 
 model auth_users {
   instance_id                 String?           @db.Uuid
@@ -103,4 +164,7 @@ model auth_users {
   @@map("users")
   @@schema("auth")
 }
+
+
+
 
