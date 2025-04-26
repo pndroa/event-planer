@@ -6,13 +6,12 @@ export async function GET() {
     const wishes = await prisma.wishes.findMany({
       include: {
         wishUpvote: true,
-        users: true,
       },
     })
 
     return NextResponse.json(wishes, { status: 200 })
   } catch (error) {
-    console.error('[GET_WISHES_ERROR]', error)
+    console.error('Wish Error', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
