@@ -18,6 +18,7 @@ import {
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import { blue, grey } from '@mui/material/colors'
 import { api } from '@/lib/api'
+import Link from 'next/link'
 
 interface Wish {
   wishId: number
@@ -109,14 +110,11 @@ export default function WishFeed() {
             <MenuItem value='likes'>Most liked</MenuItem>
           </Select>
         </FormControl>
-        <Button
-          variant='contained'
-          size='small'
-          sx={{ height: '40px' }}
-          onClick={() => alert('Create wish')}
-        >
-          + CREATE WISH
-        </Button>
+        <Link href='/wish/create'>
+          <Button variant='contained' size='small' sx={{ height: '40px' }}>
+            + CREATE WISH
+          </Button>
+        </Link>
       </Box>
 
       {/* Feed */}

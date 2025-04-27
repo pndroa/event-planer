@@ -41,3 +41,9 @@ export const postEventSchema = Joi.object({
     'any.required': 'The end date is required.',
   }),
 })
+
+export const postWishSchema = Joi.object({
+  wishCreator: Joi.string().required().uuid(),
+  title: Joi.string().required(),
+  description: Joi.string().optional().allow(null),
+})

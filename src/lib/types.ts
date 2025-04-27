@@ -15,3 +15,9 @@ export interface PostEvents {
   startDate: Date
   endDate: Date
 }
+
+export interface PostWishes {
+  wishCreator: string
+  title: string
+  description?: string
+}
