@@ -6,7 +6,6 @@ import { blue, grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
 
 interface WishCardProps {
-  wishId: string
   username: string
   title: string
   createdAt: string
@@ -14,7 +13,6 @@ interface WishCardProps {
 }
 
 export default function WishCard({
-  wishId,
   username,
   title,
   createdAt,
