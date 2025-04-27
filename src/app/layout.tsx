@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   description: 'Pep Digital - Event Planer',
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   const client = await createClientForServer()
   const {
     data: { session },
@@ -19,14 +23,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang='en'>
       <body>
-        {process.env.NODE_ENV === 'development' && <Navbar />}
         <div style={{ paddingTop: '64px' }}>
-          {process.env.NODE_ENV === 'development' ? (
+          {process.env.NODE_ENV !== 'production' ? (
             <ErrorBoundaryWrapper>
-              <NuqsAdapter>{children}</NuqsAdapter>
+              <NuqsAdapter>
+                <Navbar />
+                {children}
+              </NuqsAdapter>
             </ErrorBoundaryWrapper>
           ) : (
-            <NuqsAdapter>{children}</NuqsAdapter>
+            <ErrorBoundaryWrapper>
+              <NuqsAdapter>
+                {session && <Navbar />}
+                {children}
+              </NuqsAdapter>
+            </ErrorBoundaryWrapper>
           )}
         </div>
       </body>

@@ -27,7 +27,7 @@ const SignIn = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '97vh',
+        height: '80vh',
       }}
     >
       <Box sx={{ width: '50%', height: '75%' }}>

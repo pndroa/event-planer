@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const users = await prisma.users.findMany({
     include: {
-      Events: true,
-      Wishes: {
+      events: true,
+      wishes: {
         include: {
           wishUpvote: true,
         },
