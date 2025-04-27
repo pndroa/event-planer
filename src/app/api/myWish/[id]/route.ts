@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
-import { serializeWish } from '@/utils/serializeWish'
 
-export async function GET(request: Request, { params }: { params: { uuid: string }}) {
-  const { uuid } = params
 
-  if (!uuid) {
+export async function GET(request: Request, { params }: { params: { id: string }}) {
+  const { id } = params
+
+  if (!id) {
     throw new Error('Invalid or missing id parameter')
   }
 
@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: { uuid: string
       },
       where: {
         users: {
-          userId: uuid,
+          userId: id,
         },
       },
     })

@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, Typography, IconButton, Avatar } from '@mui/material'
+import { Box, Card, Typography, IconButton, Avatar, Button } from '@mui/material'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import { blue, grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
@@ -10,9 +10,16 @@ interface WishCardProps {
   username: string
   title: string
   createdAt: string
+  deleteButton?: boolean
 }
 
-export default function WishCard({ wishId, username, title, createdAt }: WishCardProps) {
+export default function WishCard({
+  wishId,
+  username,
+  title,
+  createdAt,
+  deleteButton = false,
+}: WishCardProps) {
   return (
     <>
       <Card
@@ -45,19 +52,24 @@ export default function WishCard({ wishId, username, title, createdAt }: WishCar
             {formatTimeAgo(createdAt)}
           </Typography>
         </Box>
-
         <Typography
           variant='h6'
           sx={{ mt: 1, fontWeight: 700, color: grey[900], wordBreak: 'break-word' }}
         >
           {title}
         </Typography>
-
         <Box display='flex' alignItems='center' mt={2}>
           <IconButton size='small' disabled sx={{ p: 0.5, mr: 0.5 }}>
             <ThumbUpAltOutlinedIcon sx={{ color: blue[500], fontSize: 20 }} />
           </IconButton>
           <Typography variant='body2' color='text.secondary'></Typography>
+        </Box>
+        <Box display='flex' justifyContent='flex-end'>
+          {deleteButton && (
+            <Button variant='contained' size='small' sx={{ height: '40px' }}>
+              Delete
+            </Button>
+          )}
         </Box>
       </Card>
     </>

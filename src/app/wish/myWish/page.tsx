@@ -1,46 +1,24 @@
 'use client'
 import { api } from '@/lib/api'
-import { createClient } from '@/utils/supabase/client'
-import { User } from '@supabase/supabase-js'
 import { useState, useEffect } from 'react'
-import SearchbarForCards from '@/components/searchbarForCards'
-import FeedForCards from '@/components/feedforCards'
-
-interface Wish {
-  wishId: number
-  userId: number
-  title: string
-  description: string
-  currentUpvotes: number
-  createdAt: string
-}
+import { Box, Stack, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
+import SearchBar from '@/components/SearchBar'
+import Link from 'next/link'
+import { Wishes } from '@/lib/types'
+import { useUser } from '@/hooks/useUser'
+import WishCard from '@/components/WishCard'
+import TopNavigation from '@/components/TopNavigation'
 
 const Page = () => {
-  const [user, setUser] = useState<User | null>(null)
-  const [wishes, setWishes] = useState<Wish[]>([])
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const supabase = createClient()
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser()
-      if (error) {
-        console.error('Error fetching user:', error)
-      } else {
-        setUser(user)
-      }
-    }
-    fetchUser()
-  }, [])
+  const [wishes, setWishes] = useState<Wishes[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState<'date'>('date')
+  const user = useUser()
 
   useEffect(() => {
     const fetchWishes = async () => {
       try {
         const res = await api.get(`/myWish/${user?.id}`)
-        console.log('myWishes')
-        console.log(res.data)
         setWishes(res.data)
       } catch (error) {
         console.error('Error loading wishes:', error)
@@ -49,11 +27,56 @@ const Page = () => {
     fetchWishes()
   }, [user])
 
+  const filteredWishes: Wishes[] = wishes
+    .filter((wish) => wish.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
   return (
-    <div>
-      <SearchbarForCards buttonText='Create Wish' />
-      <FeedForCards />
-    </div>
+    <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
+      <Box>
+        <TopNavigation />
+      </Box>
+      <Box
+        display='flex'
+        flexWrap='wrap'
+        alignItems='center'
+        justifyContent='space-between'
+        gap={1.5}
+        mb={3}
+      >
+        <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+        <FormControl size='small' sx={{ minWidth: 140 }}>
+          <InputLabel id='sort-label'>Sort by</InputLabel>
+          <Select
+            labelId='sort-label'
+            value={sortBy}
+            label='Sort by'
+            onChange={(e) => setSortBy(e.target.value as 'date')}
+          >
+            <MenuItem value='date'>Newest</MenuItem>
+          </Select>
+        </FormControl>
+        <Link href='/wish/create' style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Button variant='contained' size='small' sx={{ height: '40px' }}>
+            + CREATE WISH
+          </Button>
+        </Link>
+      </Box>
+
+      {/* Feed */}
+      <Stack spacing={2}>
+        {filteredWishes.map((wish) => (
+          <WishCard
+            key={wish.wishId}
+            wishId={wish.wishId}
+            username={wish.users.name}
+            title={wish.title}
+            createdAt={wish.createdAt}
+            deleteButton={true}
+          />
+        ))}
+      </Stack>
+    </Box>
   )
 }
 
