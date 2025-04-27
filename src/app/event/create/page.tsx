@@ -2,9 +2,7 @@
 import FormCard from '@/components/formCard'
 import { TextField, Grid, Button, Box, Snackbar, Alert } from '@mui/material'
 import DatePicker from '@/components/datePicker'
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { format } from 'date-fns'
@@ -12,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { PostEvents } from '@/lib/types'
 import { useErrorBoundary } from 'react-error-boundary'
 import { useQueryState } from 'nuqs'
+import { useUser } from '@/hooks/useUser'
 
 interface PostResponseEvent extends PostEvents {
   event: PostEvents & { eventId: string }
@@ -20,6 +19,7 @@ interface PostResponseEvent extends PostEvents {
 const Page = () => {
   //Constants
   const router = useRouter()
+  const user = useUser()
   const { showBoundary } = useErrorBoundary()
 
   const dateQueryOptions = useMemo(
@@ -34,7 +34,6 @@ const Page = () => {
   const [startDate, setStartDate] = useQueryState<Date | null>('startDate', dateQueryOptions)
   const [endDate, setEndDate] = useQueryState<Date | null>('enddate', dateQueryOptions)
   const [isClient, setIsClient] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
 
@@ -73,27 +72,6 @@ const Page = () => {
       }
     }
   }
-
-  //Effects
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const supabase = createClient()
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser()
-
-        if (error) console.error(error)
-
-        setUser(user)
-      } catch (error) {
-        showBoundary(error)
-      }
-    }
-    fetchUser()
-  }, [])
 
   useLayoutEffect(() => {
     setIsClient(true)
