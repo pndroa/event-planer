@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
+import Joi from 'joi'
+import { PostEvents } from '@/lib/types'
+import { postEventSchema } from '@/lib/validation'
 
 export async function GET() {
   try {
@@ -13,6 +16,8 @@ export async function GET() {
   } catch (error) {
     console.error('[GET_WISHES_ERROR]', error)
     return new NextResponse('Internal Server Error', { status: 500 })
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -28,7 +33,11 @@ export async function POST(req: Request) {
       )
     } else {
       const event = await prisma.events.create({
-        data: { ...value, startDate: new Date(value.startDate), endDate: new Date(value.endDate) },
+        data: {
+          ...value,
+          startDate: new Date(value.startDate),
+          endDate: new Date(value.endDate),
+        },
       })
       return NextResponse.json({ message: 'created event', event }, { status: 200 })
     }
