@@ -79,7 +79,11 @@ const Navbar = () => {
         <Box sx={{ flexGrow: 1 }}>
           <List>
             {navLinks.map((link) => (
-              <Link href={link.href} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link
+                href={link.href}
+                key={link.href}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <ListItemButton key={link.label} selected={pathname.startsWith(link.href)}>
                   <ListItemIcon>{link.icon}</ListItemIcon>
                   <ListItemText primary={link.label} />
