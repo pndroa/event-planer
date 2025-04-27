@@ -12,8 +12,6 @@ const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
   if (isAxiosError(error)) {
     const err = error.response?.data as { details?: string; message?: string }
     errorMessage = err.details as string
-  } else {
-    errorMessage = error.message
   }
 
   return (

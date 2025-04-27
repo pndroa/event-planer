@@ -1,5 +1,4 @@
 'use client'
-
 import { ErrorBoundary } from 'react-error-boundary'
 import ErrorFallback from './errorFallback'
 import { ReactNode } from 'react'

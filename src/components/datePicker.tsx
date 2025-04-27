@@ -5,8 +5,6 @@ import { DatePicker as MuiDatePicker, DatePickerProps } from '@mui/x-date-picker
 import { de } from 'date-fns/locale/de'
 
 const DatePicker = (props: DatePickerProps) => {
-  console.log('Test')
-
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={de}>
       <MuiDatePicker

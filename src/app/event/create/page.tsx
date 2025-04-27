@@ -51,25 +51,25 @@ const Page = () => {
       endDate: format(endDate as Date, 'yyyy-MM-dd'),
     }
 
-    console.log('Event startDate = ', event.startDate, ' Event Enddate = ', event.endDate)
-
     try {
       const res = await api.post<PostResponseEvent>('/event', event)
       if (res.status === 200) {
-        setSuccessMessage('Event erfolgreich erstellt!')
+        //setSuccessMessage('Event successfully created! Redirecting to the survey...')
+        setSuccessMessage('Event successfully created! Redirecting to the events...')
         setOpenSnackbar(true)
 
-        const { eventId } = res.data.event
+        //const { eventId } = res.data.event
 
         setTimeout(() => {
-          router.push(`/event/create/${eventId}/survey`)
-        }, 1500)
+          //router.push(`/event/create/${eventId}/survey`)
+          router.push('/event')
+        }, 2000)
       }
-      console.log('Response = ', event)
     } catch (error) {
       if (error instanceof AxiosError) {
         showBoundary(error)
       }
+      console.error(error)
     }
   }
 
