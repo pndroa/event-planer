@@ -1,3 +1,4 @@
+
 export interface Users {
   userId: string
   name: string
@@ -40,4 +41,13 @@ export interface EventParticipation {
   created_at: string
   participantId: string
   eventId: string
+}
+
+export interface PostEvents {
+  trainerId: string
+  title: string
+  description?: string
+  room?: string
+  startDate: Date
+  endDate: Date
 }

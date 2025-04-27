@@ -11,7 +11,7 @@ export async function GET() {
 
     return NextResponse.json(wishes, { status: 200 })
   } catch (error) {
-    console.error('[GET_WISHES_ERROR]', error)
+    console.error('Wish Error', error)
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }

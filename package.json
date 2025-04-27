@@ -10,23 +10,31 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@date-fns/tz": "^1.2.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
     "@mui/utils": "^7.0.2",
+    "@mui/x-date-pickers": "^8.0.0",
     "@next/eslint-plugin-next": "^15.3.1",
     "@prisma/client": "^6.5.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "@toolpad/core": "^0.14.0",
     "axios": "^1.8.3",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "install": "^0.13.0",
     "joi": "^17.13.3",
     "next": "^15.3.0",
+    "npm": "^11.3.0",
+    "nuqs": "^2.4.3",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-error-boundary": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
