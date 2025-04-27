@@ -12,7 +12,7 @@ interface WishCardProps {
   createdAt: string
 }
 
-export default function WishCard({ wishId, username, title, createdAt }: WishCardProps) {
+export default function WishCard({ username, title, createdAt }: WishCardProps) {
   return (
     <>
       <Card

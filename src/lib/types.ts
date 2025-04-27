@@ -1,4 +1,3 @@
-
 export interface Users {
   userId: string
   name: string
