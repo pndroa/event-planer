@@ -1,28 +1,18 @@
-import prisma from '@/lib/client'
-import { getEventSchema, postEventSchema } from '@/lib/validation'
-import Joi from 'joi'
 import { NextResponse } from 'next/server'
-import { GetEvents, PostEvents } from '@/lib/types'
+import prisma from '@/lib/client'
 
 export async function GET() {
   try {
-    const events = await prisma.events.findMany()
+    const events = await prisma.events.findMany({
+      include: {
+        users: true,
+      },
+    })
 
-    const { value, error }: Joi.ValidationResult<GetEvents[]> = Joi.array()
-      .items(getEventSchema)
-      .validate(events)
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Request failed', message: error.details[0].message },
-        { status: 500 }
-      )
-    }
-    return NextResponse.json(value, { status: 200 })
+    return NextResponse.json(events, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 })
-  }
-}
+    console.error('[GET_WISHES_ERROR]', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
 
 export async function POST(req: Request) {
   try {

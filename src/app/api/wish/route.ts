@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const wishes = await prisma.wishes.findMany({
       include: {
-        wishUpvote: true,
+        users: true,
       },
     })
 
