@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["auth", "erguen"] //if branch = main then set schema to "auth" and "public"
+  schemas  = ["auth", "public"] //if branch = main then set schema to "auth" and "public"
 }
 
 model users {
@@ -21,7 +21,7 @@ model users {
   wishes             wishes[]
 
   @@map("users")
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model events {
@@ -37,7 +37,7 @@ model events {
   users              users                @relation(fields: [trainerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Events_trainerId_fkey")
   surveys            surveys?
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model wishes {
@@ -50,7 +50,7 @@ model wishes {
   wishUpvote         wishUpvote[]
   users              users        @relation(fields: [wishCreator], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Wishes_wishCreator_fkey")
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model wishUpvote {
@@ -61,7 +61,7 @@ model wishUpvote {
   users      users    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
   wishes     wishes   @relation(fields: [wishId], references: [wishId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model eventParticipation {
@@ -72,7 +72,7 @@ model eventParticipation {
   Events               events   @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
   users                users    @relation(fields: [participantId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model surveyAnswerOptions {
@@ -83,7 +83,7 @@ model surveyAnswerOptions {
   surveyQuestions surveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade, onUpdate: NoAction)
   userAnswer      userAnswer[]
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model surveyQuestions {
@@ -95,7 +95,7 @@ model surveyQuestions {
   surveyAnswerOptions surveyAnswerOptions[]
   surveys             surveys               @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model surveys {
@@ -106,7 +106,7 @@ model surveys {
   surveyQuestions surveyQuestions[]
   Events          events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 model userAnswer {
@@ -117,7 +117,7 @@ model userAnswer {
   surveyAnswerOptions surveyAnswerOptions @relation(fields: [answerId], references: [answerId], onDelete: Cascade, onUpdate: NoAction)
   users               users               @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("erguen")
+  @@schema("public")
 }
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
