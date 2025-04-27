@@ -1,4 +1,3 @@
-
 export interface Users {
   userId: string
   name: string
@@ -14,6 +13,8 @@ export interface Wishes {
   wishCreator: string
   wishUpvote: WishUpvote[]
   users: Users
+  currentUpvotes: number // neu
+  isUpvotedByMe?: boolean
 }
 
 export interface WishUpvote {

@@ -1,7 +1,7 @@
+// app/wish/page.tsx
 'use client'
-
 import { useEffect, useState } from 'react'
-import { Box, Stack, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
+import { Box, Stack, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 import { api } from '@/lib/api'
 import WishCard from '@/components/WishCard'
 import SearchBar from '@/components/SearchBar'
@@ -12,40 +12,54 @@ export default function WishFeed() {
   const [wishes, setWishes] = useState<Wishes[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState<'date'>('date')
+  const [sortBy, setSortBy] = useState<'date' | 'likes'>('date')
 
-  useEffect(() => {
-    const fetchWishes = async () => {
-      try {
-        const res = await api.get('/wish')
-        setWishes(res.data)
-      } catch (error) {
-        console.error('Error loading wishes:', error)
-      } finally {
-        setLoading(false)
-      }
+  // Daten holen
+  const fetchWishes = async () => {
+    setLoading(true)
+    try {
+      const res = await api.get<Wishes[]>('/wish')
+      setWishes(res.data)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  const handleUpvote = async (wishId: string) => {
+    try {
+      const res = await api.post<{ upvoted: boolean; count: number }>(`/wish/${wishId}/upvote`)
+      setWishes((prev) =>
+        prev.map((w) =>
+          w.wishId === wishId
+            ? {
+                ...w,
+                currentUpvotes: res.data.count,
+                isUpvotedByMe: res.data.upvoted,
+              }
+            : w
+        )
+      )
+    } catch (err) {
+      console.error(err)
+    }
+  }
+  useEffect(() => {
     fetchWishes()
   }, [])
 
-  const filteredWishes: Wishes[] = wishes // array of wish-objects
-    .filter((wish) => wish.title.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const filteredWishes = wishes // filteredWishes ist ein Array von Wish-Objekten
+    .filter((wish) => wish.title.toLowerCase().includes(searchTerm.toLowerCase())) // behalte nur Elemente, bei denen Funktion (wish) => ... true zurückgibt.
+    .sort((a, b) =>
+      sortBy === 'likes'
+        ? b.currentUpvotes - a.currentUpvotes
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ) // .filter() und .sort(): fertige Array-Methoden => erst filtern, dann sortieren!
 
   if (loading) return <p>Loading wishes...</p>
 
   return (
-    <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
-      {/* Top Controls */}
-      <Box
-        display='flex'
-        flexWrap='wrap'
-        alignItems='center'
-        justifyContent='space-between'
-        gap={1.5}
-        mb={3}
-      >
+    <Box sx={{ p: 4, maxWidth: 700, mx: 'auto' }}>
+      <Box display='flex' gap={1.5} flexWrap='wrap' mb={3}>
         <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
         <FormControl size='small' sx={{ minWidth: 140 }}>
           <InputLabel id='sort-label'>Sort by</InputLabel>
@@ -53,13 +67,14 @@ export default function WishFeed() {
             labelId='sort-label'
             value={sortBy}
             label='Sort by'
-            onChange={(e) => setSortBy(e.target.value as 'date')}
+            onChange={(e) => setSortBy(e.target.value as 'date' | 'likes')}
           >
             <MenuItem value='date'>Newest</MenuItem>
+            <MenuItem value='likes'>Most liked</MenuItem>
           </Select>
         </FormControl>
-        <Link href='/wish/create' style={{ textDecoration: 'none', color: 'inherit' }}>
-          <Button variant='contained' size='small' sx={{ height: '40px' }}>
+        <Link href='/wish/create' passHref>
+          <Button variant='contained' size='small' sx={{ height: 40 }}>
             + CREATE WISH
           </Button>
         </Link>
@@ -74,6 +89,9 @@ export default function WishFeed() {
             username={wish.users.name}
             title={wish.title}
             createdAt={wish.createdAt}
+            isUpvoted={!!wish.isUpvotedByMe}
+            onUpvote={() => handleUpvote(wish.wishId)}
+            currentUpvotes={wish.currentUpvotes}
           />
         ))}
       </Stack>
