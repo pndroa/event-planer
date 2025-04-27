@@ -1,26 +1,41 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
-import { serializeWish } from '@/utils/serializeWish'
+import { PostWishes } from '@/lib/types'
+import Joi from 'joi'
+import { postWishSchema } from '@/lib/validation'
 
 export async function GET() {
   try {
     const wishes = await prisma.wishes.findMany({
       include: {
-        user: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
+        users: true,
       },
     })
 
-    const safeWishes = wishes.map(serializeWish)
-    /*  const safeWishes = wishes.map((wish) => {
-        return serializeWish(wish)})
-    */
-
-    return NextResponse.json(safeWishes, { status: 200 })
+    return NextResponse.json(wishes, { status: 200 })
   } catch (error) {
-    console.error('[GET_WISHES_ERROR]', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    return NextResponse.json({ error }, { status: 500 })
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json()
+    const { value, error }: { value: PostWishes; error: Joi.ValidationError | undefined } =
+      postWishSchema.validate(body, { abortEarly: false })
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Request failed', details: error.details[0].message },
+        { status: 400 }
+      )
+    } else {
+      const wish = await prisma.wishes.create({
+        data: value,
+      })
+      return NextResponse.json({ message: 'created wish', wish }, { status: 200 })
+    }
+  } catch (error) {
+    return NextResponse.json({ error }, { status: 500 })
   }
 }

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import React from 'react'
 import Navbar from '@/components/Navbar'
 import { createClientForServer } from '@/utils/supabase/server'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import ErrorBoundaryWrapper from '@/components/errorBoundaryWrapper'
 
 export const metadata: Metadata = {
   title: 'Event Planer',
@@ -21,8 +23,23 @@ export default async function RootLayout({
   return (
     <html lang='en'>
       <body>
-        {session && <Navbar />}
-        {children}
+        <div style={{ paddingTop: '64px' }}>
+          {process.env.NODE_ENV !== 'production' ? (
+            <ErrorBoundaryWrapper>
+              <NuqsAdapter>
+                <Navbar />
+                {children}
+              </NuqsAdapter>
+            </ErrorBoundaryWrapper>
+          ) : (
+            <ErrorBoundaryWrapper>
+              <NuqsAdapter>
+                {session && <Navbar />}
+                {children}
+              </NuqsAdapter>
+            </ErrorBoundaryWrapper>
+          )}
+        </div>
       </body>
     </html>
   )
