@@ -27,10 +27,10 @@ interface Wish {
   currentUpvotes: number
   createdAt: string
   isConvertedToEvent: boolean
-  user: {
+  users: {
     userId: number
-    username: string
     email: string
+    name?: string
   }
 }
 
@@ -83,35 +83,35 @@ export default function WishFeed() {
     <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
       {/* Top Controls */}
       <Box
-        display="flex"
-        flexWrap="wrap"
-        alignItems="center"
-        justifyContent="space-between"
+        display='flex'
+        flexWrap='wrap'
+        alignItems='center'
+        justifyContent='space-between'
         gap={1.5}
         mb={3}
       >
         <TextField
-          label="Search by title"
+          label='Search by title'
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          size="small"
+          size='small'
           sx={{ flex: 1, minWidth: 220 }}
         />
-        <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel id="sort-label">Sort by</InputLabel>
+        <FormControl size='small' sx={{ minWidth: 140 }}>
+          <InputLabel id='sort-label'>Sort by</InputLabel>
           <Select
-            labelId="sort-label"
+            labelId='sort-label'
             value={sortBy}
-            label="Sort by"
+            label='Sort by'
             onChange={(e) => setSortBy(e.target.value as 'date' | 'likes')}
           >
-            <MenuItem value="date">Newest</MenuItem>
-            <MenuItem value="likes">Most liked</MenuItem>
+            <MenuItem value='date'>Newest</MenuItem>
+            <MenuItem value='likes'>Most liked</MenuItem>
           </Select>
         </FormControl>
         <Button
-          variant="contained"
-          size="small"
+          variant='contained'
+          size='small'
           sx={{ height: '40px' }}
           onClick={() => alert('Create wish')}
         >
@@ -141,8 +141,8 @@ export default function WishFeed() {
             }}
           >
             {/* Top Row: Avatar, Name, Timestamp */}
-            <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-              <Box display="flex" alignItems="center" gap={1}>
+            <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
+              <Box display='flex' alignItems='center' gap={1}>
                 <Avatar
                   sx={{
                     bgcolor: blue[500],
@@ -151,16 +151,16 @@ export default function WishFeed() {
                     fontSize: 14,
                   }}
                 >
-                  {wish.user.username[0].toUpperCase()}
+                  {wish.users.email[0].toUpperCase()}
                 </Avatar>
-                <Typography variant="body2" color="text.secondary">
-                  @{wish.user.username}
+                <Typography variant='body2' color='text.secondary'>
+                  @{wish.users.email}
                 </Typography>
               </Box>
 
               <Typography
-                variant="body2"
-                color="text.secondary"
+                variant='body2'
+                color='text.secondary'
                 sx={{ ml: 2, whiteSpace: 'nowrap' }}
               >
                 {formatTimeAgo(wish.createdAt)}
@@ -169,7 +169,7 @@ export default function WishFeed() {
 
             {/* Title */}
             <Typography
-              variant="h6"
+              variant='h6'
               sx={{
                 mt: 1,
                 fontWeight: 700,
@@ -181,11 +181,11 @@ export default function WishFeed() {
             </Typography>
 
             {/* Like Button Bottom Left */}
-            <Box display="flex" alignItems="center" mt={2}>
-              <IconButton size="small" disabled sx={{ p: 0.5, mr: 0.5 }}>
+            <Box display='flex' alignItems='center' mt={2}>
+              <IconButton size='small' disabled sx={{ p: 0.5, mr: 0.5 }}>
                 <ThumbUpAltOutlinedIcon sx={{ color: blue[500], fontSize: 20 }} />
               </IconButton>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant='body2' color='text.secondary'>
                 {wish.currentUpvotes}
               </Typography>
             </Box>
