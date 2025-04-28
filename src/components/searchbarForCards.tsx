@@ -2,27 +2,22 @@ import { FC, ReactNode } from 'react'
 import {
   Box,
   Card,
-  Typography,
-  IconButton,
-  Stack,
   TextField,
   Button,
   MenuItem,
   Select,
   InputLabel,
   FormControl,
-  Avatar,
   CardContent,
 } from '@mui/material'
 
 interface FormCardProps {
   title?: string
   children?: ReactNode
-  buttonText?: string 
+  buttonText?: string
 }
 
-
-const SearchbarForCards: FC<FormCardProps> = ({ title, children, buttonText = 'default' }) => {
+const SearchbarForCards: FC<FormCardProps> = ({ buttonText = 'default' }) => {
   return (
     <Card sx={{ width: '100%' }}>
       <CardContent>

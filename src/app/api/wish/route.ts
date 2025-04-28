@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { createClientForServer } from '@/utils/supabase/server'
 
-export async function GET(req: Request) {
+export async function GET() {
   const supabase = await createClientForServer()
   const {
     data: { user },

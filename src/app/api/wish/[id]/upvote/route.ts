@@ -4,11 +4,11 @@ import prisma from '@/lib/client'
 import { createClientForServer } from '@/utils/supabase/server'
 
 interface RouteContext {
-  params: { wishid: string }
+  params: Promise<{ id: string }>
 }
 
 export async function POST(_req: Request, { params }: RouteContext) {
-  const wishId = params.wishid
+  const { id } = await params
   const supabase = await createClientForServer()
   const {
     data: { user },
@@ -21,7 +21,7 @@ export async function POST(_req: Request, { params }: RouteContext) {
 
   try {
     const existing = await prisma.wishUpvote.findFirst({
-      where: { wishId, userId },
+      where: { wishId: id, userId },
     })
 
     let upvoted: boolean
@@ -32,13 +32,13 @@ export async function POST(_req: Request, { params }: RouteContext) {
       upvoted = false
     } else {
       await prisma.wishUpvote.create({
-        data: { wishId, userId },
+        data: { wishId: id, userId },
       })
       upvoted = true
     }
 
     // immer den aktuellen Count abfragen und zurückgeben
-    const count = await prisma.wishUpvote.count({ where: { wishId } })
+    const count = await prisma.wishUpvote.count({ where: { wishId: id } })
     return NextResponse.json({ upvoted, count }, { status: 200 })
   } catch (error) {
     console.error('[POST_UPVOTE_ERROR]', error)

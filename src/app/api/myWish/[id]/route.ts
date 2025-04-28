@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 
-
-export async function GET(request: Request, { params }: { params: { id: string }}) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { id } = params
 
   if (!id) {
@@ -24,6 +23,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json(myWishes, { status: 200 })
   } catch (error) {
     console.error('Error loading myWishes:', error)
-    return NextResponse.json({ error: 'Error loading wishes' }, { status: 500 })
+    return NextResponse.json({ error }, { status: 500 })
   }
 }

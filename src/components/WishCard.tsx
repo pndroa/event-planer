@@ -10,9 +10,9 @@ interface WishCardProps {
   username: string
   title: string
   createdAt: string
-  currentUpvotes: number
-  isUpvoted: boolean
-  onUpvote: () => void
+  currentUpvotes?: number
+  isUpvoted?: boolean
+  onUpvote?: () => void
   deleteButton?: boolean
 }
 
@@ -68,13 +68,13 @@ export default function WishCard({
           {currentUpvotes}
         </Typography>
       </Box>
-         <Box display='flex' justifyContent='flex-end'>
-          {deleteButton && (
-            <Button variant='contained' size='small' sx={{ height: '40px' }}>
-              Delete
-            </Button>
-          )}
-        </Box>
+      <Box display='flex' justifyContent='flex-end'>
+        {deleteButton && (
+          <Button variant='contained' size='small' sx={{ height: '40px' }}>
+            Delete
+          </Button>
+        )}
+      </Box>
     </Card>
   )
 }

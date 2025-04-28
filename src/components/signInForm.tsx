@@ -1,5 +1,5 @@
 'use client'
-import { signInWithGoogle } from '@/utils/auth'
+import { signInWithGoogle } from '@/utils/authClient'
 import {
   Box,
   Button,
@@ -15,11 +15,18 @@ import Image from 'next/image'
 import { useState } from 'react'
 
 const SignIn = () => {
+  const [checkState, setCheckState] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
   function handleCheckbox() {
     setCheckState(!checkState)
   }
 
-  const [checkState, setCheckState] = useState<boolean>(false)
+  async function handleLogin() {
+    setIsLoading(true)
+    await signInWithGoogle()
+    setIsLoading(false)
+  }
 
   return (
     <Box
@@ -59,14 +66,8 @@ const SignIn = () => {
             </Button>
             <Divider />
             <Grid display='flex' gap='4.5rem'>
-              <Button sx={{ marginTop: '1rem' }}>
-                <Image
-                  src='/icons/googleIcon.svg'
-                  alt='Google Icon'
-                  width={40}
-                  height={40}
-                  onClick={signInWithGoogle}
-                />
+              <Button sx={{ marginTop: '1rem' }} onClick={handleLogin} disabled={isLoading}>
+                <Image src='/icons/googleIcon.svg' alt='Google Icon' width={40} height={40} />
               </Button>
               <Button sx={{ marginTop: '1rem' }}>
                 <Image

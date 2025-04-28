@@ -85,7 +85,6 @@ export default function WishFeed() {
         {filteredWishes.map((wish) => (
           <WishCard
             key={wish.wishId}
-            wishId={wish.wishId}
             username={wish.users.name}
             title={wish.title}
             createdAt={wish.createdAt}

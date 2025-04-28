@@ -20,7 +20,7 @@ import HomeIcon from '@mui/icons-material/Home'
 import StarIcon from '@mui/icons-material/Star'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { usePathname } from 'next/navigation'
-import { signOut } from '@/utils/auth'
+import { handleSignOut } from '@/utils/authClient'
 
 const navLinks = [
   { label: 'Events', href: '/event', icon: <HomeIcon /> },
@@ -53,7 +53,7 @@ const Navbar = () => {
             <IconButton component={Link} href='/profile' sx={{ color: 'white' }}>
               <AccountCircleIcon />
             </IconButton>
-            <IconButton onClick={signOut} sx={{ color: 'white' }}>
+            <IconButton onClick={handleSignOut} sx={{ color: 'white' }}>
               <LogoutIcon />
             </IconButton>
           </Box>
