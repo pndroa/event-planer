@@ -21,7 +21,7 @@ const Page = () => {
     const fetchWishes = async () => {
       if (!user?.id) return
       try {
-        const res = await api.get(`/myWish/${user?.id as string}`)
+        const res = await api.get(`/wish/myWish/${user?.id as string}`)
         setWishes(res.data)
       } catch (error) {
         console.error('Error loading wishes:', error)
