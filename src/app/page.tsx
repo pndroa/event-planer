@@ -1,6 +1,6 @@
 'use client'
 import { Box } from '@mui/material'
-import Homepage from '@/components/Home/home'
+import Homepage from '@/components/home'
 
 export default function Home() {
   return (
