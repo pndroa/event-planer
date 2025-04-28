@@ -19,7 +19,6 @@ export default function EventFeed() {
     const fetchEvents = async () => {
       try {
         const res = await api.get('/event')
-        console.log(res.data)
         setEvents(res.data)
       } catch (error) {
         console.error('Error loading events:', error)
