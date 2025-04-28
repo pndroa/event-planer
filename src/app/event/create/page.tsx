@@ -2,7 +2,7 @@
 import FormCard from '@/components/formCard'
 import { TextField, Grid, Button, Box, Snackbar, Alert } from '@mui/material'
 import DatePicker from '@/components/datePicker'
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useState, FormEvent } from 'react'
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { format } from 'date-fns'
@@ -38,7 +38,7 @@ const Page = () => {
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
 
   //Functions
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.target as HTMLFormElement)
 

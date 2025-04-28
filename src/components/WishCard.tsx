@@ -1,19 +1,19 @@
 // components/WishCard.tsx
 'use client'
-import { Box, Card, Typography, IconButton, Avatar } from '@mui/material'
+import { Box, Card, Typography, IconButton, Avatar, Button } from '@mui/material'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import { blue, grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt'
 
 interface WishCardProps {
-  wishId: string
   username: string
   title: string
   createdAt: string
   currentUpvotes: number
   isUpvoted: boolean
   onUpvote: () => void
+  deleteButton?: boolean
 }
 
 export default function WishCard({
@@ -23,6 +23,7 @@ export default function WishCard({
   currentUpvotes,
   isUpvoted,
   onUpvote,
+  deleteButton = false,
 }: WishCardProps) {
   return (
     <Card
@@ -48,7 +49,6 @@ export default function WishCard({
           {formatTimeAgo(createdAt)}
         </Typography>
       </Box>
-
       <Typography
         variant='h6'
         sx={{ mt: 1, fontWeight: 700, color: grey[900], wordBreak: 'break-word' }}
@@ -68,6 +68,13 @@ export default function WishCard({
           {currentUpvotes}
         </Typography>
       </Box>
+         <Box display='flex' justifyContent='flex-end'>
+          {deleteButton && (
+            <Button variant='contained' size='small' sx={{ height: '40px' }}>
+              Delete
+            </Button>
+          )}
+        </Box>
     </Card>
   )
 }

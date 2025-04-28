@@ -1,5 +1,5 @@
 'use client'
-import { signInWithAzure, signInWithGitHub, signInWithGoogle } from '@/utils/auth'
+import { signInWithGoogle } from '@/utils/auth'
 import {
   Box,
   Button,

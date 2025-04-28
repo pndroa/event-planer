@@ -1,7 +1,7 @@
 'use client'
 import FormCard from '@/components/formCard'
 import { TextField, Grid, Button, Box, Snackbar, Alert } from '@mui/material'
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useState, FormEvent } from 'react'
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { useRouter } from 'next/navigation'
@@ -13,7 +13,7 @@ interface PostResponseWishes extends PostWishes {
   wish: PostWishes & { wishCreator: string }
 }
 
-const page = () => {
+const Page = () => {
   //Constants
   const router = useRouter()
   const user = useUser()
@@ -24,7 +24,7 @@ const page = () => {
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
 
   //Functions
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.target as HTMLFormElement)
 
@@ -109,4 +109,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
