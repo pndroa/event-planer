@@ -3,6 +3,8 @@ import '@testing-library/jest-dom'
 import { expect, describe, it, test } from '@jest/globals'
 import { render, screen } from '@testing-library/react'
 import Homepage from '../../src/components/home'
+import WishCard from '@/components/WishCard'
+import { formatTimeAgo } from '@/utils/timeUtils'
 
 function sum(a: number, b: number) {
   return a + b
@@ -52,4 +54,37 @@ describe('Home Component Test', () => {
     const text = screen.getByText(/Homepage/i) // ACT
     expect(text).toBeInTheDocument() // ASSERT
   })
+})
+
+test('formate time with date now', () => {
+  const date = new Date().toISOString()
+  expect(formatTimeAgo(date)).toBe('0 min ago')
+})
+
+test('formate time with hrs', () => {
+  const date = new Date()
+  date.setHours(date.getHours() - 1)
+  const newDateString = date.toISOString()
+  console.log(newDateString)
+  expect(formatTimeAgo(newDateString)).toBe('1 hrs ago')
+})
+
+test('formate time with day', () => {
+  const date = new Date()
+  date.setHours(date.getHours() - 48)
+  const newDateString = date.toISOString()
+  expect(formatTimeAgo(newDateString)).toBe('2 days ago')
+})
+
+it('wishcard to have titel, name, date', () => {
+  render(
+    <WishCard username='Ergün Bickici' title='Wunsch 1' createdAt='2025-04-27 16:20:37.303476+02' />
+  )
+  const title = screen.getByText(/Wunsch 1/i)
+  const username = screen.getByText(/Ergün Bickici/i)
+  const formatCreateAt = formatTimeAgo('2025-04-27 16:20:37.303476+02')
+  const createdAt = screen.getByText(formatCreateAt)
+  expect(title).toBeInTheDocument()
+  expect(username).toBeInTheDocument()
+  expect(createdAt).toBeInTheDocument()
 })
