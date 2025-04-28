@@ -11,7 +11,7 @@ interface EventCardProps {
   createdAt: string
 }
 
-export default function EventCard({ eventId, username, title, createdAt }: EventCardProps) {
+export default function EventCard({ username, title, createdAt }: EventCardProps) {
   return (
     <Card
       sx={{

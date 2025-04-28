@@ -6,18 +6,22 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["auth", "felix"]
+  schemas  = ["auth", "public"] //if branch = main then set schema to "auth" and "public"
 }
 
-model eventParticipation {
-  eventParticipationId String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at           DateTime    @default(now()) @db.Timestamptz(6)
-  participantId        String      @db.Uuid
-  eventId              String      @db.Uuid
-  events               events      @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
-  users                felix_users @relation(fields: [participantId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+model users {
+  userId             String               @id @db.Uuid
+  email              String
+  name               String?
+  eventParticipation eventParticipation[]
+  events             events[]
+  userAnswer         userAnswer[]
+  users              auth_users           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  wishUpvote         wishUpvote[]
+  wishes             wishes[]
 
-  @@schema("felix")
+  @@map("users")
+  @@schema("public")
 }
 
 model events {
@@ -30,10 +34,45 @@ model events {
   createdAt          DateTime             @default(now()) @db.Timestamptz(6)
   trainerId          String               @db.Uuid
   eventParticipation eventParticipation[]
-  users              felix_users          @relation(fields: [trainerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Events_trainerId_fkey")
+  users              users                @relation(fields: [trainerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Events_trainerId_fkey")
   surveys            surveys?
 
-  @@schema("felix")
+  @@schema("public")
+}
+
+model wishes {
+  wishId             String       @id(map: "Wishes_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String
+  description        String?
+  isConvertedToEvent Boolean      @default(false)
+  createdAt          DateTime     @default(now()) @db.Timestamptz(6)
+  wishCreator        String       @db.Uuid
+  wishUpvote         wishUpvote[]
+  users              users        @relation(fields: [wishCreator], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Wishes_wishCreator_fkey")
+
+  @@schema("public")
+}
+
+model wishUpvote {
+  upvoteId   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @db.Uuid
+  wishId     String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  users      users    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  wishes     wishes   @relation(fields: [wishId], references: [wishId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model eventParticipation {
+  eventParticipationId String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  participantId        String   @db.Uuid
+  eventId              String   @db.Uuid
+  Events               events   @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
+  users                users    @relation(fields: [participantId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
 }
 
 model surveyAnswerOptions {
@@ -44,7 +83,7 @@ model surveyAnswerOptions {
   surveyQuestions surveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade, onUpdate: NoAction)
   userAnswer      userAnswer[]
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model surveyQuestions {
@@ -56,7 +95,7 @@ model surveyQuestions {
   surveyAnswerOptions surveyAnswerOptions[]
   surveys             surveys               @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model surveys {
@@ -65,9 +104,9 @@ model surveys {
   title           String
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   surveyQuestions surveyQuestions[]
-  events          events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
+  Events          events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model userAnswer {
@@ -76,48 +115,58 @@ model userAnswer {
   answerId            String              @db.Uuid
   created_at          DateTime            @default(now()) @db.Timestamptz(6)
   surveyAnswerOptions surveyAnswerOptions @relation(fields: [answerId], references: [answerId], onDelete: Cascade, onUpdate: NoAction)
-  users               felix_users         @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  users               users               @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
-model felix_users {
-  userId             String               @id @db.Uuid
-  email              String
-  name               String?
-  eventParticipation eventParticipation[]
-  events             events[]
-  userAnswer         userAnswer[]
-  users              auth_users           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  wishUpvote         wishUpvote[]
-  wishes             wishes[]
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model auth_users {
+  instance_id                 String?           @db.Uuid
+  id                          String            @id @db.Uuid
+  aud                         String?           @db.VarChar(255)
+  role                        String?           @db.VarChar(255)
+  email                       String?           @db.VarChar(255)
+  encrypted_password          String?           @db.VarChar(255)
+  email_confirmed_at          DateTime?         @db.Timestamptz(6)
+  invited_at                  DateTime?         @db.Timestamptz(6)
+  confirmation_token          String?           @db.VarChar(255)
+  confirmation_sent_at        DateTime?         @db.Timestamptz(6)
+  recovery_token              String?           @db.VarChar(255)
+  recovery_sent_at            DateTime?         @db.Timestamptz(6)
+  email_change_token_new      String?           @db.VarChar(255)
+  email_change                String?           @db.VarChar(255)
+  email_change_sent_at        DateTime?         @db.Timestamptz(6)
+  last_sign_in_at             DateTime?         @db.Timestamptz(6)
+  raw_app_meta_data           Json?
+  raw_user_meta_data          Json?
+  is_super_admin              Boolean?
+  created_at                  DateTime?         @db.Timestamptz(6)
+  updated_at                  DateTime?         @db.Timestamptz(6)
+  phone                       String?           @unique
+  phone_confirmed_at          DateTime?         @db.Timestamptz(6)
+  phone_change                String?           @default("")
+  phone_change_token          String?           @default("") @db.VarChar(255)
+  phone_change_sent_at        DateTime?         @db.Timestamptz(6)
+  confirmed_at                DateTime?         @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  email_change_token_current  String?           @default("") @db.VarChar(255)
+  email_change_confirm_status Int?              @default(0) @db.SmallInt
+  banned_until                DateTime?         @db.Timestamptz(6)
+  reauthentication_token      String?           @default("") @db.VarChar(255)
+  reauthentication_sent_at    DateTime?         @db.Timestamptz(6)
+  is_sso_user                 Boolean           @default(false)
+  deleted_at                  DateTime?         @db.Timestamptz(6)
+  is_anonymous                Boolean           @default(false)
+  identities                  identities[]
+  mfa_factors                 mfa_factors[]
+  one_time_tokens             one_time_tokens[]
+  sessions                    sessions[]
+  users                       users?
 
+  @@index([instance_id])
+  @@index([is_anonymous])
   @@map("users")
-  @@schema("felix")
-}
-
-model wishUpvote {
-  upvoteId   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId     String      @db.Uuid
-  wishId     String      @db.Uuid
-  created_at DateTime    @default(now()) @db.Timestamptz(6)
-  users      felix_users @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
-  wishes     wishes      @relation(fields: [wishId], references: [wishId], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("felix")
-}
-
-model wishes {
-  wishId             String       @id(map: "Wishes_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title              String
-  description        String?
-  isConvertedToEvent Boolean      @default(false)
-  createdAt          DateTime     @default(now()) @db.Timestamptz(6)
-  wishCreator        String       @db.Uuid
-  wishUpvote         wishUpvote[]
-  users              felix_users  @relation(fields: [wishCreator], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Wishes_wishCreator_fkey")
-
-  @@schema("felix")
+  @@schema("auth")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -383,58 +432,6 @@ model sso_providers {
   saml_relay_states saml_relay_states[]
   sso_domains       sso_domains[]
 
-  @@schema("auth")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
-model auth_users {
-  instance_id                 String?           @db.Uuid
-  id                          String            @id @db.Uuid
-  aud                         String?           @db.VarChar(255)
-  role                        String?           @db.VarChar(255)
-  email                       String?           @db.VarChar(255)
-  encrypted_password          String?           @db.VarChar(255)
-  email_confirmed_at          DateTime?         @db.Timestamptz(6)
-  invited_at                  DateTime?         @db.Timestamptz(6)
-  confirmation_token          String?           @db.VarChar(255)
-  confirmation_sent_at        DateTime?         @db.Timestamptz(6)
-  recovery_token              String?           @db.VarChar(255)
-  recovery_sent_at            DateTime?         @db.Timestamptz(6)
-  email_change_token_new      String?           @db.VarChar(255)
-  email_change                String?           @db.VarChar(255)
-  email_change_sent_at        DateTime?         @db.Timestamptz(6)
-  last_sign_in_at             DateTime?         @db.Timestamptz(6)
-  raw_app_meta_data           Json?
-  raw_user_meta_data          Json?
-  is_super_admin              Boolean?
-  created_at                  DateTime?         @db.Timestamptz(6)
-  updated_at                  DateTime?         @db.Timestamptz(6)
-  phone                       String?           @unique
-  phone_confirmed_at          DateTime?         @db.Timestamptz(6)
-  phone_change                String?           @default("")
-  phone_change_token          String?           @default("") @db.VarChar(255)
-  phone_change_sent_at        DateTime?         @db.Timestamptz(6)
-  confirmed_at                DateTime?         @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
-  email_change_token_current  String?           @default("") @db.VarChar(255)
-  email_change_confirm_status Int?              @default(0) @db.SmallInt
-  banned_until                DateTime?         @db.Timestamptz(6)
-  reauthentication_token      String?           @default("") @db.VarChar(255)
-  reauthentication_sent_at    DateTime?         @db.Timestamptz(6)
-  is_sso_user                 Boolean           @default(false)
-  deleted_at                  DateTime?         @db.Timestamptz(6)
-  is_anonymous                Boolean           @default(false)
-  identities                  identities[]
-  mfa_factors                 mfa_factors[]
-  one_time_tokens             one_time_tokens[]
-  sessions                    sessions[]
-  users                       felix_users?
-
-  @@index([instance_id])
-  @@index([is_anonymous])
-  @@map("users")
   @@schema("auth")
 }
 

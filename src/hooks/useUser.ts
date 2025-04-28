@@ -17,7 +17,7 @@ export function useUser() {
       }
     }
     loadUser()
-  }, [])
+  }, [showBoundary])
 
   return user
 }
