@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/client'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic' // oder 'auto'
 
 export async function GET() {
-  const user = await prisma.users.findMany()
+  const user = await prisma.auth_users.findMany()
   return NextResponse.json({ user, message: 'test api' }, { status: 200 })
 }
