@@ -3,7 +3,9 @@
     "next/core-web-vitals",
     "next/typescript",
     "eslint:recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:testing-library/react",
+    "plugin:jest-dom/recommended"
   ],
   "plugins": ["prettier", "@typescript-eslint"],
   "rules": {
