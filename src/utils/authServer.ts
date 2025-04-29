@@ -6,7 +6,7 @@ import { Provider } from '@supabase/supabase-js'
 export async function getOAuthSignInUrl(provider: Provider) {
   const supabase = await createClientForServer()
   const authCallbackUrl = `${getURL()}/auth/callback`
-
+  console.log('authCallbackUrl = ', authCallbackUrl)
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
