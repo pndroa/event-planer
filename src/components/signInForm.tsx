@@ -15,6 +15,8 @@ import Image from 'next/image'
 import { useState } from 'react'
 
 const SignIn = () => {
+  console.log('NEXT_PUBLIC_SITE_URL:', process.env.NEXT_PUBLIC_SITE_URL)
+
   const [checkState, setCheckState] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
