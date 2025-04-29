@@ -4,16 +4,20 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const users = await prisma.users.findMany({
-    include: {
-      events: true,
-      wishes: {
-        include: {
-          wishUpvote: true,
+  try {
+    const users = await prisma.users.findMany({
+      include: {
+        events: true,
+        wishes: {
+          include: {
+            wishUpvote: true,
+          },
         },
+        wishUpvote: true,
       },
-      wishUpvote: true,
-    },
-  })
-  return NextResponse.json({ users })
+    })
+    return NextResponse.json({ users })
+  } catch (error) {
+    return NextResponse.json({ error }, { status: 500 })
+  }
 }

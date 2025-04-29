@@ -14,8 +14,7 @@ export async function GET() {
 
     return NextResponse.json(events, { status: 200 })
   } catch (error) {
-    console.error('[GET_WISHES_ERROR]', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    return NextResponse.json({ error }, { status: 500 })
   }
 }
 

@@ -41,7 +41,6 @@ export async function POST(_req: Request, { params }: RouteContext) {
     const count = await prisma.wishUpvote.count({ where: { wishId: id } })
     return NextResponse.json({ upvoted, count }, { status: 200 })
   } catch (error) {
-    console.error('[POST_UPVOTE_ERROR]', error)
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error }, { status: 500 })
   }
 }
