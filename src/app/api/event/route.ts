@@ -5,13 +5,15 @@ import { PostEvents } from '@/lib/types'
 import { postEventSchema } from '@/lib/validation'
 
 export async function GET() {
+  console.log('In GET Events')
+  console.log('Prisma = ', prisma)
   try {
     const events = await prisma.events.findMany({
       include: {
         users: true,
       },
     })
-
+    console.log('Eventsdata = ', events)
     return NextResponse.json(events, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })
