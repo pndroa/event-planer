@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
-import Joi from 'joi'
-import { PostEvents } from '@/lib/types'
 import { postEventSchema } from '@/lib/validation'
 
 export const dynamic = 'force-dynamic'
@@ -11,6 +9,7 @@ export async function GET() {
     const events = await prisma.events.findMany({
       include: {
         users: true,
+        eventDates: true,
       },
     })
 
@@ -24,24 +23,37 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
 
-    const { value, error }: { value: PostEvents; error: Joi.ValidationError | undefined } =
-      postEventSchema.validate(body, { abortEarly: false })
+    const { value, error } = postEventSchema.validate(body, { abortEarly: false })
 
     if (error) {
       return NextResponse.json(
-        { error: 'Request failed', details: error.details[0].message },
+        { error: 'Validation failed', details: error.details.map((e) => e.message) },
         { status: 400 }
       )
-    } else {
-      const event = await prisma.events.create({
-        data: {
-          ...value,
-          startDate: new Date(value.startDate),
-          endDate: new Date(value.endDate),
-        },
-      })
-      return NextResponse.json({ message: 'created event', event }, { status: 200 })
     }
+
+    const { trainerId, title, description, room, eventDates } = value
+
+    const createdEvent = await prisma.events.create({
+      data: {
+        trainerId,
+        title,
+        description,
+        room,
+        eventDates: {
+          create: {
+            date: new Date(eventDates.date),
+            startTime: eventDates.startTime,
+            endTime: eventDates.endTime,
+          },
+        },
+      },
+      include: {
+        eventDates: true,
+      },
+    })
+
+    return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })
   }

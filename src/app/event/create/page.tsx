@@ -2,39 +2,32 @@
 import FormCard from '@/components/formCard'
 import { TextField, Grid, Button, Box } from '@mui/material'
 import DatePicker from '@/components/datePicker'
-import { useLayoutEffect, useMemo, useState, FormEvent } from 'react'
+import { useLayoutEffect, useState /*FormEvent*/ } from 'react'
+/*
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { format } from 'date-fns'
+
 import { useRouter } from 'next/navigation'
 import { PostEvents } from '@/lib/types'
 import { useErrorBoundary } from 'react-error-boundary'
-import { useQueryState } from 'nuqs'
 import { useUser } from '@/hooks/useUser'
 
 interface PostResponseEvent extends PostEvents {
   event: PostEvents & { eventId: string }
 }
-
+*/
 const Page = () => {
   //Constants
-  const router = useRouter()
-  const user = useUser()
-  const { showBoundary } = useErrorBoundary()
-
-  const dateQueryOptions = useMemo(
-    () => ({
-      parse: (value: string | null) => (value ? new Date(value) : null),
-      serialize: (value: Date | null) => (value ? format(value, 'yyyy-MM-dd') : ''),
-    }),
-    []
-  )
+  //const router = useRouter()
+  //const user = useUser()
+  //const { showBoundary } = useErrorBoundary()
 
   //States
-  const [startDate, setStartDate] = useQueryState<Date | null>('startDate', dateQueryOptions)
-  const [endDate, setEndDate] = useQueryState<Date | null>('enddate', dateQueryOptions)
+  const [date, setDate] = useState<Date | null>(null)
   const [isClient, setIsClient] = useState(false)
 
+  /*
   //Functions
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -45,8 +38,7 @@ const Page = () => {
       title: formData.get('title') as string,
       description: (formData.get('description') as string) || null,
       room: (formData.get('room') as string) || null,
-      startDate: format(startDate as Date, 'yyyy-MM-dd'),
-      endDate: format(endDate as Date, 'yyyy-MM-dd'),
+      date: format(date as Date, 'yyyy-MM-dd'),
     }
 
     try {
@@ -62,7 +54,7 @@ const Page = () => {
       console.error(error)
     }
   }
-
+  */
   useLayoutEffect(() => {
     setIsClient(true)
   }, [])
@@ -70,6 +62,8 @@ const Page = () => {
   if (!isClient) {
     return <Box>Loading...</Box>
   }
+
+  console.log('Hier ist des datum = ', date)
 
   return (
     <Grid
@@ -82,7 +76,7 @@ const Page = () => {
     >
       <Grid>
         <FormCard title='Create Event'>
-          <Box component='form' onSubmit={handleSubmit}>
+          <Box component='form' /*onSubmit={handleSubmit}*/>
             <TextField
               label='Title'
               variant='outlined'
@@ -108,21 +102,7 @@ const Page = () => {
             />
             <Grid container spacing={2} justifyContent='center'>
               <Grid size={6}>
-                <DatePicker
-                  label='Start Date'
-                  value={startDate}
-                  onChange={(newDate) => setStartDate(newDate)}
-                  disablePast
-                />
-              </Grid>
-              <Grid size={6}>
-                <DatePicker
-                  label='End Date'
-                  value={endDate}
-                  onChange={(newDate) => setEndDate(newDate)}
-                  disablePast
-                  minDate={startDate as Date}
-                />
+                <DatePicker value={date} onChange={(newDate) => setDate(newDate)} disablePast />
               </Grid>
             </Grid>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>

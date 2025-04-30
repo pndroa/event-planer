@@ -49,8 +49,14 @@ export interface PostEvents {
   title: string
   description?: string
   room?: string
-  startDate: Date
-  endDate: Date
+  eventDates?: PostEventDates[]
+}
+
+export interface PostEventDates {
+  eventId: string
+  date: Date
+  startTime: string
+  endTime: string
 }
 
 export interface PostWishes {
