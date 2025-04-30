@@ -36,8 +36,6 @@ export async function POST(req: Request) {
       const event = await prisma.events.create({
         data: {
           ...value,
-          startDate: new Date(value.startDate),
-          endDate: new Date(value.endDate),
         },
       })
       return NextResponse.json({ message: 'created event', event }, { status: 200 })
