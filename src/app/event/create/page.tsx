@@ -1,6 +1,6 @@
 'use client'
 import FormCard from '@/components/formCard'
-import { TextField, Grid, Button, Box, Snackbar, Alert } from '@mui/material'
+import { TextField, Grid, Button, Box } from '@mui/material'
 import DatePicker from '@/components/datePicker'
 import { useLayoutEffect, useMemo, useState, FormEvent } from 'react'
 import { AxiosError } from 'axios'
@@ -34,8 +34,6 @@ const Page = () => {
   const [startDate, setStartDate] = useQueryState<Date | null>('startDate', dateQueryOptions)
   const [endDate, setEndDate] = useQueryState<Date | null>('enddate', dateQueryOptions)
   const [isClient, setIsClient] = useState(false)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
 
   //Functions
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -54,16 +52,8 @@ const Page = () => {
     try {
       const res = await api.post<PostResponseEvent>('/event', event)
       if (res.status === 200) {
-        //setSuccessMessage('Event successfully created! Redirecting to the survey...')
-        setSuccessMessage('Event successfully created! Redirecting to the events...')
-        setOpenSnackbar(true)
-
         //const { eventId } = res.data.event
-
-        setTimeout(() => {
-          //router.push(`/event/create/${eventId}/survey`)
-          router.push('/event')
-        }, 2000)
+        router.push('/event')
       }
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -143,17 +133,6 @@ const Page = () => {
           </Box>
         </FormCard>
       </Grid>
-
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={2000}
-        onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setOpenSnackbar(false)} severity='success' sx={{ width: '100%' }}>
-          {successMessage}
-        </Alert>
-      </Snackbar>
     </Grid>
   )
 }
