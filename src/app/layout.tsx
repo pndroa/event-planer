@@ -29,9 +29,9 @@ export default async function RootLayout({
     <html lang='en'>
       <body>
         {showNavigation && <Header />}
-        <div style={{ display: 'flex' }}>
+        <div>
           {showNavigation && <Sidebar />}
-          <ContentWrapper>
+          <ContentWrapper showNavigation={showNavigation}>
             <ErrorBoundaryWrapper>
               <NuqsAdapter>{children}</NuqsAdapter>
             </ErrorBoundaryWrapper>

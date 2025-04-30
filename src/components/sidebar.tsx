@@ -5,13 +5,12 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  useMediaQuery,
   IconButton,
   Drawer,
 } from '@mui/material'
+import { IsMobile } from '@/lib/styles'
 import HomeIcon from '@mui/icons-material/Home'
 import StarIcon from '@mui/icons-material/Star'
-import SettingsIcon from '@mui/icons-material/Settings'
 import Link from 'next/link'
 import React from 'react'
 import { usePathname } from 'next/navigation'
@@ -26,7 +25,6 @@ const Sidebar = () => {
     { label: 'Events', href: '/event', icon: <HomeIcon /> },
     { label: 'Wishes', href: '/wish', icon: <StarIcon /> },
   ]
-  const isMobile = useMediaQuery('(max-width:600px)')
   const [open, setOpen] = React.useState(false)
 
   const sidebarInnerContent = (
@@ -54,29 +52,18 @@ const Sidebar = () => {
           ))}
         </List>
       </Box>
-
-      <Box>
-        <List>
-          <ListItemButton component={Link} href='/settings'>
-            <ListItemIcon>
-              <SettingsIcon />
-            </ListItemIcon>
-            <ListItemText primary='Settings' />
-          </ListItemButton>
-        </List>
-      </Box>
     </Box>
   )
 
-  if (isMobile) {
+  if (IsMobile()) {
     return (
       <>
         <IconButton
           onClick={() => setOpen((prev) => !prev)}
           sx={{
             position: 'fixed',
-            top: 32, // Position relativ zum Viewport oben
-            transform: 'translateY(-50%)', // vertikal mittig ausrichten
+            top: 32,
+            transform: 'translateY(-50%)',
             left: 16,
             zIndex: 1300,
           }}

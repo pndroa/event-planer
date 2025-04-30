@@ -54,7 +54,7 @@ export default function WishFeed() {
     ) // .filter() und .sort(): fertige Array-Methoden => erst filtern, dann sortieren!
 
   return (
-    <Box sx={{ p: 4, maxWidth: 700, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 700, mx: 'auto' }}>
       <Box display='flex' gap={1.5} flexWrap='wrap' mb={3}>
         <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
         <FormControl size='small' sx={{ minWidth: 140 }}>

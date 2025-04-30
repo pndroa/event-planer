@@ -1,21 +1,31 @@
 'use client'
-import { Box, useMediaQuery } from '@mui/material'
+import { Box } from '@mui/material'
+import { IsMobile } from '@/lib/styles'
 import React from 'react'
 
-export default function ContentWrapper({ children }: { children: React.ReactNode }) {
-  const isMobile = useMediaQuery('(max-width:600px)')
-
+const ContentWrapper = ({
+  children,
+  showNavigation,
+}: {
+  children: React.ReactNode
+  showNavigation: boolean
+}) => {
   return (
     <Box
       sx={{
-        marginLeft: isMobile ? 0 : '200px',
-        marginTop: '64px',
-        padding: 2,
+        minHeight: showNavigation ? 'calc(100vh - 64px)' : '100vh',
+        marginLeft: showNavigation && !IsMobile() ? 'auto' : -2,
+        marginTop: showNavigation ? '80px' : 0,
+        px: IsMobile() ? 2 : 4,
+        py: 2,
         flexGrow: 1,
         width: '100%',
+        overflowX: 'hidden',
       }}
     >
       {children}
     </Box>
   )
 }
+
+export default ContentWrapper

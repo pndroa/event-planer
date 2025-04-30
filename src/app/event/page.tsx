@@ -33,7 +33,7 @@ export default function EventFeed() {
 
   return (
     <>
-      <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
+      <Box sx={{ maxWidth: 700, mx: 'auto' }}>
         <Box>
           <TopNavigation />
         </Box>
