@@ -1,9 +1,11 @@
-import type { Metadata } from 'next'
 import React from 'react'
-import Navbar from '@/components/Navbar'
+import type { Metadata } from 'next'
 import { createClientForServer } from '@/utils/supabase/server'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import ErrorBoundaryWrapper from '@/components/errorBoundaryWrapper'
+import Header from '@/components/header'
+import Sidebar from '@/components/sidebar'
+import ContentWrapper from '@/components/layoutContentWrapper'
 
 export const metadata: Metadata = {
   title: 'Event Planer',
@@ -15,30 +17,25 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const isProd = process.env.NODE_ENV === 'production'
   const client = await createClientForServer()
   const {
     data: { session },
   } = await client.auth.getSession()
 
+  const showNavigation = !isProd || !!session
+
   return (
     <html lang='en'>
       <body>
-        <div style={{ paddingTop: '64px' }}>
-          {process.env.NODE_ENV !== 'production' ? (
+        {showNavigation && <Header />}
+        <div style={{ display: 'flex' }}>
+          {showNavigation && <Sidebar />}
+          <ContentWrapper>
             <ErrorBoundaryWrapper>
-              <NuqsAdapter>
-                <Navbar />
-                {children}
-              </NuqsAdapter>
+              <NuqsAdapter>{children}</NuqsAdapter>
             </ErrorBoundaryWrapper>
-          ) : (
-            <ErrorBoundaryWrapper>
-              <NuqsAdapter>
-                {session && <Navbar />}
-                {children}
-              </NuqsAdapter>
-            </ErrorBoundaryWrapper>
-          )}
+          </ContentWrapper>
         </div>
       </body>
     </html>

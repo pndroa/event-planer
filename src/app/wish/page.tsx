@@ -10,18 +10,16 @@ import Link from 'next/link'
 
 export default function WishFeed() {
   const [wishes, setWishes] = useState<Wishes[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'likes'>('date')
 
   // Daten holen
   const fetchWishes = async () => {
-    setLoading(true)
     try {
       const res = await api.get<Wishes[]>('/wish')
       setWishes(res.data)
-    } finally {
-      setLoading(false)
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -54,8 +52,6 @@ export default function WishFeed() {
         ? b.currentUpvotes - a.currentUpvotes
         : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     ) // .filter() und .sort(): fertige Array-Methoden => erst filtern, dann sortieren!
-
-  if (loading) return <p>Loading wishes...</p>
 
   return (
     <Box sx={{ p: 4, maxWidth: 700, mx: 'auto' }}>

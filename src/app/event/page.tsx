@@ -11,7 +11,6 @@ import Link from 'next/link'
 
 export default function EventFeed() {
   const [events, setEvents] = useState<Events[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date'>('date')
 
@@ -22,8 +21,6 @@ export default function EventFeed() {
         setEvents(res.data)
       } catch (error) {
         console.error('Error loading events:', error)
-      } finally {
-        setLoading(false)
       }
     }
 
@@ -33,8 +30,6 @@ export default function EventFeed() {
   const filteredEvents = events
     .filter((event) => event.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-  if (loading) return <p>Loading events...</p>
 
   return (
     <>
