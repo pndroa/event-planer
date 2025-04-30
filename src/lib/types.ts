@@ -53,10 +53,9 @@ export interface PostEvents {
 }
 
 export interface PostEventDates {
-  eventId: string
-  date: Date
-  startTime: string
-  endTime: string
+  date: Date | null
+  startTime: Date | null
+  endTime: Date | null
 }
 
 export interface PostWishes {

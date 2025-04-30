@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { postEventSchema } from '@/lib/validation'
+import { PostEventDates } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,11 +42,11 @@ export async function POST(req: Request) {
         description,
         room,
         eventDates: {
-          create: {
-            date: new Date(eventDates.date),
-            startTime: eventDates.startTime,
-            endTime: eventDates.endTime,
-          },
+          create: eventDates.map((d: PostEventDates) => ({
+            date: new Date(d.date as Date),
+            startTime: d.startTime,
+            endTime: d.endTime,
+          })),
         },
       },
       include: {
