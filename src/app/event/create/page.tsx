@@ -1,13 +1,14 @@
 'use client'
-
 import { FormEvent, useLayoutEffect, useState } from 'react'
-import { Box, TextField, Button, IconButton } from '@mui/material'
+import { Box, Button, IconButton } from '@mui/material'
+import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
 import ClearIcon from '@mui/icons-material/Clear'
 import FormCard from '@/components/formCard'
 import DatePicker from '@/components/datePicker'
 import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
+import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
 import { useErrorBoundary } from 'react-error-boundary'
@@ -55,8 +56,8 @@ const Page = () => {
     index: number
   ) => {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
+        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
           <DatePicker
             value={date}
             onChange={(newDate) => handleChange(index, 'date', newDate)}
@@ -87,34 +88,42 @@ const Page = () => {
     e.preventDefault()
 
     const formData = new FormData(e.currentTarget)
-    const title = formData.get('title')?.toString().trim()
-    const description = formData.get('description')?.toString().trim() || null
-    const room = formData.get('room')?.toString().trim() || null
+    const title = formData.get('title')
+    const description = formData.get('description') || null
+    const room = formData.get('room') || null
+    const dates = [...eventDates]
 
-    const formattedDates = (eventDates || []).map((entry) => ({
-      date: entry.date?.toISOString(),
-      startTime: entry.startTime ? entry.startTime.toTimeString().slice(0, 5) : null,
-      endTime: entry.endTime ? entry.endTime.toTimeString().slice(0, 5) : null,
-    }))
+    const finalEventDates = [
+      {
+        date,
+        startTime,
+        endTime,
+      },
+      ...dates,
+    ]
 
     const payload = {
-      trainerId: user?.id,
+      trainerId: user?.id as string,
       title,
       description,
       room,
-      eventDates: formattedDates,
+      eventDates: finalEventDates.map((entry) => ({
+        date: format(entry.date as Date, 'yyyy-MM-dd'),
+        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
+        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
+      })),
     }
 
     try {
       const response = await api.post('/event', payload)
-      if (response.status === 200) {
+      if (response.status === 201) {
         router.push('/event')
       }
     } catch (error) {
       if (error instanceof AxiosError) {
         showBoundary(error)
       }
-      console.error('Fehler beim Speichern des Events:', error)
+      console.error('Error creating Event:', error)
     }
   }
 
@@ -130,34 +139,37 @@ const Page = () => {
       <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
         <FormCard title='Create Event'>
           <Box component='form' onSubmit={handleSubmit}>
-            <TextField
-              label='Title'
-              variant='outlined'
-              margin='normal'
-              required
-              fullWidth
-              name='title'
-            />
+            <TextField label='Title' variant='outlined' margin='normal' name='title' required />
             <TextField
               label='Description'
               variant='outlined'
               margin='normal'
-              fullWidth
               name='description'
+              minRows={3}
+              multiline
+              fullWidth
             />
             <TextField
               label='Room'
               variant='outlined'
               margin='normal'
-              fullWidth
               name='room'
+              fullWidth
               sx={{ marginBottom: '1.5rem' }}
             />
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1 }}>
-                <DatePicker value={date} onChange={setDate} label='Date' />
-                <TimePicker value={startTime} onChange={setStartTime} label='Start' />
-                <TimePicker value={endTime} onChange={setEndTime} label='End' />
+              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+                <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
+                <TimePicker
+                  value={startTime}
+                  onChange={(newStartTime) => setStartTime(newStartTime)}
+                  label='Start'
+                />
+                <TimePicker
+                  value={endTime}
+                  onChange={(newEndTime) => setEndTime(newEndTime)}
+                  label='End'
+                />
               </Box>
               <IconButton onClick={handleAddButton}>
                 <AddIcon sx={{ marginRight: '0.2rem' }} />
