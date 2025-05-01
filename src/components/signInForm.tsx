@@ -6,17 +6,17 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
-  Grid,
   TextField,
   Typography,
   Divider,
 } from '@mui/material'
+import { IsMobile } from '@/lib/styles'
 import Image from 'next/image'
 import { useState } from 'react'
 
 const SignIn = () => {
-  const [checkState, setCheckState] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [checkState, setCheckState] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   function handleCheckbox() {
     setCheckState(!checkState)
@@ -31,65 +31,65 @@ const SignIn = () => {
   return (
     <Box
       sx={{
+        width: '100%',
+        minHeight: '90vh',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '80vh',
+        p: 2,
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
-      <Box sx={{ width: '50%', height: '75%' }}>
-        <Grid
-          container
-          flexDirection='column'
-          alignItems='center'
-          justifyContent='center'
-          height='65vh'
-        >
-          <Grid>
-            <Typography variant='h3'>Sign In</Typography>
-          </Grid>
-          <FormControl>
-            <TextField label='E-Mail' placeholder='E-Mail' fullWidth required margin='normal' />
-            <TextField
-              label='Password'
-              placeholder='Password'
-              type='Password'
-              required
-              margin='normal'
-            />
-            <FormControlLabel
-              control={<Checkbox checked={checkState} onChange={handleCheckbox} />}
-              label='Remember me'
-            />
-            <Button type='submit' color='primary' variant='contained' sx={{ marginY: '1rem' }}>
-              sign in
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: 400,
+          padding: 3,
+          boxShadow: 3,
+          borderRadius: 2,
+          backgroundColor: 'background.paper',
+        }}
+      >
+        <Typography variant='h4' align='center' gutterBottom>
+          Sign In
+        </Typography>
+
+        <FormControl fullWidth>
+          <TextField label='E-Mail' placeholder='E-Mail' fullWidth required margin='normal' />
+          <TextField
+            label='Password'
+            placeholder='Password'
+            type='password'
+            required
+            margin='normal'
+          />
+          <FormControlLabel
+            control={<Checkbox checked={checkState} onChange={handleCheckbox} />}
+            label='Remember me'
+          />
+          <Button
+            type='submit'
+            color='primary'
+            variant='contained'
+            sx={{ marginY: '1rem' }}
+            fullWidth
+          >
+            Sign in
+          </Button>
+          <Divider sx={{ my: 2 }} />
+          <Box display='flex' justifyContent={IsMobile() ? 'space-around' : 'center'} gap={2}>
+            <Button onClick={handleLogin} disabled={isLoading}>
+              <Image src='/icons/googleIcon.svg' alt='Google Icon' width={40} height={40} />
             </Button>
-            <Divider />
-            <Grid display='flex' gap='4.5rem'>
-              <Button sx={{ marginTop: '1rem' }} onClick={handleLogin} disabled={isLoading}>
-                <Image src='/icons/googleIcon.svg' alt='Google Icon' width={40} height={40} />
-              </Button>
-              <Button sx={{ marginTop: '1rem' }}>
-                <Image
-                  src='/icons/microsoftIcon.svg'
-                  alt='Microsoft Icon'
-                  width={40}
-                  height={40}
-                  //onClick={signInWithAzure}
-                />
-              </Button>
-              <Button sx={{ marginTop: '1rem' }}>
-                <Image
-                  src='/icons/githubIcon.svg'
-                  alt='Github Icon'
-                  width={40}
-                  height={40}
-                  //onClick={signInWithGitHub}
-                />
-              </Button>
-            </Grid>
-          </FormControl>
-        </Grid>
+            <Button>
+              <Image src='/icons/microsoftIcon.svg' alt='Microsoft Icon' width={40} height={40} />
+            </Button>
+            <Button>
+              <Image src='/icons/githubIcon.svg' alt='Github Icon' width={40} height={40} />
+            </Button>
+          </Box>
+        </FormControl>
       </Box>
     </Box>
   )

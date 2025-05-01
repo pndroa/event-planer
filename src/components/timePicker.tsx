@@ -2,24 +2,23 @@
 import { Box } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { DatePicker as MuiDatePicker, DatePickerProps } from '@mui/x-date-pickers/DatePicker'
+import { TimePicker as MuiTimePicker, TimePickerProps } from '@mui/x-date-pickers/TimePicker'
 import { de } from 'date-fns/locale/de'
 
-const DatePicker = (props: DatePickerProps) => {
+const TimePicker = (props: TimePickerProps) => {
   return (
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={de}>
-        <MuiDatePicker
+        <MuiTimePicker
           slotProps={{
             field: { clearable: true },
-            textField: { required: true },
           }}
           {...props}
-          sx={{ maxWidth: '250px' }}
+          sx={{ maxWidth: '245px' }}
         />
       </LocalizationProvider>
     </Box>
   )
 }
 
-export default DatePicker
+export default TimePicker

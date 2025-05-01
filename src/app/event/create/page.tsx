@@ -1,130 +1,183 @@
 'use client'
+import { FormEvent, useLayoutEffect, useState } from 'react'
+import { Box, Button, IconButton } from '@mui/material'
+import TextField from '@/components/textfield'
+import AddIcon from '@mui/icons-material/Add'
+import ClearIcon from '@mui/icons-material/Clear'
 import FormCard from '@/components/formCard'
-import { TextField, Grid, Button, Box } from '@mui/material'
 import DatePicker from '@/components/datePicker'
-import { useLayoutEffect, useMemo, useState, FormEvent } from 'react'
-import { AxiosError } from 'axios'
-import { api } from '@/lib/api'
+import TimePicker from '@/components/timePicker'
+import { PostEventDates } from '@/lib/types'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import { PostEvents } from '@/lib/types'
-import { useErrorBoundary } from 'react-error-boundary'
-import { useQueryState } from 'nuqs'
 import { useUser } from '@/hooks/useUser'
-
-interface PostResponseEvent extends PostEvents {
-  event: PostEvents & { eventId: string }
-}
+import { useErrorBoundary } from 'react-error-boundary'
+import { api } from '@/lib/api'
+import { AxiosError } from 'axios'
 
 const Page = () => {
-  //Constants
   const router = useRouter()
   const user = useUser()
   const { showBoundary } = useErrorBoundary()
 
-  const dateQueryOptions = useMemo(
-    () => ({
-      parse: (value: string | null) => (value ? new Date(value) : null),
-      serialize: (value: Date | null) => (value ? format(value, 'yyyy-MM-dd') : ''),
-    }),
-    []
-  )
-
-  //States
-  const [startDate, setStartDate] = useQueryState<Date | null>('startDate', dateQueryOptions)
-  const [endDate, setEndDate] = useQueryState<Date | null>('enddate', dateQueryOptions)
   const [isClient, setIsClient] = useState(false)
+  const [date, setDate] = useState<Date | null>(null)
+  const [startTime, setStartTime] = useState<Date | null>(null)
+  const [endTime, setEndTime] = useState<Date | null>(null)
+  const [eventDates, setEventDates] = useState<PostEventDates[]>([])
 
-  //Functions
+  useLayoutEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isClient) return <Box>Loading...</Box>
+
+  const handleAddButton = () => {
+    setEventDates([
+      ...eventDates,
+      { date: null, startTime: null, endTime: null } as unknown as PostEventDates,
+    ])
+  }
+
+  const handleDelete = (index: number) => {
+    setEventDates(eventDates.filter((_, i) => i !== index))
+  }
+
+  const handleChange = (index: number, key: keyof PostEventDates, value: Date | null) => {
+    const updated = [...eventDates]
+    updated[index][key] = value
+    setEventDates(updated)
+  }
+
+  const dateElements = (
+    date: Date | null,
+    startTime: Date | null,
+    endTime: Date | null,
+    index: number
+  ) => {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
+        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+          <DatePicker
+            value={date}
+            onChange={(newDate) => handleChange(index, 'date', newDate)}
+            label='Date'
+          />
+          <TimePicker
+            value={startTime}
+            onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
+            label='Start'
+          />
+          <TimePicker
+            value={endTime}
+            onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime)}
+            label='End'
+          />
+        </Box>
+
+        <Box>
+          <IconButton onClick={() => handleDelete(index)}>
+            <ClearIcon />
+          </IconButton>
+        </Box>
+      </Box>
+    )
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const formData = new FormData(e.target as HTMLFormElement)
 
-    const event = {
+    const formData = new FormData(e.currentTarget)
+    const title = formData.get('title')
+    const description = formData.get('description') || null
+    const room = formData.get('room') || null
+    const dates = [...eventDates]
+
+    const finalEventDates = [
+      {
+        date,
+        startTime,
+        endTime,
+      },
+      ...dates,
+    ]
+
+    const payload = {
       trainerId: user?.id as string,
-      title: formData.get('title') as string,
-      description: (formData.get('description') as string) || null,
-      room: (formData.get('room') as string) || null,
-      startDate: format(startDate as Date, 'yyyy-MM-dd'),
-      endDate: format(endDate as Date, 'yyyy-MM-dd'),
+      title,
+      description,
+      room,
+      eventDates: finalEventDates.map((entry) => ({
+        date: format(entry.date as Date, 'yyyy-MM-dd'),
+        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
+        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
+      })),
     }
 
     try {
-      const res = await api.post<PostResponseEvent>('/event', event)
-      if (res.status === 200) {
-        //const { eventId } = res.data.event
+      const response = await api.post('/event', payload)
+      if (response.status === 201) {
         router.push('/event')
       }
     } catch (error) {
       if (error instanceof AxiosError) {
         showBoundary(error)
       }
-      console.error(error)
+      console.error('Error creating Event:', error)
     }
   }
 
-  useLayoutEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  if (!isClient) {
-    return <Box>Loading...</Box>
-  }
-
   return (
-    <Grid
-      container
-      width={1000}
-      minHeight='80vh'
-      justifyContent='center'
-      alignItems='center'
-      margin='auto'
+    <Box
+      sx={{
+        height: '75vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
-      <Grid>
+      <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
         <FormCard title='Create Event'>
           <Box component='form' onSubmit={handleSubmit}>
-            <TextField
-              label='Title'
-              variant='outlined'
-              margin='normal'
-              required
-              fullWidth
-              name='title'
-            />
+            <TextField label='Title' variant='outlined' margin='normal' name='title' required />
             <TextField
               label='Description'
               variant='outlined'
               margin='normal'
-              fullWidth
               name='description'
+              minRows={3}
+              multiline
+              fullWidth
             />
             <TextField
               label='Room'
               variant='outlined'
               margin='normal'
-              fullWidth
               name='room'
+              fullWidth
               sx={{ marginBottom: '1.5rem' }}
             />
-            <Grid container spacing={2} justifyContent='center'>
-              <Grid size={6}>
-                <DatePicker
-                  label='Start Date'
-                  value={startDate}
-                  onChange={(newDate) => setStartDate(newDate)}
-                  disablePast
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+                <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
+                <TimePicker
+                  value={startTime}
+                  onChange={(newStartTime) => setStartTime(newStartTime)}
+                  label='Start'
                 />
-              </Grid>
-              <Grid size={6}>
-                <DatePicker
-                  label='End Date'
-                  value={endDate}
-                  onChange={(newDate) => setEndDate(newDate)}
-                  disablePast
-                  minDate={startDate as Date}
+                <TimePicker
+                  value={endTime}
+                  onChange={(newEndTime) => setEndTime(newEndTime)}
+                  label='End'
                 />
-              </Grid>
-            </Grid>
+              </Box>
+              <IconButton onClick={handleAddButton}>
+                <AddIcon sx={{ marginRight: '0.2rem' }} />
+              </IconButton>
+            </Box>
+            {eventDates.map((eventDate: PostEventDates, index) =>
+              dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
+            )}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
               <Button type='submit' color='primary' variant='contained'>
                 Create Event
@@ -132,8 +185,8 @@ const Page = () => {
             </Box>
           </Box>
         </FormCard>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   )
 }
 
