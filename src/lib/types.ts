@@ -63,3 +63,40 @@ export interface PostWishes {
   title: string
   description?: string
 }
+
+export interface Survey {
+  surveyId: string
+  eventId: string
+  title: string
+  created_at: string 
+  surveyQuestions: SurveyQuestions[]
+  Events: Events
+}
+
+export interface SurveyQuestions {
+  questionId: string
+  surveyId: string
+  questionText: string
+  isMultipleChoice: boolean
+  created_at: string
+  surveyAnswerOptions: SurveyAnswerOptions[]
+  surveys: Survey
+}
+
+export interface SurveyAnswerOptions {
+  answerId: string
+  questionId: string
+  answerText: string
+  created_at: string
+  surveyQuestions: SurveyQuestions
+  userAnswer: UserAnswer[]
+}
+
+export interface UserAnswer {
+  userAnswerId: string
+  userId: string
+  answerId: string
+  created_at: string
+  surveyAnswerOptions: SurveyAnswerOptions
+  users: Users
+}

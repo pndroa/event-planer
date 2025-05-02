@@ -11,6 +11,7 @@ import {
 import { IsMobile } from '@/lib/styles'
 import HomeIcon from '@mui/icons-material/Home'
 import StarIcon from '@mui/icons-material/Star'
+import PollOutlinedIcon from '@mui/icons-material/PollOutlined'
 import Link from 'next/link'
 import React from 'react'
 import { usePathname } from 'next/navigation'
@@ -24,6 +25,7 @@ const Sidebar = () => {
   const navLinks = [
     { label: 'Events', href: '/event', icon: <HomeIcon /> },
     { label: 'Wishes', href: '/wish', icon: <StarIcon /> },
+    { label: 'Surveys', href: '/event/mySurvey', icon: <PollOutlinedIcon /> },
   ]
   const [open, setOpen] = React.useState(false)
 

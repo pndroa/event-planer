@@ -14,6 +14,7 @@ interface WishCardProps {
   isUpvoted?: boolean
   onUpvote?: () => void
   deleteButton?: boolean
+  actionButton?: React.ReactNode
 }
 
 export default function WishCard({
@@ -24,6 +25,7 @@ export default function WishCard({
   isUpvoted,
   onUpvote,
   deleteButton = false,
+  actionButton = null,
 }: WishCardProps) {
   return (
     <Card
@@ -74,6 +76,9 @@ export default function WishCard({
             Delete
           </Button>
         )}
+      </Box>
+      <Box display='flex' justifyContent='flex-end'>
+        {actionButton}
       </Box>
     </Card>
   )
