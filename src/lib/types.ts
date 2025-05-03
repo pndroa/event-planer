@@ -29,12 +29,14 @@ export interface Events {
   title: string
   description?: string
   room?: string
-  startDate: Date
-  endDate: Date
+  startDate?: Date
+  endDate?: Date
   createdAt: string
   trainerId: string
   eventParticipation: EventParticipation[]
   users: Users
+  surveys?: Survey
+
 }
 
 export interface EventParticipation {
