@@ -36,7 +36,6 @@ export interface Events {
   eventParticipation: EventParticipation[]
   users: Users
   surveys?: Survey
-
 }
 
 export interface EventParticipation {
@@ -70,7 +69,7 @@ export interface Survey {
   surveyId: string
   eventId: string
   title: string
-  created_at: string 
+  created_at: string
   surveyQuestions: SurveyQuestions[]
   Events: Events
 }
@@ -81,24 +80,16 @@ export interface SurveyQuestions {
   questionText: string
   isMultipleChoice: boolean
   created_at: string
-  surveyAnswerOptions: SurveyAnswerOptions[]
+  surveyAnswerOptions: SurveyAnswer[]
   surveys: Survey
 }
 
-export interface SurveyAnswerOptions {
+export interface SurveyAnswer{
   answerId: string
   questionId: string
-  answerText: string
+  answer: string
   created_at: string
-  surveyQuestions: SurveyQuestions
-  userAnswer: UserAnswer[]
-}
-
-export interface UserAnswer {
-  userAnswerId: string
   userId: string
-  answerId: string
-  created_at: string
-  surveyAnswerOptions: SurveyAnswerOptions
+  surveyQuestions: SurveyQuestions
   users: Users
 }

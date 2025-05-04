@@ -13,7 +13,14 @@ export async function GET(request: Request) {
             include: {
               surveyQuestions: {
                 include: {
-                  surveyAnswers: true,
+                  surveyAnswers: {
+                    where: {
+                      userId: userId,
+                    },
+                    include: {
+                      users: true,
+                    },
+                  },
                 },
               },
             },
@@ -23,19 +30,6 @@ export async function GET(request: Request) {
           eventParticipation: {
             some: {
               participantId: userId,
-            },
-          },
-          surveys: {
-            surveyQuestions: {
-              some: {
-                surveyAnswers: {
-                  every: {
-                    userId: {
-                      not: userId,
-                    },
-                  },
-                },
-              },
             },
           },
         },
