@@ -33,12 +33,12 @@ export interface Events {
   endDate: Date
   createdAt: string
   trainerId: string
+  joined: boolean // neu
   eventParticipation: EventParticipation[]
   users: Users
 }
 
 export interface EventParticipation {
-  eventParticipationId: string
   created_at: string
   participantId: string
   eventId: string

@@ -6,9 +6,8 @@ import { api } from '@/lib/api'
 import EventCard from '@/components/EventCard'
 import SearchBar from '@/components/SearchBar'
 import TopNavigation from '@/components/TopNavigation'
-import { Events } from '@/lib/types'
 import Link from 'next/link'
-
+import { Events } from '@/lib/types'
 export default function EventFeed() {
   const [events, setEvents] = useState<Events[]>([])
   const [loading, setLoading] = useState(true)
@@ -34,7 +33,7 @@ export default function EventFeed() {
     .filter((event) => event.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-  if (loading) return <p>Loading events...</p>
+  if (loading) return <div></div>
 
   return (
     <>
@@ -59,17 +58,16 @@ export default function EventFeed() {
               label='Sort by'
               onChange={(e) => setSortBy(e.target.value as 'date')}
             >
-              <MenuItem value='date'>Newest</MenuItem>
+              <MenuItem value='date'>Latest</MenuItem>
             </Select>
           </FormControl>
           <Link href='/event/create' style={{ textDecoration: 'none', color: 'inherit' }}>
             <Button variant='contained' size='small' sx={{ height: '40px' }}>
               + CREATE EVENT
-            </Button>{' '}
+            </Button>
           </Link>
         </Box>
 
-        {/* Feed */}
         <Stack spacing={2}>
           {filteredEvents.map((event) => (
             <EventCard
@@ -78,6 +76,7 @@ export default function EventFeed() {
               username={event.users.name}
               title={event.title}
               createdAt={event.createdAt}
+              initialJoined={event.joined}
             />
           ))}
         </Stack>

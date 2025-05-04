@@ -1,6 +1,6 @@
 // components/WishCard.tsx
 'use client'
-import { Box, Card, Typography, IconButton, Avatar, Button } from '@mui/material'
+import { Box, Card, Typography, IconButton, Button } from '@mui/material'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import { blue, grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
@@ -38,9 +38,6 @@ export default function WishCard({
     >
       <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
         <Box display='flex' alignItems='center' gap={1}>
-          <Avatar sx={{ bgcolor: blue[500], width: 28, height: 28, fontSize: 14 }}>
-            {username[0].toUpperCase()}
-          </Avatar>
           <Typography variant='body2' color='text.secondary'>
             @{username}
           </Typography>
