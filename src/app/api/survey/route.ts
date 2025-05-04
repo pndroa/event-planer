@@ -7,7 +7,7 @@ export async function GET(request: Request) {
 
   if (userId) {
     try {
-      const surveys = await prisma.events.findMany({
+      const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
         include: {
           surveys: {
             include: {
@@ -41,7 +41,9 @@ export async function GET(request: Request) {
         },
       })
 
-      return NextResponse.json({ surveys }, { status: 200 })
+      const notAnsweredSurveys = participatedEventsWithouSurveyAnswers.map((event) => event.surveys)
+
+      return NextResponse.json({ notAnsweredSurveys }, { status: 200 })
     } catch (error) {
       return NextResponse.json({ error }, { status: 500 })
     }
