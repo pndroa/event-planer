@@ -1,20 +1,37 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { postEventSchema } from '@/lib/validation'
-import { PostEventDates } from '@/lib/types'
-
-export const dynamic = 'force-dynamic'
+import { createClientForServer } from '@/utils/supabase/server'
 
 export async function GET() {
-  try {
-    const events = await prisma.events.findMany({
-      include: {
-        users: true,
-        eventDates: true,
-      },
-    })
+  const supabase = await createClientForServer()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
 
-    return NextResponse.json(events, { status: 200 })
+  if (error || !user) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  }
+
+  try {
+    // asynchrone Datenabfrage, parallele Ausführung, nicht seriell!
+    const [events, participations] = await Promise.all([
+      prisma.events.findMany({ include: { users: true } }),
+      prisma.eventParticipation.findMany({
+        where: { participantId: user.id },
+        select: { eventId: true },
+      }),
+    ])
+
+    const joinedSet = new Set(participations.map((p) => p.eventId)) // Set.has(id) ist schneller als Array.includes(id)
+
+    const eventsWithJoined = events.map((event) => ({
+      ...event,
+      joined: joinedSet.has(event.eventId),
+    }))
+
+    return NextResponse.json(eventsWithJoined, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })
   }

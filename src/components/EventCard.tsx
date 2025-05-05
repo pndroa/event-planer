@@ -1,17 +1,46 @@
 'use client'
 
-import { Box, Card, Typography, Button, Avatar } from '@mui/material'
-import { blue, grey } from '@mui/material/colors'
+import { useState } from 'react'
+import { Box, Card, Typography, Button } from '@mui/material'
+import { grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
+import { api } from '@/lib/api'
 
 interface EventCardProps {
   eventId: string
   username: string
   title: string
   createdAt: string
+  initialJoined: boolean
 }
 
-export default function EventCard({ username, title, createdAt }: EventCardProps) {
+export default function EventCard({
+  eventId,
+  username,
+  title,
+  createdAt,
+  initialJoined,
+}: EventCardProps) {
+  const [joined, setJoined] = useState(initialJoined)
+
+  const createParticipation = async () => {
+    try {
+      const res = await api.post('/event/participation', { eventId })
+      setJoined(res.data.joined)
+    } catch (err) {
+      console.error('Error joining event:', err)
+    }
+  }
+
+  const deleteParticipation = async () => {
+    try {
+      const res = await api.delete(`/event/participation?eventId=${eventId}`)
+      setJoined(res.data.joined)
+    } catch (err) {
+      console.error('Error leaving event:', err)
+    }
+  }
+
   return (
     <Card
       sx={{
@@ -32,9 +61,6 @@ export default function EventCard({ username, title, createdAt }: EventCardProps
     >
       <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
         <Box display='flex' alignItems='center' gap={1}>
-          <Avatar sx={{ bgcolor: blue[500], width: 28, height: 28, fontSize: 14 }}>
-            {username[0].toUpperCase()}
-          </Avatar>
           <Typography variant='body2' color='text.secondary'>
             @{username}
           </Typography>
@@ -46,15 +72,46 @@ export default function EventCard({ username, title, createdAt }: EventCardProps
 
       <Typography
         variant='h6'
-        sx={{ mt: 1, fontWeight: 700, color: grey[900], wordBreak: 'break-word' }}
+        sx={{
+          mt: 1,
+          fontWeight: 700,
+          color: grey[900],
+          wordBreak: 'break-word',
+        }}
       >
         {title}
       </Typography>
 
       <Box display='flex' alignItems='center' mt={2}>
-        <Button variant='outlined' size='small' color='primary'>
-          Participate
-        </Button>
+        {joined ? (
+          <Button
+            variant='contained'
+            sx={{
+              color: '#fff',
+              backgroundColor: '#e57373',
+              '&:hover': {
+                backgroundColor: '#f44336',
+              },
+            }}
+            onClick={deleteParticipation}
+          >
+            Leave
+          </Button>
+        ) : (
+          <Button
+            variant='contained'
+            sx={{
+              color: '#fff',
+              backgroundColor: '#81c784',
+              '&:hover': {
+                backgroundColor: '#66bb6a',
+              },
+            }}
+            onClick={createParticipation}
+          >
+            Participate
+          </Button>
+        )}
       </Box>
     </Card>
   )

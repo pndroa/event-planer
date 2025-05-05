@@ -65,7 +65,7 @@ export default function WishFeed() {
             label='Sort by'
             onChange={(e) => setSortBy(e.target.value as 'date' | 'likes')}
           >
-            <MenuItem value='date'>Newest</MenuItem>
+            <MenuItem value='date'>Latest</MenuItem>
             <MenuItem value='likes'>Most liked</MenuItem>
           </Select>
         </FormControl>

@@ -57,7 +57,7 @@ const Page = () => {
             label='Sort by'
             onChange={(e) => setSortBy(e.target.value as 'date')}
           >
-            <MenuItem value='date'>Newest</MenuItem>
+            <MenuItem value='date'>Latest</MenuItem>
           </Select>
         </FormControl>
         <Link href='/wish/create' style={{ textDecoration: 'none', color: 'inherit' }}>
