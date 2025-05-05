@@ -8,15 +8,23 @@ import SearchBar from '@/components/SearchBar'
 import TopNavigation from '@/components/TopNavigation'
 import { Events } from '@/lib/types'
 import Link from 'next/link'
+import { fetchUser } from '@/lib/user'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Checkbox from '@mui/material/Checkbox'
 
 export default function EventFeed() {
   const [events, setEvents] = useState<Events[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date'>('date')
+  const [onlyMine, setOnlyMine] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        const user = await fetchUser()
+        setUserId(user?.id ?? null)
+
         const res = await api.get('/event')
         setEvents(res.data)
       } catch (error) {
@@ -30,6 +38,7 @@ export default function EventFeed() {
   const filteredEvents = events
     .filter((event) => event.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .filter((event) => !onlyMine || event.trainerId === userId)
 
   return (
     <>
@@ -64,6 +73,11 @@ export default function EventFeed() {
           </Link>
         </Box>
 
+        <FormControlLabel
+          control={<Checkbox checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />}
+          label='Show my events only'
+          sx={{ marginLeft: 0, marginRight: 0 }}
+        />
         {/* Feed */}
         <Stack spacing={2}>
           {filteredEvents.map((event) => (
