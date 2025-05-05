@@ -1,5 +1,88 @@
+'use client'
+import { api } from '@/lib/api'
+import { useState, useEffect } from 'react'
+import { Survey } from '@/lib/types'
+import { Box, Stack, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
+import SearchBar from '@/components/SearchBar'
+import TopNavigation from '@/components/TopNavigation'
+import { useErrorBoundary } from 'react-error-boundary'
+import { Typography } from '@mui/material'
+import { useUser } from '@/hooks/useUser'
+import SurveyCard from '@/components/SurveyCard'
+
+
 const Page = () => {
-  return <div>Page for all Surveys</div>
+  const [surveys, setSurveys] = useState<Survey[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState<'date'>('date')
+  const user = useUser()
+  const { showBoundary } = useErrorBoundary()
+
+  useEffect(() => {
+    const fetchSurveys = async () => {
+      if (!user?.id) return
+      try {
+        const res = await api.get(`/survey?userId=${user?.id}`)
+        setSurveys(res.data.notAnsweredSurveys)
+      } catch (error) {
+        console.error('Error loading surveys:', error)
+        showBoundary(error)
+      }
+    }
+    fetchSurveys()
+  }, [showBoundary, user])
+
+  const filteredSurveys = surveys
+    .filter((survey) => survey.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  return (
+    <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
+      <Typography variant='h4' component='h1' gutterBottom>
+        My Surveys
+      </Typography>
+      <Box>
+        <br />
+      </Box>
+      <Box
+        display='flex'
+        flexWrap='wrap'
+        alignItems='center'
+        justifyContent='space-between'
+        gap={1.5}
+        mb={3}
+      >
+        <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+        <FormControl size='small' sx={{ minWidth: 140 }}>
+          <InputLabel id='sort-label'>Sort by</InputLabel>
+          <Select
+            labelId='sort-label'
+            value={sortBy}
+            label='Sort by'
+            onChange={(e) => setSortBy(e.target.value as 'date')}
+          >
+            <MenuItem value='date'>Newest</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Feed */}
+      <Stack spacing={2}>
+        {filteredSurveys.map((survey) => (
+          <SurveyCard
+            key={survey.surveyId}
+            title={survey.title}
+            createdAt={survey.created_at}
+            actionButton={
+              <Button variant='contained' size='small' sx={{ height: '40px' }}>
+                Answer
+              </Button>
+            }
+          />
+        ))}
+      </Stack>
+    </Box>
+  )
 }
 
 export default Page

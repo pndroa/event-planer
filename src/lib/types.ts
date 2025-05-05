@@ -29,13 +29,14 @@ export interface Events {
   title: string
   description?: string
   room?: string
-  startDate: Date
-  endDate: Date
+  startDate?: Date
+  endDate?: Date
   createdAt: string
   trainerId: string
   joined: boolean // neu
   eventParticipation: EventParticipation[]
   users: Users
+  surveys?: Survey
 }
 
 export interface EventParticipation {
@@ -62,4 +63,33 @@ export interface PostWishes {
   wishCreator: string
   title: string
   description?: string
+}
+
+export interface Survey {
+  surveyId: string
+  eventId: string
+  title: string
+  created_at: string
+  surveyQuestions: SurveyQuestions[]
+  Events: Events
+}
+
+export interface SurveyQuestions {
+  questionId: string
+  surveyId: string
+  questionText: string
+  isMultipleChoice: boolean
+  created_at: string
+  surveyAnswerOptions: SurveyAnswer[]
+  surveys: Survey
+}
+
+export interface SurveyAnswer{
+  answerId: string
+  questionId: string
+  answer: string
+  created_at: string
+  userId: string
+  surveyQuestions: SurveyQuestions
+  users: Users
 }
