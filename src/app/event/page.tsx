@@ -1,28 +1,41 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Box, Stack, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
+import {
+  Box,
+  Stack,
+  Button,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  FormControlLabel,
+  Checkbox,
+} from '@mui/material'
 import { api } from '@/lib/api'
 import EventCard from '@/components/EventCard'
 import SearchBar from '@/components/SearchBar'
 import TopNavigation from '@/components/TopNavigation'
 import Link from 'next/link'
 import { Events } from '@/lib/types'
+import { fetchUser } from '@/lib/user'
 export default function EventFeed() {
   const [events, setEvents] = useState<Events[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date'>('date')
+  const [onlyMine, setOnlyMine] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        const user = await fetchUser()
+        setUserId(user?.id ?? null)
+
         const res = await api.get('/event')
         setEvents(res.data)
       } catch (error) {
         console.error('Error loading events:', error)
-      } finally {
-        setLoading(false)
       }
     }
 
@@ -32,8 +45,7 @@ export default function EventFeed() {
   const filteredEvents = events
     .filter((event) => event.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-  if (loading) return <div></div>
+    .filter((event) => !onlyMine || event.trainerId === userId)
 
   return (
     <>
@@ -67,6 +79,12 @@ export default function EventFeed() {
             </Button>
           </Link>
         </Box>
+
+        <FormControlLabel
+          control={<Checkbox checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />}
+          label='Show my events only'
+          sx={{ marginLeft: 0, marginRight: 0 }}
+        />
 
         <Stack spacing={2}>
           {filteredEvents.map((event) => (
