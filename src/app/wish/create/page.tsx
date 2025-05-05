@@ -1,6 +1,6 @@
 'use client'
 import FormCard from '@/components/formCard'
-import { TextField, Grid, Button, Box, Snackbar, Alert } from '@mui/material'
+import { TextField, Grid, Button, Box } from '@mui/material'
 import { useLayoutEffect, useState, FormEvent } from 'react'
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
@@ -20,8 +20,6 @@ const Page = () => {
   const { showBoundary } = useErrorBoundary()
 
   const [isClient, setIsClient] = useState(false)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false)
 
   //Functions
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -37,12 +35,7 @@ const Page = () => {
     try {
       const res = await api.post<PostResponseWishes>('/wish', wish)
       if (res.status === 200) {
-        setSuccessMessage('Wish successfully created! Redirecting to the wishes...')
-        setOpenSnackbar(true)
-
-        setTimeout(() => {
-          router.push('/wish')
-        }, 2000)
+        router.push('/wish')
       }
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -94,17 +87,6 @@ const Page = () => {
           </Box>
         </FormCard>
       </Grid>
-
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={2000}
-        onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setOpenSnackbar(false)} severity='success' sx={{ width: '100%' }}>
-          {successMessage}
-        </Alert>
-      </Snackbar>
     </Grid>
   )
 }
