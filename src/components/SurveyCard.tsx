@@ -3,11 +3,12 @@
 import { Box, Card, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
+import { ReactNode } from 'react'
 
 interface SurveyCardProps {
   title: string
   createdAt: string
-  actionButton?: React.ReactNode
+  actionButton?: ReactNode
 }
 
 export default function SurveyCard({ title, createdAt, actionButton = null }: SurveyCardProps) {

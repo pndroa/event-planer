@@ -15,7 +15,7 @@ model users {
   name               String?
   eventParticipation eventParticipation[]
   events             events[]
-  userAnswer         userAnswer[]
+  surveyAnswers      surveyAnswers[]
   users              auth_users           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   wishUpvote         wishUpvote[]
   wishes             wishes[]
@@ -64,35 +64,23 @@ model wishUpvote {
 }
 
 model eventParticipation {
-  eventParticipationId String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-  participantId        String   @db.Uuid
-  eventId              String   @db.Uuid
-  Events               events   @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
-  users                users    @relation(fields: [participantId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  participantId        String      @db.Uuid
+  eventId              String      @db.Uuid
+  created_at           DateTime    @default(now()) @db.Timestamptz(6)
+  events               events      @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
+  users                users @relation(fields: [participantId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("public")
-}
-
-model surveyAnswerOptions {
-  answerId        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  questionId      String          @db.Uuid
-  answerText      String
-  created_at      DateTime        @default(now()) @db.Timestamptz(6)
-  surveyQuestions surveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade, onUpdate: NoAction)
-  userAnswer      userAnswer[]
-
+  @@id([participantId, eventId])
   @@schema("public")
 }
 
 model surveyQuestions {
-  questionId          String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  surveyId            String                @db.Uuid
-  questionText        String
-  isMultipleChoice    Boolean               @default(false)
-  created_at          DateTime              @default(now()) @db.Timestamptz(6)
-  surveyAnswerOptions surveyAnswerOptions[]
-  surveys             surveys               @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade, onUpdate: NoAction)
+  questionId    String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  surveyId      String          @db.Uuid
+  questionText  String
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  surveyAnswers surveyAnswers[]
+  surveys       surveys         @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -104,17 +92,6 @@ model surveys {
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   surveyQuestions surveyQuestions[]
   Events          events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("public")
-}
-
-model userAnswer {
-  userAnswerId        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId              String              @db.Uuid
-  answerId            String              @db.Uuid
-  created_at          DateTime            @default(now()) @db.Timestamptz(6)
-  surveyAnswerOptions surveyAnswerOptions @relation(fields: [answerId], references: [answerId], onDelete: Cascade, onUpdate: NoAction)
-  users               users               @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -443,6 +420,18 @@ model eventDates {
   endTime    String?
   created_at DateTime @default(now()) @db.Timestamptz(6)
   events     events?  @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model surveyAnswers {
+  answerId        String          @id(map: "surveyAnswerOptions_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  questionId      String          @db.Uuid
+  answer          String
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  userId          String          @db.Uuid
+  surveyQuestions surveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade, onUpdate: NoAction, map: "surveyAnswerOptions_questionId_fkey")
+  users           users           @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }

@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react'
 import { Survey } from '@/lib/types'
 import { Box, Stack, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
 import SearchBar from '@/components/SearchBar'
-import TopNavigation from '@/components/TopNavigation'
 import { useErrorBoundary } from 'react-error-boundary'
 import { Typography } from '@mui/material'
 import { useUser } from '@/hooks/useUser'
 import SurveyCard from '@/components/SurveyCard'
-
 
 const Page = () => {
   const [surveys, setSurveys] = useState<Survey[]>([])

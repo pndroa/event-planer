@@ -84,7 +84,7 @@ export interface SurveyQuestions {
   surveys: Survey
 }
 
-export interface SurveyAnswer{
+export interface SurveyAnswer {
   answerId: string
   questionId: string
   answer: string

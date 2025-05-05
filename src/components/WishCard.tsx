@@ -5,6 +5,7 @@ import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import { blue, grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt'
+import { ReactNode } from 'react'
 
 interface WishCardProps {
   username: string
@@ -14,7 +15,7 @@ interface WishCardProps {
   isUpvoted?: boolean
   onUpvote?: () => void
   deleteButton?: boolean
-  actionButton?: React.ReactNode
+  actionButton?: ReactNode
 }
 
 export default function WishCard({

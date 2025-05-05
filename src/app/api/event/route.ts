@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { postEventSchema } from '@/lib/validation'
 import { createClientForServer } from '@/utils/supabase/server'
+import { PostEventDates } from '@/lib/types'
 
 export async function GET() {
   const supabase = await createClientForServer()
