@@ -10,14 +10,12 @@ import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@/hooks/useUser'
 import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
 import { AxiosError } from 'axios'
 
 const Page = () => {
   const router = useRouter()
-  const user = useUser()
   const { showBoundary } = useErrorBoundary()
 
   const [isClient, setIsClient] = useState(false)
@@ -103,7 +101,6 @@ const Page = () => {
     ]
 
     const payload = {
-      trainerId: user?.id as string,
       title,
       description,
       room,

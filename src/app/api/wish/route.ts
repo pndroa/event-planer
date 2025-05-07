@@ -1,23 +1,18 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
-import { createClientForServer } from '@/utils/supabase/server'
-import { PostWishes } from '@/lib/types'
-import Joi from 'joi'
-import { postWishSchema } from '@/lib/validation'
+import { getServerAuth } from '@/lib/auth'
 
 export async function GET() {
-  const supabase = await createClientForServer()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  const userId = user?.id
+  const { user, errorResponse } = await getServerAuth()
+
+  if (errorResponse) return errorResponse
 
   try {
     const wishes = await prisma.wishes.findMany({
       include: {
         users: true,
         _count: { select: { wishUpvote: true } },
-        wishUpvote: userId ? { where: { userId } } : false,
+        wishUpvote: user.id ? { where: { userId: user.id } } : false,
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -34,7 +29,7 @@ export async function GET() {
         name: w.users.name,
       },
       currentUpvotes: w._count.wishUpvote,
-      isUpvotedByMe: userId ? w.wishUpvote.length > 0 : false,
+      isUpvotedByMe: user.id ? w.wishUpvote.length > 0 : false,
     }))
 
     return NextResponse.json(data, { status: 200 })
@@ -44,22 +39,24 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const { user, errorResponse } = await getServerAuth()
+
+  if (errorResponse) return errorResponse
+
   try {
     const body = await req.json()
-    const { value, error }: { value: PostWishes; error: Joi.ValidationError | undefined } =
-      postWishSchema.validate(body, { abortEarly: false })
 
-    if (error) {
-      return NextResponse.json(
-        { error: 'Request failed', details: error.details[0].message },
-        { status: 400 }
-      )
-    } else {
-      const wish = await prisma.wishes.create({
-        data: value,
-      })
-      return NextResponse.json({ message: 'created wish', wish }, { status: 200 })
-    }
+    const { title, description } = body
+
+    const wish = await prisma.wishes.create({
+      data: {
+        wishCreator: user.id,
+        title,
+        description,
+      },
+    })
+
+    return NextResponse.json({ message: 'created wish', wish }, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })
   }

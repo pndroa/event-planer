@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
+import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('userId')
+export async function GET(_request: Request) {
+  const { user, errorResponse } = await getServerAuth()
 
-  if (userId) {
+  if (errorResponse) return errorResponse
+
+  if (user?.id) {
     try {
       const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
         include: {
@@ -15,7 +17,7 @@ export async function GET(request: Request) {
                 include: {
                   surveyAnswers: {
                     where: {
-                      userId: userId,
+                      userId: user.id,
                     },
                     include: {
                       users: true,
@@ -29,7 +31,7 @@ export async function GET(request: Request) {
         where: {
           eventParticipation: {
             some: {
-              participantId: userId,
+              participantId: user.id,
             },
           },
         },
@@ -41,5 +43,27 @@ export async function GET(request: Request) {
     } catch (error) {
       return NextResponse.json({ error }, { status: 500 })
     }
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+
+    const existingEvent = await prisma.events.findUnique({
+      where: { eventId: body.eventId },
+    })
+
+    if (!existingEvent) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
+
+    const createSurvey = await prisma.surveys.create({
+      data: body,
+    })
+
+    return NextResponse.json({ message: 'survey created', data: createSurvey }, { status: 201 })
+  } catch (error) {
+    return NextResponse.json({ error }, { status: 500 })
   }
 }

@@ -1,7 +1,7 @@
 // api/wish/[wishid]/upvote/route.ts
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
-import { createClientForServer } from '@/utils/supabase/server'
+import { getServerAuth } from '@/lib/auth'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -9,14 +9,9 @@ interface RouteContext {
 
 export async function POST(_req: Request, { params }: RouteContext) {
   const { id } = await params
-  const supabase = await createClientForServer()
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-  }
+  const { user, errorResponse } = await getServerAuth()
+
+  if (errorResponse) return errorResponse
   const userId = user.id
 
   try {
