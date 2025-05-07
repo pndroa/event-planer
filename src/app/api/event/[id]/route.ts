@@ -36,7 +36,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
       where: {
         eventId: id,
       },
+      include: {
+        eventDates: true,
+      }
     })
+
     return NextResponse.json({ event }, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error })

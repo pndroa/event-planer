@@ -17,6 +17,9 @@ import { AxiosError } from 'axios'
 import { useEffect } from 'react'
 import { Events } from '@/lib/types'
 import { useParams } from 'next/navigation'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+dayjs.extend(customParseFormat)
 
 const Page = () => {
   const router = useRouter()
@@ -27,8 +30,12 @@ const Page = () => {
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [endTime, setEndTime] = useState<Date | null>(null)
   const [eventDates, setEventDates] = useState<PostEventDates[]>([])
-  const [events, setEvents] = useState<Events[]>([])
+  const [event, setEvent] = useState<Events>()
   const { id } = useParams()
+  const [title, setTitle] = useState<string>()
+  const [description, setDescription] = useState<string>()
+  const [room, setRoom] = useState<string>()
+  const [eventId, setEventId] = useState<String>()
 
   useLayoutEffect(() => {
     setIsClient(true)
@@ -133,15 +140,24 @@ const Page = () => {
     const fetchEvents = async () => {
       try {
         const res = await api.get(`/event/${id}`)
-        console.log(res.data)
-        console.log('----------------------------------------------------------')
-        setEvents(res.data)
-        console.log(events)
+        console.log(res.data.event)
+
+        setTitle(res.data.event.title)
+        setDescription(res.data.event.description)
+        setRoom(res.data.event.room)
+
+        const convertedDates = res.data.event.eventDates.map((eventDate: any) => ({
+          date: new Date(eventDate.date),
+          startTime: dayjs(eventDate.startTime, 'HH:mm').toDate(),
+          endTime: dayjs(eventDate.endTime, 'HH:mm').toDate(),
+        }))
+
+        setEventDates(convertedDates)
+        setEvent(res.data.event)
       } catch (error) {
         console.error('Error loading events:', error)
       }
     }
-
     fetchEvents()
   }, [])
 
@@ -157,12 +173,24 @@ const Page = () => {
       <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
         <FormCard title='Edit Event'>
           <Box component='form' onSubmit={handleSubmit}>
-            <TextField label='Title' variant='outlined' margin='normal' name='title' required />
+            <TextField
+              label='Title'
+              variant='outlined'
+              margin='normal'
+              name='title'
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
             <TextField
               label='Description'
               variant='outlined'
               margin='normal'
               name='description'
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              InputLabelProps={{ shrink: true }}
               minRows={3}
               multiline
               fullWidth
@@ -172,9 +200,15 @@ const Page = () => {
               variant='outlined'
               margin='normal'
               name='room'
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
+              InputLabelProps={{ shrink: true }}
               fullWidth
               sx={{ marginBottom: '1.5rem' }}
             />
+            {eventDates.map((eventDate: PostEventDates, index) =>
+              dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
+            )}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
                 <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
@@ -193,9 +227,6 @@ const Page = () => {
                 <AddIcon sx={{ marginRight: '0.2rem' }} />
               </IconButton>
             </Box>
-            {eventDates.map((eventDate: PostEventDates, index) =>
-              dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
-            )}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
               <Button type='submit' color='primary' variant='contained'>
                 Save changes
