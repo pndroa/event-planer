@@ -37,6 +37,7 @@ const Page = () => {
   const [room, setRoom] = useState<string>()
   const [eventId, setEventId] = useState<String>()
 
+
   useLayoutEffect(() => {
     setIsClient(true)
   }, [])
@@ -124,7 +125,7 @@ const Page = () => {
     }
 
     try {
-      const response = await api.post('/event', payload)
+      const response = await api.patch(`/event/${id}`, payload)
       if (response.status === 201) {
         router.push('/event')
       }
