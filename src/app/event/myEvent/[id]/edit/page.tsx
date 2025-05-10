@@ -19,6 +19,8 @@ import { Events } from '@/lib/types'
 import { useParams } from 'next/navigation'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { PostEventDatesUpdate } from '@/lib/types'
+
 dayjs.extend(customParseFormat)
 
 const Page = () => {
@@ -29,14 +31,14 @@ const Page = () => {
   const [date, setDate] = useState<Date | null>(null)
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [endTime, setEndTime] = useState<Date | null>(null)
-  const [eventDates, setEventDates] = useState<PostEventDates[]>([])
+  const [eventDates, setEventDates] = useState<PostEventDatesUpdate[]>([])
+  const [eventDatesToCompare, setEventDatesToCompare] = useState<PostEventDatesUpdate[]>([])
   const [event, setEvent] = useState<Events>()
   const { id } = useParams()
   const [title, setTitle] = useState<string>()
   const [description, setDescription] = useState<string>()
   const [room, setRoom] = useState<string>()
   const [eventId, setEventId] = useState<String>()
-
 
   useLayoutEffect(() => {
     setIsClient(true)
@@ -45,7 +47,7 @@ const Page = () => {
   const handleAddButton = () => {
     setEventDates([
       ...eventDates,
-      { date: null, startTime: null, endTime: null } as unknown as PostEventDates,
+      { date: null, startTime: null, endTime: null } as unknown as PostEventDatesUpdate,
     ])
   }
 
@@ -69,18 +71,18 @@ const Page = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
         <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
           <DatePicker
-            value={date}
-            onChange={(newDate) => handleChange(index, 'date', newDate)}
+            value={date ?? null}
+            onChange={(newDate) => handleChange(index, 'date', newDate ?? null)}
             label='Date'
           />
           <TimePicker
-            value={startTime}
-            onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
+            value={startTime ?? null}
+            onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime ?? null)}
             label='Start'
           />
           <TimePicker
-            value={endTime}
-            onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime)}
+            value={endTime ?? null}
+            onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime ?? null)}
             label='End'
           />
         </Box>
@@ -104,12 +106,8 @@ const Page = () => {
     const dates = [...eventDates]
 
     const finalEventDates = [
-      {
-        date,
-        startTime,
-        endTime,
-      },
-      ...dates,
+      ...eventDates,
+      ...(date && startTime && endTime ? [{ date, startTime, endTime }] : []),
     ]
 
     const payload = {
@@ -118,6 +116,13 @@ const Page = () => {
       description,
       room,
       eventDates: finalEventDates.map((entry) => ({
+        ...(entry.id ? { id: entry.id } : {}),
+        date: format(entry.date as Date, 'yyyy-MM-dd'),
+        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
+        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
+      })),
+      eventDatesToCompare: eventDatesToCompare.map((entry) => ({
+        ...(entry.id ? { id: entry.id } : {}),
         date: format(entry.date as Date, 'yyyy-MM-dd'),
         startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
         endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
@@ -151,8 +156,11 @@ const Page = () => {
           date: new Date(eventDate.date),
           startTime: dayjs(eventDate.startTime, 'HH:mm').toDate(),
           endTime: dayjs(eventDate.endTime, 'HH:mm').toDate(),
+          id: eventDate.dateId,
         }))
 
+        console.log(convertedDates)
+        setEventDatesToCompare(convertedDates)
         setEventDates(convertedDates)
         setEvent(res.data.event)
       } catch (error) {
@@ -212,15 +220,19 @@ const Page = () => {
             )}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
-                <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
+                <DatePicker
+                  value={date ?? null}
+                  onChange={(newDate) => setDate(newDate ?? null)}
+                  label='Date'
+                />
                 <TimePicker
-                  value={startTime}
-                  onChange={(newStartTime) => setStartTime(newStartTime)}
+                  value={startTime ?? null}
+                  onChange={(newStartTime) => setStartTime(newStartTime ?? null)}
                   label='Start'
                 />
                 <TimePicker
-                  value={endTime}
-                  onChange={(newEndTime) => setEndTime(newEndTime)}
+                  value={endTime ?? null}
+                  onChange={(newEndTime) => setEndTime(newEndTime ?? null)}
                   label='End'
                 />
               </Box>

@@ -36,12 +36,6 @@ const Page = () => {
 
   return (
     <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
-      <Typography variant='h4' component='h1' gutterBottom>
-        My Surveys
-      </Typography>
-      <Box>
-        <br />
-      </Box>
       <Box
         display='flex'
         flexWrap='wrap'
@@ -59,7 +53,7 @@ const Page = () => {
             label='Sort by'
             onChange={(e) => setSortBy(e.target.value as 'date')}
           >
-            <MenuItem value='date'>Newest</MenuItem>
+            <MenuItem value='date'>Latest</MenuItem>
           </Select>
         </FormControl>
       </Box>

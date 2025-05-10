@@ -59,6 +59,13 @@ export interface PostEventDates {
   endTime: Date | null
 }
 
+export interface PostEventDatesUpdate {
+  id?: string
+  date: Date | null
+  startTime: Date | null
+  endTime: Date | null
+}
+
 export interface PostWishes {
   wishCreator: string
   title: string

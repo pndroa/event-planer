@@ -51,8 +51,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const { id } = params
+
   try {
     const body = await req.json()
+
+    const nonExistingEventDates = body.eventDates.filter((d: { id?: string }) => !d.id)
+    const eventDatesToUpdate = body.eventDates.filter((d: { id?: string }) => d.id)
+    const eventDatesToDelete = body.eventDatesToCompare.filter(
+      (eventDateToCompare: { id?: string }) =>
+        eventDateToCompare.id &&
+        !eventDatesToUpdate.some(
+          (eventDateToUpdate: { id?: string }) => eventDateToUpdate.id === eventDateToCompare.id
+        )
+    )
 
     const { value, error } = postEventSchema.validate(body, { abortEarly: false })
 
@@ -65,27 +76,58 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     const { trainerId, title, description, room, eventDates } = value
 
-    const createdEvent = await prisma.events.update({
-      where: {
-        eventId: id,
-      },
-      data: {
-        trainerId: body.trainerId,
-        title: body.title,
-        description: body.description,
-        room: body.room,
-        eventDates: {
-          create: body.eventDates.map((d: PostEventDates) => ({
-            date: new Date(d.date as Date),
-            startTime: d.startTime,
-            endTime: d.endTime,
-          })),
+    const createdEvent = await prisma.$transaction([
+      prisma.eventDates.deleteMany({
+        where: {
+          dateId: {
+            in: eventDatesToDelete.map((d: { id: string }) => d.id!),
+          },
         },
-      },
-      include: {
-        eventDates: true,
-      },
-    })
+      }),
+      prisma.events.update({
+        where: {
+          eventId: id,
+        },
+        data: {
+          trainerId: body.trainerId,
+          title: body.title,
+          description: body.description,
+          room: body.room,
+          eventDates: {
+            create: nonExistingEventDates.map(
+              (d: { date: string; startTime: string | null; endTime: string | null }) => ({
+                date: new Date(d.date),
+                startTime: d.startTime,
+                endTime: d.endTime,
+              })
+            ),
+            update: eventDatesToUpdate.map(
+              (d: {
+                id: string
+                date: string
+                startTime: string | null
+                endTime: string | null
+              }) => ({
+                where: { dateId: d.id },
+                data: {
+                  date: new Date(d.date),
+                  startTime: d.startTime,
+                  endTime: d.endTime,
+                },
+              })
+            ),
+          },
+        },
+        include: {
+          eventDates: true,
+        },
+      }),
+    ])
+
+    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx', eventDatesToDelete)
+    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx', eventDatesToUpdate)
+    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx', body)
+    console.log('Created Event:', createdEvent)
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
   } catch (error) {
