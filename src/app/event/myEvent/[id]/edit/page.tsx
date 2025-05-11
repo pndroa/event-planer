@@ -5,8 +5,8 @@ import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
 import ClearIcon from '@mui/icons-material/Clear'
 import FormCard from '@/components/formCard'
-import DatePicker from '@/components/datePicker'
-import TimePicker from '@/components/timePicker'
+//import DatePicker from '@/components/datePicker'
+//import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
@@ -19,6 +19,15 @@ import { useParams } from 'next/navigation'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { PostEventDatesUpdate } from '@/lib/types'
+import dynamic from 'next/dynamic'
+
+const DatePicker = dynamic(() => import('@/components/datePicker'), {
+  ssr: false,
+})
+
+const TimePicker = dynamic(() => import('@/components/timePicker'), {
+  ssr: false,
+})
 
 dayjs.extend(customParseFormat)
 
@@ -26,7 +35,7 @@ const Page = () => {
   const router = useRouter()
   const user = useUser()
   const { showBoundary } = useErrorBoundary()
-  const [isClient, setIsClient] = useState(false)
+  const [_isClient, setIsClient] = useState(false)
   const [date, setDate] = useState<Date | null>(null)
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [endTime, setEndTime] = useState<Date | null>(null)
@@ -147,7 +156,14 @@ const Page = () => {
         setDescription(res.data.event.description ?? '')
         setRoom(res.data.event.room ?? '')
 
-        const convertedDates = res.data.event.eventDates.map((eventDate: any) => ({
+        type RawEventDate = {
+          date: string
+          startTime: string
+          endTime: string
+          dateId: string | number
+        }
+
+        const convertedDates = res.data.event.eventDates.map((eventDate: RawEventDate) => ({
           date: new Date(eventDate.date),
           startTime: dayjs(eventDate.startTime, 'HH:mm').toDate(),
           endTime: dayjs(eventDate.endTime, 'HH:mm').toDate(),

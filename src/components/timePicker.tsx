@@ -12,6 +12,11 @@ const TimePicker = (props: TimePickerProps) => {
         <MuiTimePicker
           slotProps={{
             field: { clearable: true },
+            textField: {
+              inputProps: {
+                autoCapitalize: 'none',
+              },
+            },
           }}
           {...props}
           sx={{ maxWidth: '245px' }}
