@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate && next build",
+    "bld": "echo Building... && npx prisma generate && echo Prisma done && next build && echo Next build done",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",

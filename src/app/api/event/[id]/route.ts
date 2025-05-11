@@ -3,9 +3,9 @@ import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 import { createClientForServer } from '@/utils/supabase/server'
 import { postEventSchema } from '@/lib/validation'
-import { PostEventDates } from '@/lib/types'
+import { NextRequest } from 'next/server'
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
   async function getServerAuth() {
     const supabase = await createClientForServer()
     const {
@@ -27,7 +27,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   if (errorResponse) return errorResponse
 
-  const { id } = params
+  const { id } = context.params
 
   if (!id) {
     throw new Error('Invalid or missing id parameter')
@@ -49,8 +49,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { id } = params
+export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+  const { id } = context.params
 
   try {
     const body = await req.json()
@@ -74,13 +74,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       )
     }
 
-    const { trainerId, title, description, room, eventDates } = value
+    const { trainerId, title, description, room } = value
 
     const createdEvent = await prisma.$transaction([
       prisma.eventDates.deleteMany({
         where: {
           dateId: {
-            in: eventDatesToDelete.map((d: { id: string }) => d.id!),
+            in: eventDatesToDelete.map((d: { id: string }) => d.id),
           },
         },
       }),
@@ -89,10 +89,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
           eventId: id,
         },
         data: {
-          trainerId: body.trainerId,
-          title: body.title,
-          description: body.description,
-          room: body.room,
+          trainerId: trainerId,
+          title: title,
+          description: description,
+          room: room,
           eventDates: {
             create: nonExistingEventDates.map(
               (d: { date: string; startTime: string | null; endTime: string | null }) => ({
@@ -123,11 +123,6 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         },
       }),
     ])
-
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx', eventDatesToDelete)
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx', eventDatesToUpdate)
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx', body)
-    console.log('Created Event:', createdEvent)
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
   } catch (error) {

@@ -15,7 +15,6 @@ import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
 import { AxiosError } from 'axios'
 import { useEffect } from 'react'
-import { Events } from '@/lib/types'
 import { useParams } from 'next/navigation'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
@@ -33,12 +32,10 @@ const Page = () => {
   const [endTime, setEndTime] = useState<Date | null>(null)
   const [eventDates, setEventDates] = useState<PostEventDatesUpdate[]>([])
   const [eventDatesToCompare, setEventDatesToCompare] = useState<PostEventDatesUpdate[]>([])
-  const [event, setEvent] = useState<Events>()
   const { id } = useParams()
-  const [title, setTitle] = useState<string>()
-  const [description, setDescription] = useState<string>()
-  const [room, setRoom] = useState<string>()
-  const [eventId, setEventId] = useState<String>()
+  const [title, setTitle] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
+  const [room, setRoom] = useState<string>('')
 
   useLayoutEffect(() => {
     setIsClient(true)
@@ -71,18 +68,18 @@ const Page = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
         <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
           <DatePicker
-            value={date ?? null}
-            onChange={(newDate) => handleChange(index, 'date', newDate ?? null)}
+            value={date}
+            onChange={(newDate) => handleChange(index, 'date', newDate)}
             label='Date'
           />
           <TimePicker
-            value={startTime ?? null}
-            onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime ?? null)}
+            value={startTime}
+            onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
             label='Start'
           />
           <TimePicker
-            value={endTime ?? null}
-            onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime ?? null)}
+            value={endTime}
+            onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime)}
             label='End'
           />
         </Box>
@@ -103,11 +100,10 @@ const Page = () => {
     const title = formData.get('title')
     const description = formData.get('description') || null
     const room = formData.get('room') || null
-    const dates = [...eventDates]
 
     const finalEventDates = [
-      ...eventDates,
       ...(date && startTime && endTime ? [{ date, startTime, endTime }] : []),
+      ...eventDates,
     ]
 
     const payload = {
@@ -146,11 +142,10 @@ const Page = () => {
     const fetchEvents = async () => {
       try {
         const res = await api.get(`/event/${id}`)
-        console.log(res.data.event)
 
-        setTitle(res.data.event.title)
-        setDescription(res.data.event.description)
-        setRoom(res.data.event.room)
+        setTitle(res.data.event.title ?? '')
+        setDescription(res.data.event.description ?? '')
+        setRoom(res.data.event.room ?? '')
 
         const convertedDates = res.data.event.eventDates.map((eventDate: any) => ({
           date: new Date(eventDate.date),
@@ -159,10 +154,8 @@ const Page = () => {
           id: eventDate.dateId,
         }))
 
-        console.log(convertedDates)
         setEventDatesToCompare(convertedDates)
         setEventDates(convertedDates)
-        setEvent(res.data.event)
       } catch (error) {
         console.error('Error loading events:', error)
       }
@@ -189,7 +182,7 @@ const Page = () => {
               name='title'
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              fullWidth
               required
             />
             <TextField
@@ -199,7 +192,6 @@ const Page = () => {
               name='description'
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              InputLabelProps={{ shrink: true }}
               minRows={3}
               multiline
               fullWidth
@@ -211,7 +203,6 @@ const Page = () => {
               name='room'
               value={room}
               onChange={(e) => setRoom(e.target.value)}
-              InputLabelProps={{ shrink: true }}
               fullWidth
               sx={{ marginBottom: '1.5rem' }}
             />
@@ -220,19 +211,15 @@ const Page = () => {
             )}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
-                <DatePicker
-                  value={date ?? null}
-                  onChange={(newDate) => setDate(newDate ?? null)}
-                  label='Date'
-                />
+                <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
                 <TimePicker
-                  value={startTime ?? null}
-                  onChange={(newStartTime) => setStartTime(newStartTime ?? null)}
+                  value={startTime}
+                  onChange={(newStartTime) => setStartTime(newStartTime)}
                   label='Start'
                 />
                 <TimePicker
-                  value={endTime ?? null}
-                  onChange={(newEndTime) => setEndTime(newEndTime ?? null)}
+                  value={endTime}
+                  onChange={(newEndTime) => setEndTime(newEndTime)}
                   label='End'
                 />
               </Box>
