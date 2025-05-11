@@ -18,6 +18,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         users: {
           userId: id,
         },
+        isConvertedToEvent: false,
       },
     })
     return NextResponse.json(myWishes, { status: 200 })

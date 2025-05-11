@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import {
   Box,
@@ -11,20 +10,26 @@ import {
   FormControl,
   FormControlLabel,
   Checkbox,
+  Backdrop,
+  IconButton,
 } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { api } from '@/lib/api'
 import EventCard from '@/components/EventCard'
 import SearchBar from '@/components/SearchBar'
 import TopNavigation from '@/components/TopNavigation'
-import Link from 'next/link'
 import { Events } from '@/lib/types'
 import { fetchUser } from '@/lib/user'
+import SelectedEventCard from '@/components/SelectedEventCard'
+import ClickAwayListener from '@mui/material/ClickAwayListener'
+
 export default function EventFeed() {
   const [events, setEvents] = useState<Events[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date'>('date')
   const [onlyMine, setOnlyMine] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<Events | null>(null)
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -50,9 +55,7 @@ export default function EventFeed() {
   return (
     <>
       <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
-        <Box>
-          <TopNavigation />
-        </Box>
+        <TopNavigation />
         <Box
           display='flex'
           flexWrap='wrap'
@@ -73,11 +76,9 @@ export default function EventFeed() {
               <MenuItem value='date'>Latest</MenuItem>
             </Select>
           </FormControl>
-          <Link href='/event/create' style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Button variant='contained' size='small' sx={{ height: '40px' }}>
-              + CREATE EVENT
-            </Button>
-          </Link>
+          <Button variant='contained' size='small' href='/event/create' sx={{ height: '40px' }}>
+            + CREATE EVENT
+          </Button>
         </Box>
 
         <FormControlLabel
@@ -95,10 +96,54 @@ export default function EventFeed() {
               title={event.title}
               createdAt={event.createdAt}
               initialJoined={event.joined}
+              onClick={() => setSelectedEvent(event)}
             />
           ))}
         </Stack>
       </Box>
+
+      <Backdrop open={!!selectedEvent} sx={{ zIndex: (theme) => theme.zIndex.modal }}>
+        {selectedEvent && (
+          <ClickAwayListener onClickAway={() => setSelectedEvent(null)}>
+            <Box
+              sx={{
+                bgcolor: '#f0f9ff',
+                borderRadius: 5,
+                boxShadow: 6,
+                ml: 8,
+                p: 3,
+                width: '90%',
+                maxWidth: 700,
+                maxHeight: 600,
+                overflow: 'hidden',
+                position: 'relative',
+              }}
+            >
+              <IconButton
+                onClick={() => setSelectedEvent(null)}
+                sx={{
+                  position: 'absolute',
+                  top: 10,
+                  right: 10,
+                  bgcolor: 'red',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: '#cc0000',
+                    boxShadow: 3,
+                  },
+                  width: 35,
+                  height: 35,
+                  borderRadius: '50%',
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+
+              <SelectedEventCard event={selectedEvent} />
+            </Box>
+          </ClickAwayListener>
+        )}
+      </Backdrop>
     </>
   )
 }

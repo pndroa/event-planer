@@ -12,6 +12,7 @@ interface EventCardProps {
   title: string
   createdAt: string
   initialJoined: boolean
+  onClick?: () => void
 }
 
 export default function EventCard({
@@ -20,6 +21,7 @@ export default function EventCard({
   title,
   createdAt,
   initialJoined,
+  onClick,
 }: EventCardProps) {
   const [joined, setJoined] = useState(initialJoined)
 
@@ -43,7 +45,9 @@ export default function EventCard({
 
   return (
     <Card
+      onClick={onClick}
       sx={{
+        position: 'relative',
         minHeight: 140,
         display: 'flex',
         flexDirection: 'column',
@@ -53,47 +57,42 @@ export default function EventCard({
         borderRadius: 3,
         boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
         transition: '0.2s ease',
+        cursor: onClick ? 'pointer' : 'default',
         '&:hover': {
           backgroundColor: '#e0eaff',
           transform: 'scale(1.01)',
         },
       }}
     >
-      <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
-        <Box display='flex' alignItems='center' gap={1}>
-          <Typography variant='body2' color='text.secondary'>
-            @{username}
-          </Typography>
-        </Box>
-        <Typography variant='body2' color='text.secondary' sx={{ ml: 2, whiteSpace: 'nowrap' }}>
+      <Box display='flex' justifyContent='space-between'>
+        <Typography variant='body2' color='text.secondary'>
+          @{username}
+        </Typography>
+        <Typography variant='body2' color='text.secondary'>
           {formatTimeAgo(createdAt)}
         </Typography>
       </Box>
 
       <Typography
         variant='h6'
-        sx={{
-          mt: 1,
-          fontWeight: 700,
-          color: grey[900],
-          wordBreak: 'break-word',
-        }}
+        sx={{ mt: 1, fontWeight: 700, color: grey[900], wordBreak: 'break-word' }}
       >
         {title}
       </Typography>
 
-      <Box display='flex' alignItems='center' mt={2}>
+      <Box display='flex' justifyContent='flex-start' mt={2}>
         {joined ? (
           <Button
             variant='contained'
             sx={{
               color: '#fff',
               backgroundColor: '#e57373',
-              '&:hover': {
-                backgroundColor: '#f44336',
-              },
+              '&:hover': { backgroundColor: '#f44336' },
             }}
-            onClick={deleteParticipation}
+            onClick={(e) => {
+              e.stopPropagation()
+              deleteParticipation()
+            }}
           >
             Leave
           </Button>
@@ -103,11 +102,12 @@ export default function EventCard({
             sx={{
               color: '#fff',
               backgroundColor: '#81c784',
-              '&:hover': {
-                backgroundColor: '#66bb6a',
-              },
+              '&:hover': { backgroundColor: '#66bb6a' },
             }}
-            onClick={createParticipation}
+            onClick={(e) => {
+              e.stopPropagation()
+              createParticipation()
+            }}
           >
             Participate
           </Button>

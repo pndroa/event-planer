@@ -26,6 +26,7 @@ export const postEventSchema = Joi.object({
   description: Joi.string().allow(null).optional(),
   room: Joi.string().allow(null).optional(),
   eventDates: Joi.array().items(postEventDateSchema).optional(),
+  wishId: Joi.string().uuid().allow(null).optional(),
 })
 
 export const postWishSchema = Joi.object({

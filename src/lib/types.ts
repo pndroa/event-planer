@@ -13,7 +13,7 @@ export interface Wishes {
   wishCreator: string
   wishUpvote: WishUpvote[]
   users: Users
-  currentUpvotes: number // neu
+  currentUpvotes: number
   isUpvotedByMe?: boolean
 }
 
@@ -24,16 +24,25 @@ export interface WishUpvote {
   created_at: string
 }
 
+export interface EventDates {
+  dateId: string
+  eventId?: string
+  date: string
+  startTime?: string
+  endTime?: string
+  created_at: string
+}
+
 export interface Events {
   eventId: string
+  wishId?: string
   title: string
   description?: string
   room?: string
-  startDate?: Date
-  endDate?: Date
   createdAt: string
   trainerId: string
-  joined: boolean // neu
+  joined: boolean
+  eventDates: EventDates[]
   eventParticipation: EventParticipation[]
   users: Users
   surveys?: Survey
