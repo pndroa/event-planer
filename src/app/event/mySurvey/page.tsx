@@ -5,7 +5,6 @@ import { Survey } from '@/lib/types'
 import { Box, Stack, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
 import SearchBar from '@/components/SearchBar'
 import { useErrorBoundary } from 'react-error-boundary'
-import { Typography } from '@mui/material'
 import { useUser } from '@/hooks/useUser'
 import SurveyCard from '@/components/SurveyCard'
 
@@ -36,9 +35,6 @@ const Page = () => {
 
   return (
     <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
-      <Typography variant='h4' component='h1' gutterBottom>
-        My Surveys
-      </Typography>
       <Box>
         <br />
       </Box>
@@ -59,7 +55,7 @@ const Page = () => {
             label='Sort by'
             onChange={(e) => setSortBy(e.target.value as 'date')}
           >
-            <MenuItem value='date'>Newest</MenuItem>
+            <MenuItem value='date'>Latest</MenuItem>
           </Select>
         </FormControl>
       </Box>
