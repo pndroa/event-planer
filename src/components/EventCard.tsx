@@ -5,6 +5,7 @@ import { Box, Card, Typography, Button } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
 import { api } from '@/lib/api'
+import DeleteOverlay from '@/components/deleteOverlay'
 
 interface EventCardProps {
   eventId: string
@@ -22,6 +23,7 @@ export default function EventCard({
   initialJoined,
 }: EventCardProps) {
   const [joined, setJoined] = useState(initialJoined)
+  const [deleteEvent, setDeleteEvent] = useState(false)
 
   const createParticipation = async () => {
     try {
@@ -111,6 +113,27 @@ export default function EventCard({
           >
             Participate
           </Button>
+        )}
+        <Button
+          variant='contained'
+          sx={{
+            color: '#fff',
+            backgroundColor: '#81c784',
+            '&:hover': {
+              backgroundColor: '#66bb6a',
+            },
+            ml: 2,
+          }}
+          onClick={() => setDeleteEvent(true)}
+        >
+          Delete Event
+        </Button>
+
+        {deleteEvent && (
+          <DeleteOverlay
+            eventId={eventId as string | undefined}
+            onClose={() => setDeleteEvent(false)}
+          />
         )}
       </Box>
     </Card>
