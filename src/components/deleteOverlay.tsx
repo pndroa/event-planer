@@ -49,13 +49,23 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
           This action is irreversible.
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
-          <Button variant='contained' sx={{ backgroundColor: 'green', m: 2 }} onClick={onClose}>
+          <Button
+            variant='contained'
+            sx={{ backgroundColor: 'green', m: 2 }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose()
+            }}
+          >
             Cancel
           </Button>
           <Button
             variant='contained'
             sx={{ backgroundColor: 'red', m: 2 }}
-            onClick={() => deleteEvent()}
+            onClick={(e) => {
+              e.stopPropagation()
+              deleteEvent()
+            }}
           >
             Delete
           </Button>

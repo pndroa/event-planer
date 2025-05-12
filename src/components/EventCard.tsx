@@ -1,11 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Box, Card, Typography, Button } from '@mui/material'
+import { Box, Card, Typography, Button, IconButton } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
 import { api } from '@/lib/api'
 import DeleteOverlay from '@/components/deleteOverlay'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import { useRouter } from 'next/navigation'
 
 interface EventCardProps {
   eventId: string
@@ -28,6 +31,7 @@ export default function EventCard({
 }: EventCardProps) {
   const [joined, setJoined] = useState(initialJoined)
   const [deleteEvent, setDeleteEvent] = useState(false)
+  const router = useRouter()
 
   const createParticipation = async () => {
     try {
@@ -51,7 +55,11 @@ export default function EventCard({
 
   return (
     <Card
-      onClick={onClick}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClick) {
+          onClick()
+        }
+      }}
       sx={{
         position: 'relative',
         minHeight: 140,
@@ -86,7 +94,7 @@ export default function EventCard({
         {title}
       </Typography>
 
-      <Box display='flex' justifyContent='flex-start' mt={2}>
+      <Box display='flex' justifyContent='space-between' mt={2}>
         {joined ? (
           <Button
             variant='contained'
@@ -118,28 +126,30 @@ export default function EventCard({
             Participate
           </Button>
         )}
-        <Button
-          variant='contained'
-          sx={{
-            color: '#fff',
-            backgroundColor: '#81c784',
-            '&:hover': {
-              backgroundColor: '#66bb6a',
-            },
-            ml: 2,
-          }}
-          onClick={() => setDeleteEvent(true)}
-        >
-          Delete Event
-        </Button>
 
-        {deleteEvent && (
-          <DeleteOverlay
-            eventId={eventId as string | undefined}
-            onClose={() => setDeleteEvent(false)}
-          />
-        )}
+        <Box display='flex' alignItems='center'>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation()
+              router.push(`/event/myEvent/${eventId}/edit`)
+            }}
+          >
+            <EditIcon />
+          </IconButton>
+
+          <IconButton
+            sx={{ ml: 1 }}
+            onClick={(e) => {
+              e.stopPropagation()
+              setDeleteEvent(true)
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
       </Box>
+
+      {deleteEvent && <DeleteOverlay eventId={eventId} onClose={() => setDeleteEvent(false)} />}
     </Card>
   )
 }
