@@ -1,45 +1,67 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
+import { getServerAuth } from '@/lib/auth'
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('userId')
+export async function GET(_request: Request) {
+  const { user, errorResponse } = await getServerAuth()
 
-  if (userId) {
-    try {
-      const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
-        include: {
-          surveys: {
-            include: {
-              surveyQuestions: {
-                include: {
-                  surveyAnswers: {
-                    where: {
-                      userId: userId,
-                    },
-                    include: {
-                      users: true,
-                    },
+  if (errorResponse) return errorResponse
+
+  try {
+    const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
+      include: {
+        surveys: {
+          include: {
+            surveyQuestions: {
+              include: {
+                surveyAnswers: {
+                  where: {
+                    userId: user.id,
+                  },
+                  include: {
+                    users: true,
                   },
                 },
               },
             },
           },
         },
-        where: {
-          eventParticipation: {
-            some: {
-              participantId: userId,
-            },
+      },
+      where: {
+        eventParticipation: {
+          some: {
+            participantId: user.id,
           },
         },
-      })
+      },
+    })
 
-      const notAnsweredSurveys = participatedEventsWithouSurveyAnswers.map((event) => event.surveys)
+    const notAnsweredSurveys = participatedEventsWithouSurveyAnswers.map((event) => event.surveys)
 
-      return NextResponse.json({ notAnsweredSurveys }, { status: 200 })
-    } catch (error) {
-      return NextResponse.json({ error }, { status: 500 })
+    return NextResponse.json({ notAnsweredSurveys }, { status: 200 })
+  } catch (error) {
+    return NextResponse.json({ error }, { status: 500 })
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+
+    const existingEvent = await prisma.events.findUnique({
+      where: { eventId: body.eventId },
+    })
+
+    if (!existingEvent) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
+
+    const createSurvey = await prisma.surveys.create({
+      data: body,
+    })
+
+    return NextResponse.json({ message: 'survey created', data: createSurvey }, { status: 201 })
+  } catch (error) {
+    return NextResponse.json({ error }, { status: 500 })
   }
 }

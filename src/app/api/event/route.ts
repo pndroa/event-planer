@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
-import { postEventSchema } from '@/lib/validation'
-import { createClientForServer } from '@/utils/supabase/server'
 import { PostEventDates } from '@/lib/types'
+import { getServerAuth } from '@/lib/auth'
 
 export async function GET() {
-  const supabase = await createClientForServer()
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
+  const { user, errorResponse } = await getServerAuth()
 
-  if (error || !user) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-  }
+  if (errorResponse) return errorResponse
 
   try {
     // asynchrone Datenabfrage, parallele Ausführung, nicht seriell!
@@ -39,23 +32,18 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const { user, errorResponse } = await getServerAuth()
+
+  if (errorResponse) return errorResponse
+
   try {
     const body = await req.json()
 
-    const { value, error } = postEventSchema.validate(body, { abortEarly: false })
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.details.map((e) => e.message) },
-        { status: 400 }
-      )
-    }
-
-    const { trainerId, title, description, room, eventDates, wishId } = value
+    const { title, description, room, eventDates, wishId } = body
 
     const createdEvent = await prisma.events.create({
       data: {
-        trainerId,
+        trainerId: user.id,
         title,
         description,
         room,
@@ -67,9 +55,15 @@ export async function POST(req: Request) {
             endTime: d.endTime,
           })),
         },
+        surveys: {
+          create: {
+            title: `Survey for Event: ${title}`,
+          },
+        },
       },
       include: {
         eventDates: true,
+        surveys: true,
       },
     })
 

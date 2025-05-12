@@ -1,33 +1,14 @@
-//import { getServerAuth } from '@/lib/auth'
+import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
-import { createClientForServer } from '@/utils/supabase/server'
-import { postEventSchema } from '@/lib/validation'
 import { NextRequest } from 'next/server'
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
-  async function getServerAuth() {
-    const supabase = await createClientForServer()
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser()
-
-    if (error || !user) {
-      return {
-        user: null,
-        errorResponse: NextResponse.json({ error: 'Not authenticated' }, { status: 401 }),
-      }
-    }
-
-    return { user, errorResponse: null }
-  }
-
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { errorResponse } = await getServerAuth()
 
   if (errorResponse) return errorResponse
 
-  const { id } = context.params
+  const { id } = params
 
   if (!id) {
     throw new Error('Invalid or missing id parameter')
@@ -88,16 +69,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
         )
     )
 
-    const { value, error } = postEventSchema.validate(body, { abortEarly: false })
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.details.map((e) => e.message) },
-        { status: 400 }
-      )
-    }
-
-    const { trainerId, title, description, room } = value
+    const { trainerId, title, description, room } = body
 
     const createdEvent = await prisma.$transaction([
       prisma.eventDates.deleteMany({

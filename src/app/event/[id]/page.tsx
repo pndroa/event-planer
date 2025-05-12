@@ -1,10 +1,7 @@
-'use client'
-import { useParams } from 'next/navigation'
+import React from 'react'
 
-const Page = () => {
-  const { id } = useParams()
-
-  return <div>Event Page for Event:{id}</div>
+const page = () => {
+  return <div>single Event page</div>
 }
 
-export default Page
+export default page
