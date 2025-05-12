@@ -1,4 +1,6 @@
 'use client'
+
+import React from 'react'
 import {
   Box,
   Button,
@@ -14,7 +16,6 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import DatePicker from './datePicker'
-import React from 'react'
 
 type QuestionType = 'multiple' | 'text' | 'date'
 
@@ -24,6 +25,7 @@ type Question = {
   options?: string[]
   dates?: (Date | null)[]
   selectedDateIndex?: number
+  selectedOptionIndex?: number
 }
 
 const SurveyForm = ({
@@ -67,6 +69,12 @@ const SurveyForm = ({
           ? {
               ...q,
               options: q.options!.filter((_, j) => j !== optIndex),
+              selectedOptionIndex:
+                q.selectedOptionIndex === optIndex
+                  ? undefined
+                  : q.selectedOptionIndex! > optIndex
+                    ? q.selectedOptionIndex! - 1
+                    : q.selectedOptionIndex,
             }
           : q
       )
@@ -117,6 +125,12 @@ const SurveyForm = ({
     )
   }
 
+  const handleSelectOption = (qIndex: number, selectedIndex: number) => {
+    setQuestions((prev) =>
+      prev.map((q, i) => (i === qIndex ? { ...q, selectedOptionIndex: selectedIndex } : q))
+    )
+  }
+
   const handleDateTypeSelect = (index: number) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
@@ -124,7 +138,7 @@ const SurveyForm = ({
           ? {
               ...q,
               type: 'date',
-              dates: [null], // ❌ kein new Date() → leerer DatePicker
+              dates: [null],
               selectedDateIndex: undefined,
             }
           : q
@@ -146,7 +160,7 @@ const SurveyForm = ({
         >
           {!q.type ? (
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-              <Typography>Fragetyp wählen:</Typography>
+              <Typography>Select question type:</Typography>
               <Button onClick={() => onSelectType(i, 'multiple')}>Multiple Choice</Button>
               <Button onClick={() => onSelectType(i, 'text')}>Text</Button>
               <Button onClick={() => handleDateTypeSelect(i)}>Date</Button>
@@ -155,7 +169,7 @@ const SurveyForm = ({
             <>
               <TextField
                 fullWidth
-                label='Frage'
+                label='Question'
                 value={q.question}
                 onChange={(e) => updateQuestionText(i, e.target.value)}
                 sx={{ mb: 2 }}
@@ -163,11 +177,14 @@ const SurveyForm = ({
 
               {q.type === 'multiple' && (
                 <FormControl component='fieldset'>
-                  <FormLabel>Antwortmöglichkeiten</FormLabel>
-                  <RadioGroup>
+                  <FormLabel>Answer options</FormLabel>
+                  <RadioGroup
+                    value={q.selectedOptionIndex ?? -1}
+                    onChange={(e) => handleSelectOption(i, parseInt(e.target.value))}
+                  >
                     {q.options!.map((option, j) => (
                       <Box key={j} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Radio disabled />
+                        <Radio value={j} />
                         <TextField
                           value={option}
                           onChange={(e) => updateOption(i, j, e.target.value)}
@@ -184,15 +201,19 @@ const SurveyForm = ({
                       </Box>
                     ))}
                   </RadioGroup>
-                  <Button startIcon={<AddIcon />} onClick={() => addOption(i)} sx={{ mt: 1 }}>
-                    Option hinzufügen
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={() => addOption(i)}
+                    sx={{ mt: 1, alignSelf: 'flex-start' }}
+                  >
+                    Add option
                   </Button>
                 </FormControl>
               )}
 
               {q.type === 'date' && (
                 <FormControl fullWidth>
-                  <FormLabel>Datumsauswahl (eins auswählbar)</FormLabel>
+                  <FormLabel>Date selection (only one selectable)</FormLabel>
                   <RadioGroup
                     value={q.selectedDateIndex ?? -1}
                     onChange={(e) => handleSelectDate(i, parseInt(e.target.value))}
@@ -218,7 +239,7 @@ const SurveyForm = ({
                     onClick={() => addDateField(i)}
                     sx={{ mt: 1, alignSelf: 'flex-start' }}
                   >
-                    Weiteres Datum hinzufügen
+                    Add another date
                   </Button>
                 </FormControl>
               )}
@@ -233,7 +254,7 @@ const SurveyForm = ({
               onClick={() => onDeleteQuestion(i)}
               startIcon={<DeleteIcon />}
             >
-              Löschen
+              Delete
             </Button>
           </Box>
         </Box>

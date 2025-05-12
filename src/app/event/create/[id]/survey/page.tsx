@@ -3,7 +3,7 @@
 import SurveyForm from '@/components/surveyForm'
 import { api } from '@/lib/api'
 import { Box, Button, Typography } from '@mui/material'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 type QuestionType = 'multiple' | 'text' | 'date'
@@ -13,12 +13,14 @@ type Question = {
   question: string
   options?: string[]
   dates?: (Date | null)[]
+  selectedDateIndex?: number
 }
 
 const Page = () => {
-  const { id } = useParams() as { id: string } // UUID aus URL
+  const { id } = useParams() as { id: string }
+  const router = useRouter()
   const [surveyTitle, setSurveyTitle] = useState<string>('')
-  const [surveyId, setSurveyId] = useState<string>('') // echte DB-ID
+  const [surveyId, setSurveyId] = useState<string>('')
   const [questions, setQuestions] = useState<Question[]>([])
   const [isSaving, setIsSaving] = useState<boolean>(false)
 
@@ -26,7 +28,7 @@ const Page = () => {
     const fetchSurvey = async () => {
       const res = await api.get(`/survey/${id}`)
       setSurveyTitle(res.data.survey.title)
-      setSurveyId(res.data.survey.surveyId) // UUID von der DB
+      setSurveyId(res.data.survey.surveyId)
     }
     fetchSurvey()
   }, [id])
@@ -49,7 +51,7 @@ const Page = () => {
               ...q,
               type,
               ...(type === 'multiple' ? { options: [''] } : {}),
-              ...(type === 'date' ? { dates: [new Date()] } : {}),
+              ...(type === 'date' ? { dates: [null], selectedDateIndex: undefined } : {}),
             }
           : q
       )
@@ -62,36 +64,41 @@ const Page = () => {
 
   const handleSaveSurvey = async () => {
     setIsSaving(true)
+
+    const validQuestions = questions.filter((q) => q.type !== null && q.question.trim() !== '')
+
     try {
       await Promise.all(
-        questions.map((q) =>
+        validQuestions.map((q) =>
           api.post('/survey/surveyQuestion', {
             surveyId,
-            questionText: q.question,
+            questionText: q.question.trim(),
           })
         )
       )
-      alert('Alle Fragen erfolgreich gespeichert!')
+      alert('All questions saved successfully.')
+      router.push(`/event/${id}/survey`)
     } catch (err) {
       console.error(err)
-      alert('Fehler beim Speichern einer oder mehrerer Fragen!')
+      alert('An error occurred while saving.')
     } finally {
       setIsSaving(false)
     }
   }
 
+  const hasValidQuestions = questions.some((q) => q.type !== null && q.question.trim() !== '')
+
   return (
-    <Box sx={{ px: 2, py: 4 }}>
+    <Box sx={{ px: 2, py: 4, ml: { md: '160px' } }}>
       <Box
         sx={{
           maxWidth: 800,
-          ml: '27rem',
+          mx: 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: 4,
         }}
       >
-        {/* Header */}
         <Box
           sx={{
             display: 'flex',
@@ -111,13 +118,12 @@ const Page = () => {
             variant='outlined'
             color='success'
             onClick={handleSaveSurvey}
-            disabled={isSaving || questions.length === 0}
+            disabled={isSaving || !hasValidQuestions}
           >
-            {isSaving ? 'Speichern...' : 'Speichern'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </Box>
 
-        {/* Fragen */}
         <SurveyForm
           questions={questions}
           setQuestions={setQuestions}
