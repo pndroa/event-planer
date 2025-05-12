@@ -1,4 +1,3 @@
-// components/WishCard.tsx
 'use client'
 import { Box, Card, Typography, IconButton, Button } from '@mui/material'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
@@ -16,6 +15,7 @@ interface WishCardProps {
   onUpvote?: () => void
   deleteButton?: boolean
   actionButton?: ReactNode
+  onClick?: () => void
 }
 
 export default function WishCard({
@@ -27,9 +27,11 @@ export default function WishCard({
   onUpvote,
   deleteButton = false,
   actionButton = null,
+  onClick,
 }: WishCardProps) {
   return (
     <Card
+      onClick={onClick}
       sx={{
         p: 2,
         backgroundColor: '#f0f4ff',
@@ -57,20 +59,36 @@ export default function WishCard({
       </Typography>
 
       <Box display='flex' alignItems='center' mt={2}>
-        <IconButton size='small' onClick={onUpvote} sx={{ p: 0.5, mr: 0.5 }}>
+        <IconButton
+          size='small'
+          onClick={(e) => {
+            e.stopPropagation()
+            onUpvote?.()
+          }}
+          sx={{ p: 0.5, mr: 0.5 }}
+        >
           {isUpvoted ? (
             <ThumbUpAltIcon sx={{ color: blue[800], fontSize: 20 }} />
           ) : (
             <ThumbUpAltOutlinedIcon sx={{ color: blue[500], fontSize: 20 }} />
           )}
         </IconButton>
+
         <Typography variant='body2' color='text.secondary'>
           {currentUpvotes}
         </Typography>
       </Box>
       <Box display='flex' justifyContent='flex-end'>
         {deleteButton && (
-          <Button variant='contained' size='small' sx={{ height: '40px' }}>
+          <Button
+            variant='contained'
+            size='small'
+            sx={{ height: '40px' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              // hier delete-function aufrufen!
+            }}
+          >
             Delete
           </Button>
         )}

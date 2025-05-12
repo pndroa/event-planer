@@ -14,6 +14,9 @@ export async function GET() {
 
   try {
     const wishes = await prisma.wishes.findMany({
+      where: {
+        isConvertedToEvent: false,
+      },
       include: {
         users: true,
         _count: { select: { wishUpvote: true } },
