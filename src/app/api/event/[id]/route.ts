@@ -1,7 +1,3 @@
-
-import prisma from '@/lib/client'
-import { NextResponse } from 'next/server'
-import { createClientForServer } from '@/utils/supabase/server'
 //import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
@@ -53,7 +49,6 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
   }
 }
 
-
 export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
   const { id } = context.params
 
@@ -69,12 +64,13 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
       },
     })
 
-    
     console.log('Event deleted successfully:', event)
     console.log('Event ID:', id)
     return NextResponse.json({ event }, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error })
+  }
+}
 
 export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
   const { id } = context.params

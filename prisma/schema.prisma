@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["auth", "felix"]
+  schemas  = ["auth", "public"]
 }
 
 model users {
@@ -21,11 +21,12 @@ model users {
   wishes             wishes[]
 
   @@map("users")
-  @@schema("felix")
+  @@schema("public")
 }
 
 model events {
   eventId            String               @id(map: "Events_pkey") @unique(map: "Events_eventId_key") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  wishId             String?              @db.Uuid @unique
   title              String
   description        String?
   room               String?
@@ -33,10 +34,11 @@ model events {
   trainerId          String               @db.Uuid
   eventDates         eventDates[]
   eventParticipation eventParticipation[]
+  wish               wishes?              @relation(fields: [wishId], references: [wishId], map: "Events_wishId_fkey") //hier, neu!
   users              users                @relation(fields: [trainerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Events_trainerId_fkey")
   surveys            surveys?
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model wishes {
@@ -48,8 +50,9 @@ model wishes {
   wishCreator        String       @db.Uuid
   wishUpvote         wishUpvote[]
   users              users        @relation(fields: [wishCreator], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Wishes_wishCreator_fkey")
+  events             events? @relation(map: "Events_wishId_fkey")
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model wishUpvote {
@@ -60,7 +63,7 @@ model wishUpvote {
   users      users    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
   wishes     wishes   @relation(fields: [wishId], references: [wishId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model eventParticipation {
@@ -71,7 +74,7 @@ model eventParticipation {
   users                users @relation(fields: [participantId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([participantId, eventId])
-  @@schema("felix")
+  @@schema("public")
 }
 
 model surveyQuestions {
@@ -82,7 +85,7 @@ model surveyQuestions {
   surveyAnswers surveyAnswers[]
   surveys       surveys         @relation(fields: [surveyId], references: [surveyId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model surveys {
@@ -93,7 +96,7 @@ model surveys {
   surveyQuestions surveyQuestions[]
   Events          events            @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
@@ -421,7 +424,7 @@ model eventDates {
   created_at DateTime @default(now()) @db.Timestamptz(6)
   events     events?  @relation(fields: [eventId], references: [eventId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 model surveyAnswers {
@@ -433,7 +436,7 @@ model surveyAnswers {
   surveyQuestions surveyQuestions @relation(fields: [questionId], references: [questionId], onDelete: Cascade, onUpdate: NoAction, map: "surveyAnswerOptions_questionId_fkey")
   users           users           @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
 
-  @@schema("felix")
+  @@schema("public")
 }
 
 enum aal_level {

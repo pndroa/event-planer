@@ -80,7 +80,7 @@ export default function WishFeed() {
     })
 
   return (
-    <>
+    <Box>
       <Box sx={{ maxWidth: 700, mx: 'auto' }}>
         <Box display='flex' gap={1.5} flexWrap='wrap' mb={3}>
           <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
@@ -162,7 +162,7 @@ export default function WishFeed() {
           </ClickAwayListener>
         )}
       </Backdrop>
-    </>
+
       <FormControlLabel
         control={<Checkbox checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />}
         label='Show my created wishes'

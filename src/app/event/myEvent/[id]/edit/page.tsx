@@ -177,7 +177,7 @@ const Page = () => {
       }
     }
     fetchEvents()
-  }, [])
+  }, [id])
 
   return (
     <Box

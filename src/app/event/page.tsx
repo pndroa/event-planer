@@ -31,7 +31,7 @@ export default function EventFeed() {
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<Events | null>(null)
   const [onlyParticipating, setOnlyParticipating] = useState(false)
-  
+
   const handleParticipationChange = (eventId: string, joined: boolean) => {
     setEvents((prev) => prev.map((e) => (e.eventId === eventId ? { ...e, joined } : e)))
   }
