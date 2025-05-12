@@ -11,7 +11,7 @@ export async function GET() {
   try {
     // asynchrone Datenabfrage, parallele Ausführung, nicht seriell!
     const [events, participations] = await Promise.all([
-      prisma.events.findMany({ include: { users: true } }),
+      prisma.events.findMany({ include: { users: true, eventDates: true } }),
       prisma.eventParticipation.findMany({
         where: { participantId: user.id },
         select: { eventId: true },
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
         title,
         description,
         room,
+        wishId,
         eventDates: {
           create: eventDates.map((d: PostEventDates) => ({
             date: new Date(d.date as Date),
@@ -65,6 +66,13 @@ export async function POST(req: Request) {
         surveys: true,
       },
     })
+
+    if (wishId) {
+      await prisma.wishes.update({
+        where: { wishId },
+        data: { isConvertedToEvent: true },
+      })
+    }
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
   } catch (error) {

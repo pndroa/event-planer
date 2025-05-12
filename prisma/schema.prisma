@@ -26,6 +26,7 @@ model users {
 
 model events {
   eventId            String               @id(map: "Events_pkey") @unique(map: "Events_eventId_key") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  wishId             String?              @db.Uuid @unique
   title              String
   description        String?
   room               String?
@@ -33,6 +34,7 @@ model events {
   trainerId          String               @db.Uuid
   eventDates         eventDates[]
   eventParticipation eventParticipation[]
+  wish               wishes?              @relation(fields: [wishId], references: [wishId], map: "Events_wishId_fkey") //hier, neu!
   users              users                @relation(fields: [trainerId], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Events_trainerId_fkey")
   surveys            surveys?
 
@@ -48,6 +50,7 @@ model wishes {
   wishCreator        String       @db.Uuid
   wishUpvote         wishUpvote[]
   users              users        @relation(fields: [wishCreator], references: [userId], onDelete: Cascade, onUpdate: NoAction, map: "Wishes_wishCreator_fkey")
+  events             events? @relation(map: "Events_wishId_fkey")
 
   @@schema("public")
 }

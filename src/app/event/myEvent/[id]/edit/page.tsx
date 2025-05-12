@@ -1,62 +1,59 @@
 'use client'
-import { FormEvent, useLayoutEffect, useState, useEffect } from 'react'
+import { FormEvent, useLayoutEffect, useState } from 'react'
 import { Box, Button, IconButton } from '@mui/material'
 import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
 import ClearIcon from '@mui/icons-material/Clear'
 import FormCard from '@/components/formCard'
-import DatePicker from '@/components/datePicker'
-import TimePicker from '@/components/timePicker'
+//import DatePicker from '@/components/datePicker'
+//import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
 import { format } from 'date-fns'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
 import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
 import { AxiosError } from 'axios'
+import { useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { PostEventDatesUpdate } from '@/lib/types'
+import dynamic from 'next/dynamic'
+
+const DatePicker = dynamic(() => import('@/components/datePicker'), {
+  ssr: false,
+})
+
+const TimePicker = dynamic(() => import('@/components/timePicker'), {
+  ssr: false,
+})
+
+dayjs.extend(customParseFormat)
 
 const Page = () => {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const user = useUser()
   const { showBoundary } = useErrorBoundary()
-
-  const [isClient, setIsClient] = useState(false)
+  const [_isClient, setIsClient] = useState(false)
   const [date, setDate] = useState<Date | null>(null)
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [endTime, setEndTime] = useState<Date | null>(null)
-  const [eventDates, setEventDates] = useState<PostEventDates[]>([])
-
-  const [prefilledTitle, setPrefilledTitle] = useState('')
-  const [prefilledDescription, setPrefilledDescription] = useState('')
+  const [eventDates, setEventDates] = useState<PostEventDatesUpdate[]>([])
+  const [eventDatesToCompare, setEventDatesToCompare] = useState<PostEventDatesUpdate[]>([])
+  const { id } = useParams()
+  const [title, setTitle] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
+  const [room, setRoom] = useState<string>('')
 
   useLayoutEffect(() => {
     setIsClient(true)
   }, [])
 
-  useEffect(() => {
-    const wishId = searchParams.get('wishId')
-    if (wishId) {
-      const fetchWish = async () => {
-        try {
-          const res = await api.get(`/wish/${wishId}`)
-          const wish = res.data
-          setPrefilledTitle(wish.title || '')
-          setPrefilledDescription(wish.description || '')
-        } catch (error) {
-          console.error('Fehler beim Laden des Wishes:', error)
-        }
-      }
-      fetchWish()
-    }
-  }, [searchParams])
-
-  if (!isClient) return <Box>Loading...</Box>
-
   const handleAddButton = () => {
     setEventDates([
       ...eventDates,
-      { date: null, startTime: null, endTime: null } as unknown as PostEventDates,
+      { date: null, startTime: null, endTime: null } as unknown as PostEventDatesUpdate,
     ])
   }
 
@@ -112,23 +109,25 @@ const Page = () => {
     const title = formData.get('title')
     const description = formData.get('description') || null
     const room = formData.get('room') || null
-    const dates = [...eventDates]
 
     const finalEventDates = [
-      {
-        date,
-        startTime,
-        endTime,
-      },
-      ...dates,
+      ...(date && startTime && endTime ? [{ date, startTime, endTime }] : []),
+      ...eventDates,
     ]
 
     const payload = {
+      trainerId: user?.id as string,
       title,
       description,
       room,
-      wishId: searchParams.get('wishId') || null,
       eventDates: finalEventDates.map((entry) => ({
+        ...(entry.id ? { id: entry.id } : {}),
+        date: format(entry.date as Date, 'yyyy-MM-dd'),
+        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
+        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
+      })),
+      eventDatesToCompare: eventDatesToCompare.map((entry) => ({
+        ...(entry.id ? { id: entry.id } : {}),
         date: format(entry.date as Date, 'yyyy-MM-dd'),
         startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
         endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
@@ -136,18 +135,49 @@ const Page = () => {
     }
 
     try {
-      const response = await api.post('/event', payload)
-      console.log(response)
+      const response = await api.patch(`/event/${id}`, payload)
       if (response.status === 201) {
-        router.push(`/event/create/${response.data.data.eventId}/survey`)
+        router.push('/event')
       }
     } catch (error) {
       if (error instanceof AxiosError) {
         showBoundary(error)
       }
-      console.error('Error creating Event:', error)
+      console.error('Error updating Event:', error)
     }
   }
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await api.get(`/event/${id}`)
+
+        setTitle(res.data.event.title ?? '')
+        setDescription(res.data.event.description ?? '')
+        setRoom(res.data.event.room ?? '')
+
+        type RawEventDate = {
+          date: string
+          startTime: string
+          endTime: string
+          dateId: string | number
+        }
+
+        const convertedDates = res.data.event.eventDates.map((eventDate: RawEventDate) => ({
+          date: new Date(eventDate.date),
+          startTime: dayjs(eventDate.startTime, 'HH:mm').toDate(),
+          endTime: dayjs(eventDate.endTime, 'HH:mm').toDate(),
+          id: eventDate.dateId,
+        }))
+
+        setEventDatesToCompare(convertedDates)
+        setEventDates(convertedDates)
+      } catch (error) {
+        console.error('Error loading events:', error)
+      }
+    }
+    fetchEvents()
+  }, [id])
 
   return (
     <Box
@@ -159,36 +189,42 @@ const Page = () => {
       }}
     >
       <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
-        <FormCard title='Create Event'>
+        <FormCard title='Edit Event'>
           <Box component='form' onSubmit={handleSubmit}>
             <TextField
               label='Title'
               variant='outlined'
               margin='normal'
               name='title'
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              fullWidth
               required
-              value={prefilledTitle}
-              onChange={(e) => setPrefilledTitle(e.target.value)}
             />
             <TextField
               label='Description'
               variant='outlined'
               margin='normal'
               name='description'
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               minRows={3}
               multiline
               fullWidth
-              value={prefilledDescription}
-              onChange={(e) => setPrefilledDescription(e.target.value)}
             />
             <TextField
               label='Room'
               variant='outlined'
               margin='normal'
               name='room'
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
               fullWidth
               sx={{ marginBottom: '1.5rem' }}
             />
+            {eventDates.map((eventDate: PostEventDates, index) =>
+              dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
+            )}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
                 <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
@@ -207,12 +243,9 @@ const Page = () => {
                 <AddIcon sx={{ marginRight: '0.2rem' }} />
               </IconButton>
             </Box>
-            {eventDates.map((eventDate: PostEventDates, index) =>
-              dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
-            )}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
               <Button type='submit' color='primary' variant='contained'>
-                Create Event
+                Save changes
               </Button>
             </Box>
           </Box>
