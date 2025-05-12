@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Box, Typography, Paper, Stack, Chip, Button, IconButton } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { api } from '@/lib/api'
@@ -14,6 +14,7 @@ interface Question {
 
 const Page = () => {
   const { id } = useParams() as { id: string }
+  const router = useRouter()
   const [questions, setQuestions] = useState<Question[]>([])
   const [surveyTitle, setSurveyTitle] = useState<string>('')
   const [surveyId, setSurveyId] = useState<string>('')
@@ -39,10 +40,9 @@ const Page = () => {
 
     try {
       await api.delete(`/survey/${surveyId}`)
-      alert('Survey deleted successfully.')
+      router.push('/event')
     } catch (err) {
       console.error('Failed to delete survey', err)
-      alert('An error occurred while deleting the survey.')
     }
   }
 
@@ -55,7 +55,6 @@ const Page = () => {
       setQuestions((prev) => prev.filter((q) => q.questionId !== questionId))
     } catch (err) {
       console.error('Failed to delete question', err)
-      alert('Could not delete the question.')
     }
   }
 

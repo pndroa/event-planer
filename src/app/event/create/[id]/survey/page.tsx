@@ -76,11 +76,9 @@ const Page = () => {
           })
         )
       )
-      alert('All questions saved successfully.')
       router.push(`/event/${id}/survey`)
     } catch (err) {
       console.error(err)
-      alert('An error occurred while saving.')
     } finally {
       setIsSaving(false)
     }

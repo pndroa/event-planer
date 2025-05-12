@@ -113,8 +113,9 @@ const Page = () => {
 
     try {
       const response = await api.post('/event', payload)
+      console.log(response)
       if (response.status === 201) {
-        router.push('/event')
+        router.push(`/event/create/${response.data.data.eventId}/survey`)
       }
     } catch (error) {
       if (error instanceof AxiosError) {
