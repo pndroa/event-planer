@@ -1,7 +1,6 @@
 import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
-import { postEventSchema } from '@/lib/validation'
 import { NextRequest } from 'next/server'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -70,16 +69,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
         )
     )
 
-    const { value, error } = postEventSchema.validate(body, { abortEarly: false })
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.details.map((e) => e.message) },
-        { status: 400 }
-      )
-    }
-
-    const { trainerId, title, description, room } = value
+    const { trainerId, title, description, room } = body
 
     const createdEvent = await prisma.$transaction([
       prisma.eventDates.deleteMany({

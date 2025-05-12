@@ -1,48 +1,46 @@
 import { NextResponse } from 'next/server'
-import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
+import { getServerAuth } from '@/lib/auth'
 
 export async function GET(_request: Request) {
   const { user, errorResponse } = await getServerAuth()
 
   if (errorResponse) return errorResponse
 
-  if (user?.id) {
-    try {
-      const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
-        include: {
-          surveys: {
-            include: {
-              surveyQuestions: {
-                include: {
-                  surveyAnswers: {
-                    where: {
-                      userId: user.id,
-                    },
-                    include: {
-                      users: true,
-                    },
+  try {
+    const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
+      include: {
+        surveys: {
+          include: {
+            surveyQuestions: {
+              include: {
+                surveyAnswers: {
+                  where: {
+                    userId: user.id,
+                  },
+                  include: {
+                    users: true,
                   },
                 },
               },
             },
           },
         },
-        where: {
-          eventParticipation: {
-            some: {
-              participantId: user.id,
-            },
+      },
+      where: {
+        eventParticipation: {
+          some: {
+            participantId: user.id,
           },
         },
-      })
+      },
+    })
 
-      const notAnsweredSurveys = participatedEventsWithouSurveyAnswers.map((event) => event.surveys)
+    const notAnsweredSurveys = participatedEventsWithouSurveyAnswers.map((event) => event.surveys)
 
-      return NextResponse.json({ notAnsweredSurveys }, { status: 200 })
-    } catch (error) {
-      return NextResponse.json({ error }, { status: 500 })
-    }
+    return NextResponse.json({ notAnsweredSurveys }, { status: 200 })
+  } catch (error) {
+    return NextResponse.json({ error }, { status: 500 })
   }
 }
 

@@ -10,7 +10,6 @@ import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
 import { format } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useUser } from '@/hooks/useUser'
 import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
 import { AxiosError } from 'axios'
@@ -18,7 +17,6 @@ import { AxiosError } from 'axios'
 const Page = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const user = useUser()
   const { showBoundary } = useErrorBoundary()
 
   const [isClient, setIsClient] = useState(false)

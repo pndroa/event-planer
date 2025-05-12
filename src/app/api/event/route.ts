@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
 
-    const { title, description, room, eventDates } = body
+    const { title, description, room, eventDates, wishId } = body
 
     const createdEvent = await prisma.events.create({
       data: {

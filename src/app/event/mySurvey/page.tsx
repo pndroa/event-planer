@@ -19,7 +19,7 @@ const Page = () => {
     const fetchSurveys = async () => {
       if (!user?.id) return
       try {
-        const res = await api.get(`/survey?userId=${user?.id}`)
+        const res = await api.get('/survey')
         setSurveys(res.data.notAnsweredSurveys)
       } catch (error) {
         console.error('Error loading surveys:', error)
@@ -30,7 +30,7 @@ const Page = () => {
   }, [showBoundary, user])
 
   const filteredSurveys = surveys
-    .filter((survey) => survey.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((survey) => survey?.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return (
