@@ -12,7 +12,7 @@ const DatePicker = (props: DatePickerProps) => {
         <MuiDatePicker
           slotProps={{
             field: { clearable: true },
-            textField: { required: true },
+            textField: { required: false },
           }}
           {...props}
           sx={{ maxWidth: '250px' }}

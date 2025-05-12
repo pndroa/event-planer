@@ -13,6 +13,7 @@ interface EventCardProps {
   createdAt: string
   initialJoined: boolean
   onClick?: () => void
+  onParticipationChange?: (eventId: string, joined: boolean) => void
 }
 
 export default function EventCard({
@@ -22,12 +23,14 @@ export default function EventCard({
   createdAt,
   initialJoined,
   onClick,
+  onParticipationChange,
 }: EventCardProps) {
   const [joined, setJoined] = useState(initialJoined)
 
   const createParticipation = async () => {
     try {
       const res = await api.post('/event/participation', { eventId })
+      onParticipationChange?.(eventId, res.data.joined)
       setJoined(res.data.joined)
     } catch (err) {
       console.error('Error joining event:', err)
@@ -37,6 +40,7 @@ export default function EventCard({
   const deleteParticipation = async () => {
     try {
       const res = await api.delete(`/event/participation?eventId=${eventId}`)
+      onParticipationChange?.(eventId, res.data.joined)
       setJoined(res.data.joined)
     } catch (err) {
       console.error('Error leaving event:', err)

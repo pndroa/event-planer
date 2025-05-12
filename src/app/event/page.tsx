@@ -30,6 +30,11 @@ export default function EventFeed() {
   const [onlyMine, setOnlyMine] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<Events | null>(null)
+  const [onlyParticipating, setOnlyParticipating] = useState(false)
+  
+  const handleParticipationChange = (eventId: string, joined: boolean) => {
+    setEvents((prev) => prev.map((e) => (e.eventId === eventId ? { ...e, joined } : e)))
+  }
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -50,8 +55,12 @@ export default function EventFeed() {
   const filteredEvents = events
     .filter((event) => event.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .filter((event) => !onlyMine || event.trainerId === userId)
-
+    .filter((e) => {
+      if (!onlyMine && !onlyParticipating) return true
+      if (onlyMine && e.trainerId === userId) return true
+      if (onlyParticipating && e.joined) return true
+      return false
+    })
   return (
     <>
       <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
@@ -83,7 +92,19 @@ export default function EventFeed() {
 
         <FormControlLabel
           control={<Checkbox checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />}
-          label='Show my events only'
+          label='Show created Events only'
+          sx={{ marginLeft: 0, marginRight: 0 }}
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={onlyParticipating}
+              onChange={(e) => setOnlyParticipating(e.target.checked)}
+              disabled={!userId}
+            />
+          }
+          label='Show participating events only'
           sx={{ marginLeft: 0, marginRight: 0 }}
         />
 
@@ -97,6 +118,7 @@ export default function EventFeed() {
               createdAt={event.createdAt}
               initialJoined={event.joined}
               onClick={() => setSelectedEvent(event)}
+              onParticipationChange={handleParticipationChange}
             />
           ))}
         </Stack>
