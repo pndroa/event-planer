@@ -1,6 +1,7 @@
 import Joi from 'joi'
 
 export const postEventDateSchema = Joi.object({
+  id: Joi.string().uuid().optional(),
   date: Joi.date().required().messages({
     'string.pattern.base': 'date must be in YYYY-MM-DD format',
   }),
@@ -26,6 +27,8 @@ export const postEventSchema = Joi.object({
   description: Joi.string().allow(null).optional(),
   room: Joi.string().allow(null).optional(),
   eventDates: Joi.array().items(postEventDateSchema).optional(),
+  wishId: Joi.string().uuid().allow(null).optional(),
+  eventDatesToCompare: Joi.array().items(postEventDateSchema).optional(),
 })
 
 export const postWishSchema = Joi.object({

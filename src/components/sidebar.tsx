@@ -29,6 +29,11 @@ const Sidebar = () => {
   ]
   const [open, setOpen] = React.useState(false)
 
+  const isSelected = (href: string) => {
+    if (href === '/event') return path === href
+    return path.startsWith(href)
+  }
+
   const sidebarInnerContent = (
     <Box
       sx={{
@@ -46,7 +51,7 @@ const Sidebar = () => {
               key={link.href}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
-              <ListItemButton selected={path.startsWith(link.href)}>
+              <ListItemButton selected={isSelected(link.href)}>
                 <ListItemIcon>{link.icon}</ListItemIcon>
                 <ListItemText primary={link.label} />
               </ListItemButton>

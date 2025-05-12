@@ -1,5 +1,5 @@
 'use client'
-import { FormEvent, useLayoutEffect, useState } from 'react'
+import { FormEvent, useLayoutEffect, useState, useEffect } from 'react'
 import { Box, Button, IconButton } from '@mui/material'
 import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
@@ -9,7 +9,7 @@ import DatePicker from '@/components/datePicker'
 import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
 import { format } from 'date-fns'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
 import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
@@ -17,6 +17,7 @@ import { AxiosError } from 'axios'
 
 const Page = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const user = useUser()
   const { showBoundary } = useErrorBoundary()
 
@@ -26,9 +27,29 @@ const Page = () => {
   const [endTime, setEndTime] = useState<Date | null>(null)
   const [eventDates, setEventDates] = useState<PostEventDates[]>([])
 
+  const [prefilledTitle, setPrefilledTitle] = useState('')
+  const [prefilledDescription, setPrefilledDescription] = useState('')
+
   useLayoutEffect(() => {
     setIsClient(true)
   }, [])
+
+  useEffect(() => {
+    const wishId = searchParams.get('wishId')
+    if (wishId) {
+      const fetchWish = async () => {
+        try {
+          const res = await api.get(`/wish/${wishId}`)
+          const wish = res.data
+          setPrefilledTitle(wish.title || '')
+          setPrefilledDescription(wish.description || '')
+        } catch (error) {
+          console.error('Fehler beim Laden des Wishes:', error)
+        }
+      }
+      fetchWish()
+    }
+  }, [searchParams])
 
   if (!isClient) return <Box>Loading...</Box>
 
@@ -107,6 +128,7 @@ const Page = () => {
       title,
       description,
       room,
+      wishId: searchParams.get('wishId') || null,
       eventDates: finalEventDates.map((entry) => ({
         date: format(entry.date as Date, 'yyyy-MM-dd'),
         startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
@@ -139,7 +161,15 @@ const Page = () => {
       <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
         <FormCard title='Create Event'>
           <Box component='form' onSubmit={handleSubmit}>
-            <TextField label='Title' variant='outlined' margin='normal' name='title' required />
+            <TextField
+              label='Title'
+              variant='outlined'
+              margin='normal'
+              name='title'
+              required
+              value={prefilledTitle}
+              onChange={(e) => setPrefilledTitle(e.target.value)}
+            />
             <TextField
               label='Description'
               variant='outlined'
@@ -148,6 +178,8 @@ const Page = () => {
               minRows={3}
               multiline
               fullWidth
+              value={prefilledDescription}
+              onChange={(e) => setPrefilledDescription(e.target.value)}
             />
             <TextField
               label='Room'
