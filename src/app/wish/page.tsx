@@ -103,6 +103,12 @@ export default function WishFeed() {
           </Link>
         </Box>
 
+        <FormControlLabel
+          control={<Checkbox checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />}
+          label='Show my created wishes'
+          sx={{ marginLeft: 0, marginRight: 0 }}
+        />
+
         {/* Feed */}
         <Stack spacing={2}>
           {filteredWishes.map((wish) => (
@@ -162,27 +168,6 @@ export default function WishFeed() {
           </ClickAwayListener>
         )}
       </Backdrop>
-
-      <FormControlLabel
-        control={<Checkbox checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />}
-        label='Show my created wishes'
-        sx={{ marginLeft: 0, marginRight: 0 }}
-      />
-
-      {/* Feed */}
-      <Stack spacing={2}>
-        {filteredWishes.map((wish) => (
-          <WishCard
-            key={wish.wishId}
-            username={wish.users.name}
-            title={wish.title}
-            createdAt={wish.createdAt}
-            isUpvoted={!!wish.isUpvotedByMe}
-            onUpvote={() => handleUpvote(wish.wishId)}
-            currentUpvotes={wish.currentUpvotes}
-          />
-        ))}
-      </Stack>
     </Box>
   )
 }

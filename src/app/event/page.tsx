@@ -17,7 +17,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { api } from '@/lib/api'
 import EventCard from '@/components/EventCard'
 import SearchBar from '@/components/SearchBar'
-import TopNavigation from '@/components/TopNavigation'
+//import TopNavigation from '@/components/TopNavigation'
 import { Events } from '@/lib/types'
 import { fetchUser } from '@/lib/user'
 import SelectedEventCard from '@/components/SelectedEventCard'
@@ -64,7 +64,7 @@ export default function EventFeed() {
   return (
     <>
       <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
-        <TopNavigation />
+        {/*<TopNavigation />*/}
         <Box
           display='flex'
           flexWrap='wrap'
