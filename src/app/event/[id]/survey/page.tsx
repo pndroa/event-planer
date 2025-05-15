@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Box, Typography, Paper, Stack, Chip, Button, IconButton } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { api } from '@/lib/api'
+import EditIcon from '@mui/icons-material/Edit'
 
 interface Question {
   questionId: string
@@ -58,6 +59,10 @@ const Page = () => {
     }
   }
 
+  const handleEditQuestion = async (questionId: string) => {
+    router.push(`survey/edit?id=${questionId}`)
+  }
+
   return (
     <Box sx={{ px: 4, py: 4, ml: { md: '200px' } }}>
       <Box sx={{ maxWidth: 800, mx: 'auto' }}>
@@ -72,6 +77,9 @@ const Page = () => {
                 <Typography>{q.questionText}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Chip size='small' variant='outlined' label='Question' />
+                  <IconButton onClick={() => handleEditQuestion(q.questionId)}>
+                    <EditIcon />
+                  </IconButton>
                   <IconButton color='error' onClick={() => handleDeleteQuestion(q.questionId)}>
                     <DeleteIcon />
                   </IconButton>
