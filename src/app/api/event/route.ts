@@ -55,11 +55,6 @@ export async function POST(req: Request) {
             endTime: d.endTime,
           })),
         },
-        surveys: {
-          create: {
-            title: `Survey for Event: ${title}`,
-          },
-        },
       },
       include: {
         eventDates: true,

@@ -1,11 +1,11 @@
-import { getServerAuth } from '@/lib/auth'
+//import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const { errorResponse } = await getServerAuth()
+  //const { errorResponse } = await getServerAuth()
 
-  if (errorResponse) return errorResponse
+  //if (errorResponse) return errorResponse
 
   try {
     const surveyQuestions = await prisma.surveyQuestions.findMany()
@@ -16,19 +16,33 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { errorResponse } = await getServerAuth()
-
-  if (errorResponse) return errorResponse
+  // const { errorResponse } = await getServerAuth()
+  // if (errorResponse) return errorResponse
 
   try {
     const body = await request.json()
+    const { surveyId, questionText } = body
 
-    const createSurveyQuestions = await prisma.surveyQuestions.create({
-      data: body,
+    if (!surveyId || !questionText) {
+      return NextResponse.json({ error: 'surveyId and questionText are required' }, { status: 400 })
+    }
+
+    const createSurveyQuestion = await prisma.surveyQuestions.create({
+      data: {
+        questionText,
+        surveyId,
+      },
     })
 
-    return NextResponse.json({ message: 'survey question created', data: createSurveyQuestions })
+    return NextResponse.json(
+      {
+        message: 'Question created',
+        data: createSurveyQuestion,
+      },
+      { status: 201 }
+    )
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 })
+    console.error('Fehler beim Erstellen der Frage:', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
