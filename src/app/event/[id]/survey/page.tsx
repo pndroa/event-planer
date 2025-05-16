@@ -60,7 +60,7 @@ const Page = () => {
   }
 
   const handleEditQuestion = async (questionId: string) => {
-    router.push(`survey/edit?id=${questionId}`)
+    router.push(`survey/edit?questionId=${questionId}`)
   }
 
   return (
