@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { PostEventDates } from '@/lib/types'
 import { getServerAuth } from '@/lib/auth'
+import { addWishUpvotersAsParticipants } from '@/lib/eventParticipationService'
 
 export async function GET() {
   const { user, errorResponse } = await getServerAuth()
@@ -67,6 +68,8 @@ export async function POST(req: Request) {
         where: { wishId },
         data: { isConvertedToEvent: true },
       })
+
+      await addWishUpvotersAsParticipants(wishId, createdEvent.eventId)
     }
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
