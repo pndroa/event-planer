@@ -97,8 +97,7 @@ export default function EventDetailPage() {
   }
   const handleCreateSurvey = () => {
     setAnchorEl(null)
-    // second User-Story: in progress!!!
-    alert('platzhalter :)')
+    router.push(`/event/${id}/survey`)
   }
 
   if (loading)
@@ -116,7 +115,7 @@ export default function EventDetailPage() {
         width: '100%',
         maxWidth: 950,
         mx: 'auto',
-        mt: 6,
+        mt: 4,
         mb: 6,
         pt: 4,
         px: { xs: 2, sm: 3, md: 4 },
