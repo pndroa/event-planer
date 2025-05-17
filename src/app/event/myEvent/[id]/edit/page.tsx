@@ -137,7 +137,7 @@ const Page = () => {
     try {
       const response = await api.patch(`/event/${id}`, payload)
       if (response.status === 201) {
-        router.push('/event')
+        router.push(`/event/${id}`)
       }
     } catch (error) {
       if (error instanceof AxiosError) {

@@ -21,6 +21,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       },
       include: {
         eventDates: true,
+        users: true,
       },
     })
 
