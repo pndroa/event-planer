@@ -20,13 +20,9 @@ type Question = {
 const Page = () => {
   const searchParams = useSearchParams()
   const questionId = searchParams.get('questionId')
-  const [question, setQuestion] = useState<Question[]>([
-    {
-      type: 'text',
-      question: 'question',
-    },
-  ])
+  const [question, setQuestion] = useState<Question[]>([])
 
+  /** Change question typ*/
   const handleSelectType = (index: number, type: QuestionType) => {
     setQuestion((prev) => prev.map((q, i) => (i === index ? { ...q, type } : q)))
   }
@@ -40,10 +36,30 @@ const Page = () => {
       if (!questionId) return
 
       try {
+        console.log('questionId')
+        console.log(questionId)
         const res = await api.get(`/survey/surveyQuestion/${questionId}`)
 
         console.log('res.data')
-        console.log(res.data.surveyQuestion)
+        console.log(res.data)
+        setQuestion([
+          {
+            type: res.data.question.type,
+            question: res.data.question.questionText,
+            selectedOptionIndex: 0,
+            ...(res.data.question.type === 'multiple'
+              ? {
+                  options: res.data.question.surveyAnswerOptions.map(
+                    (surveyAnswerOption) => surveyAnswerOption.answerText
+                  ),
+                }
+              : {
+                  dates: res.data.question.surveyAnswerOptions.map(
+                    (surveyAnswerOption) => new Date(surveyAnswerOption.answerText)
+                  ),
+                }),
+          },
+        ])
       } catch (err) {
         console.error('Failed to load questions', err)
       }

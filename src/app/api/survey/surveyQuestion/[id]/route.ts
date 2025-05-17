@@ -41,6 +41,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
       where: {
         questionId: id,
       },
+      include: {
+        surveyAnswerOptions: {
+          select: {
+            answerOptionsid: true,
+            answerText: true,
+          },
+        },
+      },
     })
     return NextResponse.json({ question }, { status: 200 })
   } catch (error) {
