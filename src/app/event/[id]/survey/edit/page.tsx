@@ -22,13 +22,17 @@ const Page = () => {
   const questionId = searchParams.get('questionId')
   const [question, setQuestion] = useState<Question[]>([])
 
-  /** Change question typ*/
-  const handleSelectType = (index: number, type: QuestionType) => {
-    setQuestion((prev) => prev.map((q, i) => (i === index ? { ...q, type } : q)))
-  }
+  const handleEditQuestion = (editedQuestion: Question) => {
+    console.log('Edit question at index:')
+    console.log(editedQuestion)
 
-  const handleDeleteQuestion = (index: number) => {
-    setQuestion((prev) => prev.filter((_, i) => i !== index))
+    const payload = {
+      questionText: editedQuestion.question,
+      options: editedQuestion.options,
+      dates: editedQuestion.dates,
+    }
+
+    api.patch(`/survey/surveyQuestion/${questionId}`, payload)
   }
 
   useEffect(() => {
@@ -50,14 +54,17 @@ const Page = () => {
             ...(res.data.question.type === 'multiple'
               ? {
                   options: res.data.question.surveyAnswerOptions.map(
-                    (surveyAnswerOption) => surveyAnswerOption.answerText
+                    (surveyAnswerOption: { answerText: string }) => surveyAnswerOption.answerText
                   ),
                 }
-              : {
-                  dates: res.data.question.surveyAnswerOptions.map(
-                    (surveyAnswerOption) => new Date(surveyAnswerOption.answerText)
-                  ),
-                }),
+              : res.data.question.type === 'date'
+                ? {
+                    dates: res.data.question.surveyAnswerOptions.map(
+                      (surveyAnswerOption: { answerText: string }) =>
+                        new Date(surveyAnswerOption.answerText)
+                    ),
+                  }
+                : {}),
           },
         ])
       } catch (err) {
@@ -74,8 +81,8 @@ const Page = () => {
         <SurveyForm
           questions={question}
           setQuestions={setQuestion}
-          onSelectType={handleSelectType}
-          onDeleteQuestion={handleDeleteQuestion}
+          onEditQuestion={handleEditQuestion}
+          editButton={true}
         />
       </Box>
     </div>

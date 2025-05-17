@@ -16,6 +16,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import DatePicker from './datePicker'
+import EditButton from './button'
 
 type QuestionType = 'multiple' | 'text' | 'date'
 
@@ -33,11 +34,15 @@ const SurveyForm = ({
   setQuestions,
   onSelectType,
   onDeleteQuestion,
+  onEditQuestion,
+  editButton = false,
 }: {
   questions: Question[]
   setQuestions: React.Dispatch<React.SetStateAction<Question[]>>
-  onSelectType: (index: number, type: QuestionType) => void
-  onDeleteQuestion: (index: number) => void
+  onSelectType?: (index: number, type: QuestionType) => void
+  onDeleteQuestion?: (index: number) => void
+  onEditQuestion?: (editedQuestion: Question) => void
+  editButton?: boolean
 }) => {
   const updateQuestionText = (index: number, text: string) => {
     setQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, question: text } : q)))
@@ -161,8 +166,8 @@ const SurveyForm = ({
           {!q.type ? (
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
               <Typography>Select question type:</Typography>
-              <Button onClick={() => onSelectType(i, 'multiple')}>Multiple Choice</Button>
-              <Button onClick={() => onSelectType(i, 'text')}>Text</Button>
+              <Button onClick={() => onSelectType?.(i, 'multiple')}>Multiple Choice</Button>
+              <Button onClick={() => onSelectType?.(i, 'text')}>Text</Button>
               <Button onClick={() => handleDateTypeSelect(i)}>Date</Button>
             </Box>
           ) : (
@@ -246,17 +251,27 @@ const SurveyForm = ({
             </>
           )}
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
-            <Button
-              variant='outlined'
-              color='error'
-              size='small'
-              onClick={() => onDeleteQuestion(i)}
-              startIcon={<DeleteIcon />}
-            >
-              Delete
-            </Button>
-          </Box>
+          {editButton && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
+              <EditButton color='green' onClick={() => onEditQuestion?.(q)}>
+                Save
+              </EditButton>
+            </Box>
+          )}
+
+          {!editButton && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
+              <Button
+                variant='outlined'
+                color='error'
+                size='small'
+                onClick={() => onDeleteQuestion?.(i)}
+                startIcon={<DeleteIcon />}
+              >
+                Delete
+              </Button>
+            </Box>
+          )}
         </Box>
       ))}
     </Stack>
