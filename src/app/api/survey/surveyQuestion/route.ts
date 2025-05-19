@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { surveyId, questionText } = body
+    const { surveyId, questionText, type } = body
 
     if (!surveyId || !questionText) {
       return NextResponse.json({ error: 'surveyId and questionText are required' }, { status: 400 })
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
       data: {
         questionText,
         surveyId,
+        type,
       },
     })
 
