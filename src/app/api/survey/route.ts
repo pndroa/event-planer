@@ -47,21 +47,42 @@ export async function GET(_request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+    const { eventId } = body
+
+    if (!eventId) {
+      return NextResponse.json({ error: 'eventId is required' }, { status: 400 })
+    }
 
     const existingEvent = await prisma.events.findUnique({
-      where: { eventId: body.eventId },
+      where: { eventId },
     })
 
     if (!existingEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const createSurvey = await prisma.surveys.create({
-      data: body,
+    const existingSurvey = await prisma.surveys.findUnique({
+      where: { eventId },
     })
 
-    return NextResponse.json({ message: 'survey created', data: createSurvey }, { status: 201 })
+    if (existingSurvey) {
+      return NextResponse.json(
+        { message: 'Survey already exists', data: existingSurvey },
+        { status: 200 }
+      )
+    }
+
+    // Neue Survey erstellen
+    const createSurvey = await prisma.surveys.create({
+      data: {
+        eventId,
+        title: `Survey for Event: ${existingEvent.title}`,
+      },
+    })
+
+    return NextResponse.json({ message: 'Survey created', data: createSurvey }, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 })
+    console.error('Fehler beim Erstellen der Survey:', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

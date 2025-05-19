@@ -17,13 +17,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const isProd = process.env.NODE_ENV === 'production'
   const client = await createClientForServer()
   const {
     data: { session },
   } = await client.auth.getSession()
 
-  const showNavigation = !isProd || !!session
+  const showNavigation = !!session
 
   return (
     <html lang='en'>
