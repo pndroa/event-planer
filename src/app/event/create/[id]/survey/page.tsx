@@ -63,6 +63,7 @@ const Page = () => {
           const questionPayload = {
             questionText: q.question,
             surveyId,
+            type: q.type,
           }
 
           const questionsRes = await api.post('/survey/surveyQuestion', questionPayload)

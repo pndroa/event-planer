@@ -2,12 +2,34 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { getServerAuth } from '@/lib/auth'
 
-export async function GET(_request: Request) {
+export async function GET(request: Request) {
   const { user, errorResponse } = await getServerAuth()
 
   if (errorResponse) return errorResponse
 
+  const { searchParams } = new URL(request.url)
+  const eventId = searchParams.get('eventId')
+  const field = searchParams.get('field')
+
   try {
+    if (eventId) {
+      if (field && field !== 'surveyQuestions') {
+        return NextResponse.json(
+          { error: `Invalid field: ${field}. Only 'surveyQuestions' is allowed.` },
+          { status: 400 }
+        )
+      }
+
+      const include = field ? { [field]: true } : undefined
+
+      const survey = await prisma.surveys.findMany({
+        where: { eventId },
+        include,
+      })
+
+      return NextResponse.json({ survey }, { status: 200 })
+    }
+
     const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
       include: {
         surveys: {

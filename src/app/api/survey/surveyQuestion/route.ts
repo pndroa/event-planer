@@ -2,13 +2,21 @@
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   //const { errorResponse } = await getServerAuth()
 
   //if (errorResponse) return errorResponse
 
+  const { searchParams } = new URL(request.url)
+  const answerOptionsParam = searchParams.get('answerOptions')
+  const includeAnswerOptions = answerOptionsParam === 'true'
+
   try {
-    const surveyQuestions = await prisma.surveyQuestions.findMany()
+    const surveyQuestions = await prisma.surveyQuestions.findMany({
+      include: {
+        surveyAnswerOptions: includeAnswerOptions,
+      },
+    })
     return NextResponse.json({ surveyQuestions }, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error })
@@ -21,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { surveyId, questionText } = body
+    const { surveyId, questionText, type } = body
 
     if (!surveyId || !questionText) {
       return NextResponse.json({ error: 'surveyId and questionText are required' }, { status: 400 })
@@ -31,6 +39,7 @@ export async function POST(request: Request) {
       data: {
         questionText,
         surveyId,
+        type,
       },
     })
 

@@ -4,14 +4,11 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { errorResponse } = await getServerAuth()
-
   if (errorResponse) return errorResponse
 
   const { id } = params
 
-  if (!id) {
-    throw new Error('Invalid or missing id parameter')
-  }
+  if (!id) return NextResponse.json({ error: 'Missing survey ID' }, { status: 400 })
 
   try {
     const survey = await prisma.surveys.findFirst({
@@ -19,10 +16,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
         OR: [{ eventId: id }, { surveyId: id }],
       },
       include: {
-        surveyQuestions: true,
+        surveyQuestions: {
+          include: {
+            surveyAnswerOptions: true,
+          },
+        },
       },
     })
-    return NextResponse.json({ survey }, { status: 200 })
+    return NextResponse.json(survey, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error })
   }
@@ -36,7 +37,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   const { id } = params
 
   if (!id) {
-    throw new Error('Invalid or missing id parameter')
+    throw new Error('Invalid or missi ng id parameter')
   }
 
   try {

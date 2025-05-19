@@ -1,7 +1,6 @@
-'use client'
 import { Box, Typography } from '@mui/material'
 
-export default function Home() {
+export default function NotFound() {
   return (
     <Box
       sx={{
@@ -10,7 +9,7 @@ export default function Home() {
         alignItems: 'center',
       }}
     >
-      <Typography variant='h2'>Welcome to the Event-planner</Typography>
+      <Typography variant='h2'>Page Not Found</Typography>
     </Box>
   )
 }

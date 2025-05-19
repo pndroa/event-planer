@@ -2,30 +2,26 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Box, Typography, Paper, Stack, Chip, Button, IconButton } from '@mui/material'
+import { Box, Typography, Paper, Stack, Button, IconButton } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
 import { api } from '@/lib/api'
-
-interface Question {
-  questionId: string
-  surveyId: string
-  questionText: string
-}
+import { Survey, SurveyQuestions } from '@/lib/types'
 
 const Page = () => {
   const { id } = useParams() as { id: string }
   const router = useRouter()
-  const [questions, setQuestions] = useState<Question[]>([])
+  const [surveyQuestions, setSurveyQuestions] = useState<SurveyQuestions[]>([])
   const [surveyTitle, setSurveyTitle] = useState<string>('')
   const [surveyId, setSurveyId] = useState<string>('')
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await api.get(`/survey/${id}`)
-        setQuestions(res.data.survey.surveyQuestions)
-        setSurveyTitle(res.data.survey.title)
-        setSurveyId(res.data.survey.surveyId)
+        const surveyRes = await api.get<Survey>(`/survey/${id}`)
+        setSurveyQuestions(surveyRes.data.surveyQuestions as SurveyQuestions[])
+        setSurveyTitle(surveyRes.data.title)
+        setSurveyId(surveyRes.data.surveyId)
       } catch (err) {
         console.error('Failed to load questions', err)
       }
@@ -52,26 +48,42 @@ const Page = () => {
 
     try {
       await api.delete(`/survey/surveyQuestion/${questionId}`)
-      setQuestions((prev) => prev.filter((q) => q.questionId !== questionId))
+      setSurveyQuestions((prev) => prev.filter((q) => q.questionId !== questionId))
     } catch (err) {
       console.error('Failed to delete question', err)
     }
+  }
+
+  const handleAnswerQuestion = async (questionId: string) => {
+    try {
+      const answerOptions = await api.get(`/survey/surveyQuestion/${questionId}`, {
+        params: {
+          answerOptions: true,
+        },
+      })
+    } catch (err) {
+      console.error('Failed to delete question', err)
+    }
+
+    return window.confirm(`Answer Question ${questionId}`)
   }
 
   return (
     <Box sx={{ px: 4, py: 4, ml: { md: '200px' } }}>
       <Box sx={{ maxWidth: 800, mx: 'auto' }}>
         <Typography variant='h5' gutterBottom>
-          Questions for {surveyTitle}
+          {surveyTitle}
         </Typography>
 
         <Stack spacing={2} sx={{ mb: 4 }}>
-          {questions.map((q) => (
+          {surveyQuestions.map((q) => (
             <Paper key={q.questionId} sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography>{q.questionText}</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Chip size='small' variant='outlined' label='Question' />
+                  <IconButton color='primary' onClick={() => handleAnswerQuestion(q.questionId)}>
+                    <QuestionAnswerIcon />
+                  </IconButton>
                   <IconButton color='error' onClick={() => handleDeleteQuestion(q.questionId)}>
                     <DeleteIcon />
                   </IconButton>
