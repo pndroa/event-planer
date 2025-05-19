@@ -1,17 +1,18 @@
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const { id } = params
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const questionId = searchParams.get('questionId')
 
-  if (!id) {
+  if (!questionId) {
     throw new Error('Invalid or missing id parameter')
   }
 
   try {
     const surveyAnswers = await prisma.surveyAnswers.deleteMany({
       where: {
-        questionId: id,
+        questionId: questionId,
       },
     })
     return NextResponse.json(

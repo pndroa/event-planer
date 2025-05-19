@@ -49,16 +49,16 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url)
-  const id = searchParams.get('id')
+  const questionId = searchParams.get('questionId')
 
-  if (!id) {
+  if (!questionId) {
     throw new Error('Invalid or missing id parameter')
   }
 
   try {
     const surveyAnswerOption = await prisma.surveyAnswerOptions.deleteMany({
       where: {
-        questionId: id,
+        questionId: questionId,
       },
     })
     return NextResponse.json(

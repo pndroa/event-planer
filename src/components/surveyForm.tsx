@@ -21,6 +21,7 @@ import EditButton from './button'
 type QuestionType = 'multiple' | 'text' | 'date'
 
 type Question = {
+  questionId?: string
   type: QuestionType | null
   question: string
   options?: string[]

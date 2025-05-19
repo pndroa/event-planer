@@ -9,21 +9,19 @@ import { useState } from 'react'
 type QuestionType = 'multiple' | 'text' | 'date'
 
 type Question = {
-  questionId: string
+  questionId?: string
   type: QuestionType | null
   question: string
   options?: string[]
   dates?: (Date | null)[]
   selectedDateIndex?: number
   selectedOptionIndex?: number
-  answerQuestionObjects?: any[]
 }
 
 const Page = () => {
   const searchParams = useSearchParams()
   const questionId = searchParams.get('questionId')
   const [question, setQuestion] = useState<Question[]>([])
-  const [oldAnswerOptions, setOldAnswerOptions] = useState<string[]>([])
 
   const handleEditQuestion = async (editedQuestion: Question) => {
     const payload = {
@@ -33,56 +31,55 @@ const Page = () => {
     }
     console.log('editedQuestion')
     console.log(editedQuestion)
+
     try {
       await api
         .patch(`/survey/surveyQuestion/${editedQuestion.questionId}`, payload)
         .then(async (res) => {
-          console.log('res')
-          console.log(res)
           if (res.status === 200) {
-            console.log(res)
-            console.log('res.data.questionId')
-            console.log(editedQuestion.questionId)
+            /**Delete all answers given to aquestion */
             await api
-              .delete(`/survey/surveyAnswers/${editedQuestion.questionId}`)
-              .then(async (res) => {
-                await api
-                  .delete('/survey/surveyAnswerOption', {
-                    params: { id: editedQuestion.questionId },
-                  })
-                  .then((res) => {
-                    console.log('res')
-
-                    if (editedQuestion.type === 'multiple') {
-                      editedQuestion.options?.map((option) => {
-                        const answerPayload = {
-                          questionId: editedQuestion.questionId,
-                          answerText: option,
-                        }
-                        return api.post('/survey/surveyAnswerOption', answerPayload)
-                      })
-                    } else if (editedQuestion.type === 'date') {
-                      editedQuestion.options?.map((option) => {
-                        const datePayload = {
-                          questionId: editedQuestion.questionId,
-                          answerText: option?.toString().split('T')[0],
-                        }
-                        return api.post('/survey/surveyAnswerOption', datePayload)
-                      })
-                    }
-                  })
+              .delete(`/survey/surveyAnswers`, {
+                params: { questionId: editedQuestion.questionId },
+              })
+              .then(async () => {
+                if (Array.isArray(editedQuestion.options) || Array.isArray(editedQuestion.dates)) {
+                  /**Delete all answer options to a question*/
+                  await api
+                    .delete('/survey/surveyAnswerOption', {
+                      params: { questionId: editedQuestion.questionId },
+                    })
+                    .then(() => {
+                      console.log('edit')
+                      console.log(editedQuestion.options)
+                      /**Create the questions new*/
+                      if (editedQuestion.type === 'multiple') {
+                        editedQuestion.options?.map((option) => {
+                          const answerPayload = {
+                            questionId: editedQuestion.questionId,
+                            answerText: option,
+                          }
+                          return api.post('/survey/surveyAnswerOption', answerPayload)
+                        })
+                      } else if (editedQuestion.type === 'date') {
+                        editedQuestion.dates?.map((date) => {
+                          const datePayload = {
+                            questionId: editedQuestion.questionId,
+                            answerText: date?.toISOString().split('T')[0],
+                          }
+                          console.log('datePayload')
+                          console.log(datePayload)
+                          return api.post('/survey/surveyAnswerOption', datePayload)
+                        })
+                      }
+                    })
+                }
               })
           }
         })
-
-      console.log(oldAnswerOptions)
     } catch (err) {
       console.error('Failed to edit question', err)
     }
-  }
-
-  const arrayToCompareOldQuestionOptions = (res: any) => {
-    setOldAnswerOptions(...[res.data.question.surveyAnswerOptions])
   }
 
   useEffect(() => {
@@ -93,7 +90,6 @@ const Page = () => {
         console.log('questionId')
         console.log(questionId)
         const res = await api.get(`/survey/surveyQuestion/${questionId}`)
-        arrayToCompareOldQuestionOptions(res)
 
         console.log('res.data')
         console.log(res.data)
@@ -103,14 +99,18 @@ const Page = () => {
             type: res.data.question.type,
             question: res.data.question.questionText,
             selectedOptionIndex: 0,
-            answerQuestionObjects: res.data.question.surveyAnswerOptions,
             ...(res.data.question.type === 'multiple'
               ? {
-                  options: getAnswerOptions(res),
+                  options: res.data.question.surveyAnswerOptions.map(
+                    (surveyAnswerOption: { answerText: string }) => surveyAnswerOption.answerText
+                  ),
                 }
               : res.data.question.type === 'date'
                 ? {
-                    dates: getAnswerOptions(res),
+                    dates: res.data.question.surveyAnswerOptions.map(
+                      (surveyAnswerOption: { answerText: string }) =>
+                        new Date(surveyAnswerOption.answerText)
+                    ),
                   }
                 : {}),
           },
@@ -124,12 +124,6 @@ const Page = () => {
 
     fetchQuestions()
   }, [questionId])
-
-  const getAnswerOptions = (res: any) => {
-    return res.data.question.surveyAnswerOptions.map(
-      (surveyAnswerOption: { answerText: string }) => surveyAnswerOption.answerText
-    )
-  }
 
   return (
     <div>
