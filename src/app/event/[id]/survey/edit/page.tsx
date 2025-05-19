@@ -29,9 +29,6 @@ const Page = () => {
       options: editedQuestion.options,
       dates: editedQuestion.dates,
     }
-    console.log('editedQuestion')
-    console.log(editedQuestion)
-
     try {
       await api
         .patch(`/survey/surveyQuestion/${editedQuestion.questionId}`, payload)
@@ -50,8 +47,6 @@ const Page = () => {
                       params: { questionId: editedQuestion.questionId },
                     })
                     .then(() => {
-                      console.log('edit')
-                      console.log(editedQuestion.options)
                       /**Create the questions new*/
                       if (editedQuestion.type === 'multiple') {
                         editedQuestion.options?.map((option) => {
@@ -67,8 +62,6 @@ const Page = () => {
                             questionId: editedQuestion.questionId,
                             answerText: date?.toISOString().split('T')[0],
                           }
-                          console.log('datePayload')
-                          console.log(datePayload)
                           return api.post('/survey/surveyAnswerOption', datePayload)
                         })
                       }
@@ -87,12 +80,8 @@ const Page = () => {
       if (!questionId) return
 
       try {
-        console.log('questionId')
-        console.log(questionId)
         const res = await api.get(`/survey/surveyQuestion/${questionId}`)
 
-        console.log('res.data')
-        console.log(res.data)
         setQuestion([
           {
             questionId: res.data.question.questionId,
@@ -115,8 +104,6 @@ const Page = () => {
                 : {}),
           },
         ])
-        console.log('aaaaaaaaaaaaaaaaa')
-        console.log(question)
       } catch (err) {
         console.error('Failed to load questions', err)
       }
