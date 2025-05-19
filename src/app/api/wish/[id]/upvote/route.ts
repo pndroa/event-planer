@@ -1,4 +1,3 @@
-// api/wish/[wishid]/upvote/route.ts
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { getServerAuth } from '@/lib/auth'
