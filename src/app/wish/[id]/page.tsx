@@ -19,10 +19,11 @@ import { blue } from '@mui/material/colors'
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import Button from '@/components/button'
+import { Wishes } from '@/lib/types'
 
 export default function WishDetailPage() {
   const { id } = useParams() as { id: string }
-  const [wish, setWish] = useState<any>(null)
+  const [wish, setWish] = useState<Wishes | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)

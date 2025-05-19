@@ -42,12 +42,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         questionId: id,
       },
       include: {
-        surveyAnswerOptions: {
-          select: {
-            answerOptionsid: true,
-            answerText: true,
-          },
-        },
+        surveyAnswerOptions: true,
       },
     })
     return NextResponse.json({ question }, { status: 200 })
@@ -55,7 +50,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ error })
   }
 }
-
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const { errorResponse } = await getServerAuth()

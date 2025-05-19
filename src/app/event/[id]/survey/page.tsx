@@ -16,7 +16,6 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { api } from '@/lib/api'
 import { fetchUser } from '@/lib/user'
-import EditIcon from '@mui/icons-material/Edit'
 
 interface Question {
   questionId: string
