@@ -1,6 +1,7 @@
 'use client'
 import { FormEvent, useLayoutEffect, useState, useEffect } from 'react'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
+import Button from '@/components/button'
 import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -8,7 +9,7 @@ import FormCard from '@/components/formCard'
 import DatePicker from '@/components/datePicker'
 import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
@@ -126,16 +127,27 @@ const Page = () => {
       description,
       room,
       wishId: searchParams.get('wishId') || null,
-      eventDates: finalEventDates.map((entry) => ({
-        date: format(entry.date as Date, 'yyyy-MM-dd'),
-        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
-        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
-      })),
+      ...(finalEventDates &&
+        finalEventDates.length > 0 && {
+          eventDates: finalEventDates
+            .filter((entry) => entry.date !== null && isValid(entry.date))
+            .map((entry) => ({
+              date: format(entry.date as Date, 'yyyy-MM-dd'),
+              startTime:
+                entry.startTime !== null && isValid(entry.startTime)
+                  ? format(entry.startTime, 'kk:mm')
+                  : null,
+              endTime:
+                entry.endTime !== null && isValid(entry.endTime)
+                  ? format(entry.endTime, 'kk:mm')
+                  : null,
+            })),
+        }),
     }
 
     try {
       const response = await api.post('/event', payload)
-      console.log(response)
+
       if (response.status === 201) {
         router.push(`/event/create/${response.data.data.eventId}/survey`)
       }
@@ -209,9 +221,7 @@ const Page = () => {
               dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
             )}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button type='submit' color='primary' variant='contained'>
-                Create Event
-              </Button>
+              <Button type='submit'>Create Event</Button>
             </Box>
           </Box>
         </FormCard>

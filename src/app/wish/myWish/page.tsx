@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import {
   Box,
   Stack,
-  Button,
   MenuItem,
   Select,
   InputLabel,
@@ -12,6 +11,7 @@ import {
   Backdrop,
   IconButton,
 } from '@mui/material'
+import Button from '@/components/button'
 import SearchBar from '@/components/SearchBar'
 import Link from 'next/link'
 import { Wishes } from '@/lib/types'
@@ -76,9 +76,7 @@ const Page = () => {
             </Select>
           </FormControl>
           <Link href='/wish/create' style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Button variant='contained' size='small' sx={{ height: '40px' }}>
-              + CREATE WISH
-            </Button>
+            <Button>+ CREATE WISH</Button>
           </Link>
         </Box>
 

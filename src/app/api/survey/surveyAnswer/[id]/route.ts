@@ -3,50 +3,52 @@ import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const { errorResponse } = await getServerAuth()
+  const { user, errorResponse } = await getServerAuth()
   if (errorResponse) return errorResponse
 
   const { id } = params
 
-  if (!id) return NextResponse.json({ error: 'Missing survey ID' }, { status: 400 })
+  if (!id) return NextResponse.json({ error: 'Missing answer ID' }, { status: 400 })
 
   try {
-    const survey = await prisma.surveys.findFirst({
+    const surveyAnswers = await prisma.surveyAnswers.findMany({
       where: {
-        OR: [{ eventId: id }, { surveyId: id }],
-      },
-      include: {
         surveyQuestions: {
-          include: {
-            surveyAnswerOptions: true,
-          },
+          surveyId: id,
         },
+        userId: user.id,
+      },
+      select: {
+        questionId: true,
+        answer: true,
       },
     })
-    return NextResponse.json(survey, { status: 200 })
+
+    return NextResponse.json(surveyAnswers, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error })
   }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const { errorResponse } = await getServerAuth()
-
+  const { user, errorResponse } = await getServerAuth()
   if (errorResponse) return errorResponse
 
   const { id } = params
 
   if (!id) {
-    throw new Error('Invalid or missi ng id parameter')
+    return NextResponse.json({ error: 'Missing question ID' }, { status: 400 })
   }
 
   try {
-    const survey = await prisma.surveys.delete({
+    await prisma.surveyAnswers.deleteMany({
       where: {
-        surveyId: id,
+        questionId: id,
+        userId: user.id,
       },
     })
-    return NextResponse.json({ message: 'succesfully deleted survey', survey }, { status: 204 })
+
+    return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error })
   }

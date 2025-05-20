@@ -7,6 +7,6 @@ export function formatTimeAgo(dateString: string): string {
   const diffDays = Math.floor(diffHrs / 24)
 
   if (diffMin < 60) return `${diffMin} min ago`
-  if (diffHrs < 24) return `${diffHrs} hrs ago`
+  if (diffHrs < 24) return `${diffHrs} ${diffHrs === 1 ? 'hr' : 'hrs'} ago`
   return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
 }

@@ -2,7 +2,8 @@
 import { api } from '@/lib/api'
 import { useState, useEffect } from 'react'
 import { Survey } from '@/lib/types'
-import { Box, Stack, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
+import { Box, Stack, MenuItem, Select, InputLabel, FormControl } from '@mui/material'
+import Button from '@/components/button'
 import SearchBar from '@/components/SearchBar'
 import { useErrorBoundary } from 'react-error-boundary'
 import { useUser } from '@/hooks/useUser'
@@ -34,10 +35,7 @@ const Page = () => {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return (
-    <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
-      <Box>
-        <br />
-      </Box>
+    <Box sx={{ maxWidth: 700, mx: 'auto' }}>
       <Box
         display='flex'
         flexWrap='wrap'
@@ -67,11 +65,7 @@ const Page = () => {
             key={survey.surveyId}
             title={survey.title}
             createdAt={survey.created_at}
-            actionButton={
-              <Button variant='contained' size='small' sx={{ height: '40px' }}>
-                Answer
-              </Button>
-            }
+            actionButton={<Button>Answer</Button>}
           />
         ))}
       </Stack>

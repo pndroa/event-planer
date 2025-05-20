@@ -1,6 +1,8 @@
 'use client'
-import { Box, Modal, Typography, Button } from '@mui/material'
+import { Box, Modal, Typography } from '@mui/material'
+import Button from '@/components/button'
 import { api } from '@/lib/api'
+import { useRouter } from 'next/navigation'
 
 interface DeleteOverlayProps {
   eventId?: string
@@ -8,6 +10,7 @@ interface DeleteOverlayProps {
 }
 
 export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayProps) {
+  const router = useRouter()
   const deleteEvent = async () => {
     try {
       if (eventId == '') {
@@ -16,10 +19,8 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
       const res = await api.delete(`/event/${eventId}`)
 
       if (res.status === 200) {
-        window.location.reload()
+        router.push('/event')
       }
-
-      console.log('Event deleted successfully:', res)
     } catch (error) {
       console.error('Error deleting Events:', error)
     }
@@ -37,10 +38,8 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
-
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-start',
           gap: 2,
         }}
       >
@@ -48,10 +47,17 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
           Do you really want to delete this Event? <br></br>
           This action is irreversible.
         </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+          }}
+        >
           <Button
-            variant='contained'
-            sx={{ backgroundColor: 'green', m: 2 }}
+            color='green'
             onClick={(e) => {
               e.stopPropagation()
               onClose()
@@ -60,8 +66,7 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
             Cancel
           </Button>
           <Button
-            variant='contained'
-            sx={{ backgroundColor: 'red', m: 2 }}
+            color='red'
             onClick={(e) => {
               e.stopPropagation()
               deleteEvent()

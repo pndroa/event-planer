@@ -3,33 +3,29 @@ import { useEffect, useState } from 'react'
 import {
   Box,
   Stack,
-  Button,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  IconButton,
-  Backdrop,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material'
+import Button from '@/components/button'
 import { api } from '@/lib/api'
 import WishCard from '@/components/WishCard'
 import SearchBar from '@/components/SearchBar'
 import { Wishes } from '@/lib/types'
 import Link from 'next/link'
-import SelectedWishCard from '@/components/SelectedWishCard'
-import CloseIcon from '@mui/icons-material/Close'
-import ClickAwayListener from '@mui/material/ClickAwayListener'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '@mui/material/Checkbox'
 import { fetchUser } from '@/lib/user'
+import { useRouter } from 'next/navigation'
 
 export default function WishFeed() {
   const [wishes, setWishes] = useState<Wishes[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'likes'>('date')
-  const [selectedWish, setSelectedWish] = useState<Wishes | null>(null)
   const [onlyMine, setOnlyMine] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const router = useRouter()
 
   const fetchWishes = async () => {
     try {
@@ -39,7 +35,7 @@ export default function WishFeed() {
       const res = await api.get<Wishes[]>('/wish')
       setWishes(res.data)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
@@ -61,22 +57,22 @@ export default function WishFeed() {
       console.error(err)
     }
   }
+
   useEffect(() => {
     fetchWishes()
   }, [])
 
-  const filteredWishes = wishes // filteredWishes ist ein Array von Wish-Objekten
-    .filter((wish) => wish.title.toLowerCase().includes(searchTerm.toLowerCase())) // behalte nur Elemente, bei denen Funktion (wish) => ... true zurückgibt.
+  const filteredWishes = wishes
+    .filter((wish) => wish.title.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) =>
       sortBy === 'likes'
         ? b.currentUpvotes - a.currentUpvotes
         : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ) // .filter() und .sort(): fertige Array-Methoden => erst filtern, dann sortieren!
-
+    )
     .filter((w) => {
       if (!onlyMine) return true
-      if (!userId) return false // wenn userId null ist, dann return false
-      return w.users.userId === userId // wenn userId nicht null ist, dann return true
+      if (!userId) return false
+      return w.users.userId === userId
     })
 
   return (
@@ -97,9 +93,7 @@ export default function WishFeed() {
             </Select>
           </FormControl>
           <Link href='/wish/create' passHref>
-            <Button variant='contained' size='small' sx={{ height: 40 }}>
-              + CREATE WISH
-            </Button>
+            <Button>+ create wish</Button>
           </Link>
         </Box>
 
@@ -120,54 +114,11 @@ export default function WishFeed() {
               isUpvoted={!!wish.isUpvotedByMe}
               onUpvote={() => handleUpvote(wish.wishId)}
               currentUpvotes={wish.currentUpvotes}
-              onClick={() => setSelectedWish(wish)}
+              onClick={() => router.push(`/wish/${wish.wishId}`)} //Nur noch routing zur [wishId] page
             />
           ))}
         </Stack>
       </Box>
-
-      <Backdrop open={!!selectedWish} sx={{ zIndex: (theme) => theme.zIndex.modal }}>
-        {selectedWish && (
-          <ClickAwayListener onClickAway={() => setSelectedWish(null)}>
-            <Box
-              sx={{
-                bgcolor: '#f0f9ff',
-                borderRadius: 5,
-                boxShadow: 6,
-                ml: 8,
-                p: 3,
-                width: '90%',
-                maxWidth: 700,
-                maxHeight: 600,
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
-              <IconButton
-                onClick={() => setSelectedWish(null)}
-                sx={{
-                  position: 'absolute',
-                  top: 10,
-                  right: 10,
-                  bgcolor: 'red',
-                  color: 'white',
-                  '&:hover': {
-                    bgcolor: '#cc0000',
-                    boxShadow: 3,
-                  },
-                  width: 35,
-                  height: 35,
-                  borderRadius: '50%',
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-
-              <SelectedWishCard wish={selectedWish} />
-            </Box>
-          </ClickAwayListener>
-        )}
-      </Backdrop>
     </Box>
   )
 }

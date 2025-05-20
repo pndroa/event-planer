@@ -3,13 +3,13 @@ import {
   Box,
   Card,
   TextField,
-  Button,
   MenuItem,
   Select,
   InputLabel,
   FormControl,
   CardContent,
 } from '@mui/material'
+import Button from '@/components/button'
 
 interface FormCardProps {
   title?: string
@@ -39,14 +39,7 @@ const SearchbarForCards: FC<FormCardProps> = ({ buttonText = 'default' }) => {
                 <MenuItem value='likes'>Most liked</MenuItem>
               </Select>
             </FormControl>
-            <Button
-              variant='contained'
-              size='small'
-              sx={{ height: '40px' }}
-              onClick={() => alert('Create wish')}
-            >
-              + {buttonText}
-            </Button>
+            <Button onClick={() => alert('Create wish')}>+ {buttonText}</Button>
           </Box>
         </Box>
       </CardContent>

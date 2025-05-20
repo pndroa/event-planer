@@ -86,18 +86,23 @@ export interface Survey {
   eventId: string
   title: string
   created_at: string
-  surveyQuestions: SurveyQuestions[]
-  Events: Events
+  surveyQuestions?: SurveyQuestions[]
 }
 
 export interface SurveyQuestions {
   questionId: string
   surveyId: string
   questionText: string
-  isMultipleChoice: boolean
   created_at: string
-  surveyAnswerOptions: SurveyAnswer[]
-  surveys: Survey
+  type: string
+  surveyAnswerOptions?: SurveyAnswerOptions[]
+}
+
+export interface SurveyAnswerOptions {
+  answerOptionsId: string
+  questionId: string
+  answerText: string
+  created_at: string
 }
 
 export interface SurveyAnswer {

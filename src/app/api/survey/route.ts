@@ -2,12 +2,34 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { getServerAuth } from '@/lib/auth'
 
-export async function GET(_request: Request) {
+export async function GET(request: Request) {
   const { user, errorResponse } = await getServerAuth()
 
   if (errorResponse) return errorResponse
 
+  const { searchParams } = new URL(request.url)
+  const eventId = searchParams.get('eventId')
+  const field = searchParams.get('field')
+
   try {
+    if (eventId) {
+      if (field && field !== 'surveyQuestions') {
+        return NextResponse.json(
+          { error: `Invalid field: ${field}. Only 'surveyQuestions' is allowed.` },
+          { status: 400 }
+        )
+      }
+
+      const include = field ? { [field]: true } : undefined
+
+      const survey = await prisma.surveys.findMany({
+        where: { eventId },
+        include,
+      })
+
+      return NextResponse.json({ survey }, { status: 200 })
+    }
+
     const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
       include: {
         surveys: {
@@ -47,21 +69,42 @@ export async function GET(_request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+    const { eventId } = body
+
+    if (!eventId) {
+      return NextResponse.json({ error: 'eventId is required' }, { status: 400 })
+    }
 
     const existingEvent = await prisma.events.findUnique({
-      where: { eventId: body.eventId },
+      where: { eventId },
     })
 
     if (!existingEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const createSurvey = await prisma.surveys.create({
-      data: body,
+    const existingSurvey = await prisma.surveys.findUnique({
+      where: { eventId },
     })
 
-    return NextResponse.json({ message: 'survey created', data: createSurvey }, { status: 201 })
+    if (existingSurvey) {
+      return NextResponse.json(
+        { message: 'Survey already exists', data: existingSurvey },
+        { status: 200 }
+      )
+    }
+
+    // Neue Survey erstellen
+    const createSurvey = await prisma.surveys.create({
+      data: {
+        eventId,
+        title: `Survey for Event: ${existingEvent.title}`,
+      },
+    })
+
+    return NextResponse.json({ message: 'Survey created', data: createSurvey }, { status: 201 })
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 })
+    console.error('Fehler beim Erstellen der Survey:', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

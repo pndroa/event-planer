@@ -2,9 +2,10 @@
 
 import SurveyForm from '@/components/surveyForm'
 import { api } from '@/lib/api'
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
+import Button from '@/components/button'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 type QuestionType = 'multiple' | 'text' | 'date'
 
@@ -17,21 +18,10 @@ type Question = {
 }
 
 const Page = () => {
-  const { id } = useParams() as { id: string }
+  const { id: eventId } = useParams<{ id: string }>()
   const router = useRouter()
-  const [surveyTitle, setSurveyTitle] = useState<string>('')
-  const [surveyId, setSurveyId] = useState<string>('')
   const [questions, setQuestions] = useState<Question[]>([])
   const [isSaving, setIsSaving] = useState<boolean>(false)
-
-  useEffect(() => {
-    const fetchSurvey = async () => {
-      const res = await api.get(`/survey/${id}`)
-      setSurveyTitle(res.data.survey.title)
-      setSurveyId(res.data.survey.surveyId)
-    }
-    fetchSurvey()
-  }, [id])
 
   const handleAddQuestion = () => {
     setQuestions((prev) => [
@@ -65,26 +55,62 @@ const Page = () => {
   const handleSaveSurvey = async () => {
     setIsSaving(true)
 
-    const validQuestions = questions.filter((q) => q.type !== null && q.question.trim() !== '')
-
     try {
+      const survey = await api.post('/survey/', { eventId })
+      const surveyId = survey.data.data.surveyId
+
       await Promise.all(
-        validQuestions.map((q) =>
-          api.post('/survey/surveyQuestion', {
+        questions.map(async (q: Question) => {
+          const questionPayload = {
+            questionText: q.question,
             surveyId,
-            questionText: q.question.trim(),
-          })
-        )
+            type: q.type,
+          }
+
+          const questionsRes = await api.post('/survey/surveyQuestion', questionPayload)
+          const { questionId } = questionsRes.data.data
+
+          if (q.type === 'multiple' && Array.isArray(q.options)) {
+            await Promise.all(
+              q.options.map((option) => {
+                const answerPayload = {
+                  questionId,
+                  answerText: option,
+                }
+                return api.post('/survey/surveyAnswerOption', answerPayload)
+              })
+            )
+          }
+
+          if (q.type === 'date' && Array.isArray(q.dates)) {
+            await Promise.all(
+              q.dates.map((date) => {
+                const datePayload = {
+                  questionId,
+                  answerText: date?.toISOString().split('T')[0],
+                }
+                return api.post('/survey/surveyAnswerOption', datePayload)
+              })
+            )
+          }
+
+          if (q.type === 'text') {
+            const textPayload = {
+              questionId,
+              answerText: 'add question',
+            }
+            await api.post('/survey/surveyAnswerOption', textPayload)
+          }
+        })
       )
-      router.push(`/event/${id}/survey`)
+
+      router.push(`/event/${eventId}/survey`)
     } catch (err) {
-      console.error(err)
+      console.error('Fehler beim Speichern:', err)
     } finally {
       setIsSaving(false)
     }
   }
-
-  const hasValidQuestions = questions.some((q) => q.type !== null && q.question.trim() !== '')
 
   return (
     <Box sx={{ px: 2, py: 4, ml: { md: '160px' } }}>
@@ -106,17 +132,16 @@ const Page = () => {
         >
           <Box>
             <Typography variant='h5' gutterBottom>
-              {surveyTitle}
+              Create new Survey
             </Typography>
-            <Button variant='contained' onClick={handleAddQuestion}>
-              Add Question
-            </Button>
+            <Button onClick={handleAddQuestion}>Add Question</Button>
           </Box>
           <Button
-            variant='outlined'
-            color='success'
+            color='green'
             onClick={handleSaveSurvey}
-            disabled={isSaving || !hasValidQuestions}
+            disabled={
+              isSaving || questions.length === 0 || questions.some((q) => !q.question.trim())
+            }
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>

@@ -1,5 +1,6 @@
 'use client'
-import { Box, Card, Typography, IconButton, Button } from '@mui/material'
+import { Box, Card, Typography, IconButton } from '@mui/material'
+import Button from '@/components/button'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import { blue, grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
@@ -81,12 +82,8 @@ export default function WishCard({
       <Box display='flex' justifyContent='flex-end'>
         {deleteButton && (
           <Button
-            variant='contained'
-            size='small'
-            sx={{ height: '40px' }}
             onClick={(e) => {
               e.stopPropagation()
-              // hier delete-function aufrufen!
             }}
           >
             Delete
