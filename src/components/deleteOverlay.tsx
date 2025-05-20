@@ -1,6 +1,7 @@
 'use client'
 import { Box, Modal, Typography, Button } from '@mui/material'
 import { api } from '@/lib/api'
+import { useRouter } from 'next/navigation'
 
 interface DeleteOverlayProps {
   eventId?: string
@@ -8,6 +9,7 @@ interface DeleteOverlayProps {
 }
 
 export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayProps) {
+  const router = useRouter()
   const deleteEvent = async () => {
     try {
       if (eventId == '') {
@@ -16,7 +18,7 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
       const res = await api.delete(`/event/${eventId}`)
 
       if (res.status === 200) {
-        window.location.reload()
+        router.push('/event')
       }
 
       console.log('Event deleted successfully:', res)

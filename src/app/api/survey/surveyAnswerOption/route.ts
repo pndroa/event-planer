@@ -46,3 +46,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 })
   }
 }
+
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const questionId = searchParams.get('questionId')
+
+  if (!questionId) {
+    throw new Error('Invalid or missing id parameter')
+  }
+
+  try {
+    const surveyAnswerOption = await prisma.surveyAnswerOptions.deleteMany({
+      where: {
+        questionId: questionId,
+      },
+    })
+    return NextResponse.json(
+      { message: 'Succesfully deleted answer option', surveyAnswerOption },
+      { status: 200 }
+    )
+  } catch (error) {
+    return NextResponse.json({ error })
+  }
+}
