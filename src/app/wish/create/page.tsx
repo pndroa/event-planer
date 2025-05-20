@@ -22,15 +22,23 @@ const Page = () => {
 
   const [isClient, setIsClient] = useState(false)
 
-  //Functions
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.target as HTMLFormElement)
 
+    const title = (formData.get('title') as string)?.trim()
+    const description = (formData.get('description') as string)?.trim() || null
+
+    if (!title) {
+      const error = new Error('Please enter a title.')
+      showBoundary(error)
+      return
+    }
+
     const wish = {
       wishCreator: user?.id as string,
-      title: formData.get('title') as string,
-      description: (formData.get('description') as string) || null,
+      title,
+      description,
     }
 
     try {
@@ -59,7 +67,6 @@ const Page = () => {
       <Grid
         sx={{
           width: '50%',
-          marginLeft: '10rem',
         }}
       >
         <FormCard title='Create Wish'>
