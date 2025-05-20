@@ -8,7 +8,7 @@ import FormCard from '@/components/formCard'
 import DatePicker from '@/components/datePicker'
 import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
@@ -126,11 +126,22 @@ const Page = () => {
       description,
       room,
       wishId: searchParams.get('wishId') || null,
-      eventDates: finalEventDates.map((entry) => ({
-        date: format(entry.date as Date, 'yyyy-MM-dd'),
-        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
-        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
-      })),
+      ...(finalEventDates &&
+        finalEventDates.length > 0 && {
+          eventDates: finalEventDates
+            .filter((entry) => entry.date !== null && isValid(entry.date))
+            .map((entry) => ({
+              date: format(entry.date as Date, 'yyyy-MM-dd'),
+              startTime:
+                entry.startTime !== null && isValid(entry.startTime)
+                  ? format(entry.startTime, 'kk:mm')
+                  : null,
+              endTime:
+                entry.endTime !== null && isValid(entry.endTime)
+                  ? format(entry.endTime, 'kk:mm')
+                  : null,
+            })),
+        }),
     }
 
     try {

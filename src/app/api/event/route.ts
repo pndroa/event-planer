@@ -49,13 +49,16 @@ export async function POST(req: Request) {
         description,
         room,
         wishId,
-        eventDates: {
-          create: eventDates.map((d: PostEventDates) => ({
-            date: new Date(d.date as Date),
-            startTime: d.startTime,
-            endTime: d.endTime,
-          })),
-        },
+        ...(eventDates &&
+          eventDates.length > 0 && {
+            eventDates: {
+              create: eventDates.map((d: PostEventDates) => ({
+                date: new Date(d.date as Date),
+                startTime: d.startTime,
+                endTime: d.endTime,
+              })),
+            },
+          }),
       },
       include: {
         eventDates: true,

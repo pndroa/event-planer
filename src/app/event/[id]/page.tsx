@@ -321,8 +321,8 @@ export default function EventDetailPage() {
               ))}
             </Stack>
           ) : (
-            <Typography fontSize={15} color='text.disabled' mt={1}>
-              No dates defined yet.
+            <Typography fontSize={15} color='text.disabled' fontStyle='italic'>
+              No dates defined yet...
             </Typography>
           )}
         </Box>

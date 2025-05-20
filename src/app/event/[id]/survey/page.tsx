@@ -2,17 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  Box,
-  Typography,
-  Paper,
-  Stack,
-  Chip,
-  Button,
-  IconButton,
-  CircularProgress,
-} from '@mui/material'
+import { Box, Typography, Paper, Stack, Button, IconButton, CircularProgress } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { api } from '@/lib/api'
 import { fetchUser } from '@/lib/user'
@@ -81,6 +73,10 @@ const Page = () => {
     }
   }
 
+  const handleEditQuestion = async (questionId: string) => {
+    router.push(`survey/edit?questionId=${questionId}`)
+  }
+
   if (loading) {
     return (
       <Box
@@ -131,7 +127,9 @@ const Page = () => {
                 >
                   <Typography>{q.questionText}</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip size='small' variant='outlined' label='Question' />
+                    <IconButton onClick={() => handleEditQuestion(q.questionId)}>
+                      <EditIcon />
+                    </IconButton>
                     <IconButton color='error' onClick={() => handleDeleteQuestion(q.questionId)}>
                       <DeleteIcon />
                     </IconButton>

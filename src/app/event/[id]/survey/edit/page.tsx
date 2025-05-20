@@ -1,5 +1,5 @@
 'use client'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect } from 'react'
 import { api } from '@/lib/api'
 import { Box } from '@mui/material'
@@ -20,6 +20,7 @@ type Question = {
 
 const Page = () => {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const questionId = searchParams.get('questionId')
   const [question, setQuestion] = useState<Question[]>([])
 
@@ -70,6 +71,8 @@ const Page = () => {
               })
           }
         })
+
+      router.back()
     } catch (err) {
       console.error('Failed to edit question', err)
     }
