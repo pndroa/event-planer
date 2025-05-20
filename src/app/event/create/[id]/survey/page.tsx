@@ -2,7 +2,8 @@
 
 import SurveyForm from '@/components/surveyForm'
 import { api } from '@/lib/api'
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
+import Button from '@/components/button'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -133,11 +134,15 @@ const Page = () => {
             <Typography variant='h5' gutterBottom>
               Create new Survey
             </Typography>
-            <Button variant='contained' onClick={handleAddQuestion}>
-              Add Question
-            </Button>
+            <Button onClick={handleAddQuestion}>Add Question</Button>
           </Box>
-          <Button variant='outlined' color='success' onClick={handleSaveSurvey} disabled={isSaving}>
+          <Button
+            color='green'
+            onClick={handleSaveSurvey}
+            disabled={
+              isSaving || questions.length === 0 || questions.some((q) => !q.question.trim())
+            }
+          >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </Box>

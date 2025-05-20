@@ -1,6 +1,7 @@
 'use client'
 import { FormEvent, useLayoutEffect, useState } from 'react'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
+import Button from '@/components/button'
 import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -244,9 +245,7 @@ const Page = () => {
               </IconButton>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button type='submit' color='primary' variant='contained'>
-                Save changes
-              </Button>
+              <Button type='submit'>Save changes</Button>
             </Box>
           </Box>
         </FormCard>

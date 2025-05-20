@@ -1,5 +1,6 @@
 'use client'
-import { Box, Modal, Typography, Button } from '@mui/material'
+import { Box, Modal, Typography } from '@mui/material'
+import Button from '@/components/button'
 import { api } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 
@@ -52,8 +53,7 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
           <Button
-            variant='contained'
-            sx={{ backgroundColor: 'green', m: 2 }}
+            color='green'
             onClick={(e) => {
               e.stopPropagation()
               onClose()
@@ -62,8 +62,7 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
             Cancel
           </Button>
           <Button
-            variant='contained'
-            sx={{ backgroundColor: 'red', m: 2 }}
+            color='red'
             onClick={(e) => {
               e.stopPropagation()
               deleteEvent()

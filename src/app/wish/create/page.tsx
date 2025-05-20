@@ -1,6 +1,7 @@
 'use client'
 import FormCard from '@/components/formCard'
-import { TextField, Grid, Button, Box } from '@mui/material'
+import { TextField, Grid, Box } from '@mui/material'
+import Button from '@/components/button'
 import { useLayoutEffect, useState, FormEvent } from 'react'
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
@@ -80,9 +81,7 @@ const Page = () => {
               multiline
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button type='submit' color='primary' variant='contained'>
-                Create Wish
-              </Button>
+              <Button type='submit'>Create Wish</Button>
             </Box>
           </Box>
         </FormCard>

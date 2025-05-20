@@ -3,7 +3,6 @@
 import React from 'react'
 import {
   Box,
-  Button,
   FormControl,
   FormLabel,
   IconButton,
@@ -13,6 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import Button from '@/components/button'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import DatePicker from './datePicker'
@@ -262,13 +262,7 @@ const SurveyForm = ({
 
           {!editButton && (
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
-              <Button
-                variant='outlined'
-                color='error'
-                size='small'
-                onClick={() => onDeleteQuestion?.(i)}
-                startIcon={<DeleteIcon />}
-              >
+              <Button color='red' onClick={() => onDeleteQuestion?.(i)} startIcon={<DeleteIcon />}>
                 Delete
               </Button>
             </Box>

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Box, Card, Typography, Button } from '@mui/material'
+import { Box, Card, Typography } from '@mui/material'
+import Button from '@/components/button'
 import { grey } from '@mui/material/colors'
 import { formatTimeAgo } from '@/utils/timeUtils'
 import { api } from '@/lib/api'
@@ -87,12 +88,7 @@ export default function EventCard({
         <Box display='flex' justifyContent='space-between' mt={2}>
           {joined ? (
             <Button
-              variant='contained'
-              sx={{
-                color: '#fff',
-                backgroundColor: '#e57373',
-                '&:hover': { backgroundColor: '#f44336' },
-              }}
+              color='orange'
               onClick={(e) => {
                 e.stopPropagation()
                 deleteParticipation()
@@ -102,12 +98,6 @@ export default function EventCard({
             </Button>
           ) : (
             <Button
-              variant='contained'
-              sx={{
-                color: '#fff',
-                backgroundColor: '#81c784',
-                '&:hover': { backgroundColor: '#66bb6a' },
-              }}
               onClick={(e) => {
                 e.stopPropagation()
                 createParticipation()

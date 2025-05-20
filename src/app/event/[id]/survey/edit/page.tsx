@@ -37,7 +37,7 @@ const Page = () => {
           if (res.status === 200) {
             /**Delete all answers given to aquestion */
             await api
-              .delete(`/survey/surveyAnswers`, {
+              .delete(`/survey/surveyAnswer`, {
                 params: { questionId: editedQuestion.questionId },
               })
               .then(async () => {

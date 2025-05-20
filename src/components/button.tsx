@@ -1,25 +1,20 @@
 import React, { ReactNode } from 'react'
-import { Button as MuiButton } from '@mui/material'
+import { Button as MuiButton, ButtonProps as MuiButtonProps } from '@mui/material'
 
-// Color guidelines:
-// - Red: permanent deletions
-// - Orange: leave/exit actions
-// - Green: safe actions and success messages
-// - All other cases: use standard MUI colors
+type CustomColor = 'green' | 'red' | 'orange'
 
-interface ButtonProps {
-  onClick?: () => void
-  color?: 'green' | 'red' | 'orange'
+interface CustomButtonProps extends Omit<MuiButtonProps, 'color'> {
+  color?: CustomColor
   children?: ReactNode
 }
 
-const colorMap: Record<NonNullable<ButtonProps['color']>, string> = {
+const colorMap: Record<CustomColor, string> = {
   green: '#4caf50',
   red: '#f44336',
   orange: '#ff9800',
 }
 
-const Button = ({ onClick, color, children }: ButtonProps) => {
+const Button = ({ color, children, sx, ...rest }: CustomButtonProps) => {
   const customStyles = color
     ? {
         backgroundColor: colorMap[color],
@@ -29,10 +24,17 @@ const Button = ({ onClick, color, children }: ButtonProps) => {
           opacity: 0.9,
         },
       }
-    : undefined
+    : {}
 
   return (
-    <MuiButton variant='contained' onClick={onClick} sx={customStyles}>
+    <MuiButton
+      variant='contained'
+      {...rest}
+      sx={{
+        ...customStyles,
+        ...sx,
+      }}
+    >
       {children}
     </MuiButton>
   )

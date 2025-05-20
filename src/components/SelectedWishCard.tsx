@@ -1,5 +1,6 @@
 import { Wishes } from '@/lib/types'
-import { Box, Typography, Button } from '@mui/material'
+import { Box, Typography } from '@mui/material'
+import Button from '@/components/button'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline'
 import { useRouter } from 'next/navigation'
 
@@ -91,9 +92,6 @@ export default function SelectedWishCard({ wish }: { wish: Wishes }) {
 
       <Box display='flex' justifyContent='flex-end' sx={{ mt: 0.2 }}>
         <Button
-          variant='contained'
-          size='small'
-          sx={{ height: '35px' }}
           onClick={() => {
             router.push(`/event/create?wishId=${wish.wishId}`)
           }}

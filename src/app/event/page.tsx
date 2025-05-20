@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import {
   Box,
   Stack,
-  Button,
   MenuItem,
   Select,
   InputLabel,
@@ -11,10 +10,12 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material'
+import Button from '@/components/button'
 import { api } from '@/lib/api'
 import EventCard from '@/components/EventCard'
 import SearchBar from '@/components/SearchBar'
 //import TopNavigation from '@/components/TopNavigation'
+import Link from 'next/link'
 import { Events } from '@/lib/types'
 import { fetchUser } from '@/lib/user'
 
@@ -57,7 +58,7 @@ export default function EventFeed() {
     })
   return (
     <>
-      <Box sx={{ padding: 4, maxWidth: 700, mx: 'auto' }}>
+      <Box sx={{ maxWidth: 700, mx: 'auto' }}>
         {/*<TopNavigation />*/}
         <Box
           display='flex'
@@ -79,9 +80,9 @@ export default function EventFeed() {
               <MenuItem value='date'>Latest</MenuItem>
             </Select>
           </FormControl>
-          <Button variant='contained' size='small' href='/event/create' sx={{ height: '40px' }}>
-            + CREATE EVENT
-          </Button>
+          <Link href='/event/create' passHref>
+            <Button>+ create event</Button>
+          </Link>
         </Box>
 
         <FormControlLabel

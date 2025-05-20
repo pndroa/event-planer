@@ -14,7 +14,7 @@ export default function SearchBar({ searchTerm, onSearchTermChange }: SearchBarP
       value={searchTerm}
       onChange={(e) => onSearchTermChange(e.target.value)}
       size='small'
-      sx={{ flex: 1, minWidth: 220 }}
+      sx={{ flex: 1, minWidth: 220, maxWidth: 400 }}
     />
   )
 }

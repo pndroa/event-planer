@@ -2,13 +2,13 @@
 import { signInWithGoogle } from '@/utils/authClient'
 import {
   Box,
-  Button,
   Checkbox,
   FormControl,
   FormControlLabel,
   TextField,
   Typography,
   Divider,
+  Button,
 } from '@mui/material'
 import { IsMobile } from '@/lib/styles'
 import Image from 'next/image'
@@ -68,13 +68,7 @@ const SignIn = () => {
             control={<Checkbox checked={checkState} onChange={handleCheckbox} />}
             label='Remember me'
           />
-          <Button
-            type='submit'
-            color='primary'
-            variant='contained'
-            sx={{ marginY: '1rem' }}
-            fullWidth
-          >
+          <Button type='submit' variant='contained' sx={{ marginY: '1rem' }} fullWidth>
             Sign in
           </Button>
           <Divider sx={{ my: 2 }} />

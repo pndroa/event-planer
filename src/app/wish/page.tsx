@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import {
   Box,
   Stack,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -11,6 +10,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material'
+import Button from '@/components/button'
 import { api } from '@/lib/api'
 import WishCard from '@/components/WishCard'
 import SearchBar from '@/components/SearchBar'
@@ -93,9 +93,7 @@ export default function WishFeed() {
             </Select>
           </FormControl>
           <Link href='/wish/create' passHref>
-            <Button variant='contained' size='small' sx={{ height: 40 }}>
-              + CREATE WISH
-            </Button>
+            <Button>+ create wish</Button>
           </Link>
         </Box>
 

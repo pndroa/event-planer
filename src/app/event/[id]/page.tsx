@@ -26,6 +26,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CreateIcon from '@mui/icons-material/AddCircleOutline'
 import DeleteOverlay from '@/components/deleteOverlay'
+import Button from '@/components/button'
 
 export default function EventDetailPage() {
   const params = useParams()
@@ -361,6 +362,9 @@ export default function EventDetailPage() {
             {event.room || 'Not defined yet...'}
           </Typography>
         </Box>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        <Button onClick={() => router.push(`/event/${id}/survey`)}>To Surveys</Button>
       </Box>
 
       {/* Delete Overlay */}

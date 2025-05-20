@@ -1,5 +1,6 @@
 'use client'
-import { Modal, Box, Typography, Button } from '@mui/material'
+import { Modal, Box, Typography } from '@mui/material'
+import Button from '@/components/button'
 import { AxiosError, isAxiosError } from 'axios'
 
 interface ErrorFallbackProps {
@@ -39,9 +40,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
         <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
           {errorMessage}
         </Typography>
-        <Button variant='contained' onClick={resetErrorBoundary}>
-          new try
-        </Button>
+        <Button onClick={resetErrorBoundary}>new try</Button>
       </Box>
     </Modal>
   )

@@ -54,32 +54,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   }
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const { errorResponse } = await getServerAuth()
-
-  if (errorResponse) return errorResponse
-
-  const { id } = params
-
-  if (!id) {
-    throw new Error('Invalid or missing id parameter')
-  }
-
-  try {
-    const question = await prisma.surveyQuestions.findFirst({
-      where: {
-        questionId: id,
-      },
-      include: {
-        surveyAnswerOptions: true,
-      },
-    })
-    return NextResponse.json({ question }, { status: 200 })
-  } catch (error) {
-    return NextResponse.json({ error })
-  }
-}
-
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const { errorResponse } = await getServerAuth()
 

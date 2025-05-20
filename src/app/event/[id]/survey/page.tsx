@@ -2,19 +2,16 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Box, Typography, Paper, Stack, Button, IconButton, CircularProgress } from '@mui/material'
+import { Box, Typography, Paper, Stack, IconButton, CircularProgress } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
 import { api } from '@/lib/api'
 import { fetchUser } from '@/lib/user'
-
-interface Question {
-  questionId: string
-  surveyId: string
-  questionText: string
-}
+import { SurveyQuestions } from '@/lib/types'
+import SurveyAnswerCard from '@/components/surveyAnswerCard'
+import Button from '@/components/button'
 
 const Page = () => {
   const { id } = useParams() as { id: string }
@@ -24,31 +21,43 @@ const Page = () => {
   const [surveyId, setSurveyId] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
+  const [activeAnswerId, setActiveAnswerId] = useState<string | null>(null)
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [userId, setUserId] = useState<string>()
+  const [trainerId, setTrainerId] = useState<string | null>(null)
+
   useEffect(() => {
-    const fetchQuestionsAndCheckTrainer = async () => {
+    const fetchSurveyData = async () => {
       setLoading(true)
       try {
         const user = await fetchUser()
         const res = await api.get(`/survey/${id}`)
         const eventRes = await api.get(`/event/${id}`)
-        const trainerId = eventRes.data.event.trainerId
+        const eventTrainerId = eventRes.data.event.trainerId
 
-        if (!user || user.id !== trainerId) {
-          router.back()
-          return
-        }
+        setUserId(user?.id as string)
+        setTrainerId(eventTrainerId)
 
-        setQuestions(res.data.survey.surveyQuestions)
-        setSurveyTitle(res.data.survey.title)
-        setSurveyId(res.data.survey.surveyId)
+        setSurveyQuestions(res.data.surveyQuestions)
+        setSurveyTitle(res.data.title)
+        setSurveyId(res.data.surveyId)
+
+        const answerRes = await api.get(`/survey/surveyAnswer/${res.data.surveyId}`)
+        const mappedAnswers = Object.fromEntries(
+          answerRes.data.map((a: { questionId: string; answer: string }) => [
+            a.questionId,
+            a.answer,
+          ])
+        )
+        setAnswers(mappedAnswers)
       } catch (err) {
-        console.error('Failed to load questions', err)
+        console.error('Failed to load questions or answers', err)
       }
       setLoading(false)
     }
 
-    fetchQuestionsAndCheckTrainer()
-  }, [id, router])
+    fetchSurveyData()
+  }, [id])
 
   const handleDeleteSurvey = async () => {
     const confirm = window.confirm('Are you sure you want to delete this survey?')
@@ -74,7 +83,7 @@ const Page = () => {
     }
   }
 
-  const handleEditQuestion = async (questionId: string) => {
+  const handleEditQuestion = (questionId: string) => {
     router.push(`survey/edit?questionId=${questionId}`)
   }
 
@@ -95,18 +104,19 @@ const Page = () => {
           <Typography variant='h5' gutterBottom>
             {surveyTitle}
           </Typography>
-          <Button
-            variant='contained'
-            startIcon={<AddIcon />}
-            onClick={() => router.push(`/event/create/${id}/survey`)}
-            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
-          >
-            Create Questions
-          </Button>
+          {userId === trainerId && (
+            <Button
+              startIcon={<AddIcon />}
+              onClick={() => router.push(`/event/create/${id}/survey`)}
+              sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+            >
+              Create Survey
+            </Button>
+          )}
         </Box>
 
         <Stack spacing={2} sx={{ mb: 4 }}>
-          {questions.length === 0 ? (
+          {surveyQuestions.length === 0 ? (
             <Box
               sx={{
                 p: 4,
@@ -121,31 +131,59 @@ const Page = () => {
               No questions yet...
             </Box>
           ) : (
-            questions.map((q) => (
-              <Paper key={q.questionId} sx={{ p: 2 }}>
-                <Box
-                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <Typography>{q.questionText}</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <IconButton onClick={() => handleEditQuestion(q.questionId)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton color='error' onClick={() => handleDeleteQuestion(q.questionId)}>
-                      <DeleteIcon />
-                    </IconButton>
+            surveyQuestions.map((q) => (
+              <Box key={q.questionId}>
+                <Paper sx={{ p: 2 }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <Typography>{q.questionText}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <IconButton
+                        onClick={() =>
+                          setActiveAnswerId(activeAnswerId === q.questionId ? null : q.questionId)
+                        }
+                      >
+                        <QuestionAnswerIcon />
+                      </IconButton>
+                      {userId === trainerId && (
+                        <>
+                          <IconButton onClick={() => handleEditQuestion(q.questionId)}>
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            color='error'
+                            onClick={() => handleDeleteQuestion(q.questionId)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              </Paper>
+                </Paper>
+
+                {activeAnswerId === q.questionId && (
+                  <SurveyAnswerCard
+                    question={q}
+                    currentAnswer={answers[q.questionId] || ''}
+                    setAnswer={(val: string) =>
+                      setAnswers((prev) => ({ ...prev, [q.questionId]: val }))
+                    }
+                  />
+                )}
+              </Box>
             ))
           )}
         </Stack>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button color='error' variant='contained' onClick={handleDeleteSurvey}>
-            Delete Survey
-          </Button>
-        </Box>
+        {userId === trainerId && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button color='red' variant='contained' onClick={handleDeleteSurvey}>
+              Delete Survey
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   )
