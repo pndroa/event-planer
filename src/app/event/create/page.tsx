@@ -147,7 +147,7 @@ const Page = () => {
 
     try {
       const response = await api.post('/event', payload)
-      console.log(response)
+
       if (response.status === 201) {
         router.push(`/event/create/${response.data.data.eventId}/survey`)
       }

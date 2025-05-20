@@ -37,7 +37,6 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
   if (!id) {
     throw new Error('Invalid or missing id parameter')
   }
-  console.log('Event ID:', id)
 
   try {
     const event = await prisma.events.delete({
@@ -46,8 +45,6 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
       },
     })
 
-    console.log('Event deleted successfully:', event)
-    console.log('Event ID:', id)
     return NextResponse.json({ event }, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error })

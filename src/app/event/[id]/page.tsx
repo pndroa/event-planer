@@ -64,7 +64,7 @@ export default function EventDetailPage() {
         const user = await fetchUser()
         setUserId(user?.id ?? null)
       } catch (err) {
-        console.log(err)
+        console.error(err)
         setUserId(null)
       }
     }

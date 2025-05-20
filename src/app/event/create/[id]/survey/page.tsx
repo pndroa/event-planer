@@ -54,7 +54,7 @@ const Page = () => {
 
   const handleSaveSurvey = async () => {
     setIsSaving(true)
-    console.log(questions)
+
     try {
       const survey = await api.post('/survey/', { eventId })
       const surveyId = survey.data.data.surveyId

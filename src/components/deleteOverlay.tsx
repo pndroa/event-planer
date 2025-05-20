@@ -21,8 +21,6 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
       if (res.status === 200) {
         router.push('/event')
       }
-
-      console.log('Event deleted successfully:', res)
     } catch (error) {
       console.error('Error deleting Events:', error)
     }
@@ -40,10 +38,8 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
-
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-start',
           gap: 2,
         }}
       >
@@ -51,7 +47,15 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
           Do you really want to delete this Event? <br></br>
           This action is irreversible.
         </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+          }}
+        >
           <Button
             color='green'
             onClick={(e) => {

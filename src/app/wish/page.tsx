@@ -35,7 +35,7 @@ export default function WishFeed() {
       const res = await api.get<Wishes[]>('/wish')
       setWishes(res.data)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 
