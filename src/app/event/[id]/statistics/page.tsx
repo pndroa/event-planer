@@ -41,7 +41,9 @@ export default function StatisticsPage() {
   if (loading) {
     return (
       <Box display='flex' justifyContent='center' mt={6}>
-        <CircularProgress />
+        <Box display='flex' justifyContent='center' mt={6}>
+          <CircularProgress />
+        </Box>
       </Box>
     )
   }
@@ -55,7 +57,6 @@ export default function StatisticsPage() {
     router.back()
     return null
   }
-
   if (noSurvey) {
     return (
       <Box
