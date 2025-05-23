@@ -24,7 +24,7 @@ import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import CreateIcon from '@mui/icons-material/AddCircleOutline'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
 import DeleteOverlay from '@/components/deleteOverlay'
 import Button from '@/components/button'
 
@@ -96,9 +96,9 @@ export default function EventDetailPage() {
     setAnchorEl(null)
     setDeleteEvent(true)
   }
-  const handleCreateSurvey = () => {
+  const handleView = () => {
     setAnchorEl(null)
-    router.push(`/event/${id}/survey`)
+    router.push(`/event/${id}/statistics`)
   }
 
   if (loading)
@@ -201,11 +201,11 @@ export default function EventDetailPage() {
                 </ListItemIcon>
                 Delete Event
               </MenuItem>
-              <MenuItem onClick={handleCreateSurvey}>
+              <MenuItem onClick={handleView}>
                 <ListItemIcon>
-                  <CreateIcon fontSize='small' />
+                  <ShowChartIcon fontSize='small' />
                 </ListItemIcon>
-                View Survey
+                View Statistics
               </MenuItem>
             </Menu>
           </>
