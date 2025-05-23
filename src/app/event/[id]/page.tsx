@@ -37,6 +37,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [joined, setJoined] = useState<boolean>(false)
 
   // Drei-Punkte-Menü State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -49,6 +50,7 @@ export default function EventDetailPage() {
       try {
         const res = await api.get(`/event/${id}`)
         setEvent(res.data.event)
+        setJoined(res.data.event.joined)
       } catch (err) {
         setError('Fehler beim Laden des Events.')
         console.error(err)
@@ -57,6 +59,24 @@ export default function EventDetailPage() {
     }
     fetchEvent()
   }, [id])
+
+  const createParticipation = async () => {
+    try {
+      const res = await api.post('/event/participation', { eventId: id })
+      setJoined(res.data.joined)
+    } catch (err) {
+      console.error('Error joining event:', err)
+    }
+  }
+
+  const deleteParticipation = async () => {
+    try {
+      const res = await api.delete(`/event/participation?eventId=${id}`)
+      setJoined(res.data.joined)
+    } catch (err) {
+      console.error('Error leaving event:', err)
+    }
+  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -363,8 +383,25 @@ export default function EventDetailPage() {
           </Typography>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-        <Button onClick={() => router.push(`/event/${id}/survey`)}>To Surveys</Button>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          mt: 5,
+          flexWrap: 'wrap',
+          gap: 1,
+        }}
+      >
+        <Button
+          {...(joined ? { color: 'orange' } : {})}
+          onClick={joined ? deleteParticipation : createParticipation}
+        >
+          {joined ? 'Leave' : 'Participate'}
+        </Button>
+
+        {(joined || userId === event.trainerId) && (
+          <Button onClick={() => router.push(`/event/${id}/survey`)}>To Surveys</Button>
+        )}
       </Box>
 
       {/* Delete Overlay */}

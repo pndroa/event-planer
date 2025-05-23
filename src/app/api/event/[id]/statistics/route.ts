@@ -2,7 +2,7 @@ import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const { id } = params
+  const { id } = await params
 
   if (!id) {
     return NextResponse.json({ error: 'Missing eventId' }, { status: 400 })
@@ -14,6 +14,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       select: {
         eventId: true,
         title: true,
+        trainerId: true,
         eventParticipation: {
           select: {
             participantId: true,

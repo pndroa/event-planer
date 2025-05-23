@@ -118,6 +118,7 @@ export interface SurveyAnswer {
 export interface SurveyStatistics {
   eventId: string
   title: string
+  trainerId: string
   eventParticipation: {
     participantId: string
   }[]
