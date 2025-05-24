@@ -1,6 +1,5 @@
 import { handleSignOut } from '@/utils/authClient'
 import { AppBar, Box, IconButton, Link, Toolbar, Typography } from '@mui/material'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import LogoutIcon from '@mui/icons-material/Logout'
 
@@ -16,9 +15,6 @@ const Header = () => {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton component={Link} href='/notification' sx={{ color: 'white' }}>
               <NotificationsIcon />
-            </IconButton>
-            <IconButton component={Link} href='/profile' sx={{ color: 'white' }}>
-              <AccountCircleIcon />
             </IconButton>
             <IconButton onClick={handleSignOut} sx={{ color: 'white' }}>
               <LogoutIcon />
