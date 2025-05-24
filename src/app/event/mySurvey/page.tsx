@@ -8,12 +8,14 @@ import SearchBar from '@/components/SearchBar'
 import { useErrorBoundary } from 'react-error-boundary'
 import { useUser } from '@/hooks/useUser'
 import SurveyCard from '@/components/SurveyCard'
+import { useRouter } from 'next/navigation'
 
 const Page = () => {
   const [surveys, setSurveys] = useState<Survey[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'date'>('date')
   const user = useUser()
+  const route = useRouter()
   const { showBoundary } = useErrorBoundary()
 
   useEffect(() => {
@@ -21,6 +23,7 @@ const Page = () => {
       if (!user?.id) return
       try {
         const res = await api.get('/survey')
+
         setSurveys(res.data.notAnsweredSurveys)
       } catch (error) {
         console.error('Error loading surveys:', error)
@@ -58,14 +61,15 @@ const Page = () => {
         </FormControl>
       </Box>
 
-      {/* Feed */}
       <Stack spacing={2}>
         {filteredSurveys.map((survey) => (
           <SurveyCard
             key={survey.surveyId}
             title={survey.title}
             createdAt={survey.created_at}
-            actionButton={<Button>Answer</Button>}
+            actionButton={
+              <Button onClick={() => route.push(`/event/${survey.eventId}/survey`)}>Answer</Button>
+            }
           />
         ))}
       </Stack>
