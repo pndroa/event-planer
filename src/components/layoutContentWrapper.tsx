@@ -19,8 +19,13 @@ const ContentWrapper = ({
         px: IsMobile() ? 2 : 4,
         py: 2,
         flexGrow: 1,
-        width: '100%',
-        overflowX: 'hidden',
+        width: 'auto',
+        height: '10vh',
+        overflow: 'scroll',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
       }}
     >
       {children}

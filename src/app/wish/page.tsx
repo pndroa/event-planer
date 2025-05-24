@@ -77,7 +77,7 @@ export default function WishFeed() {
 
   return (
     <Box>
-      <Box sx={{ maxWidth: 700, mx: 'auto' }}>
+      <Box sx={{ maxWidth: 700, mx: 'auto', paddingBottom: '100px' }}>
         <Box display='flex' gap={1.5} flexWrap='wrap' mb={3}>
           <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
           <FormControl size='small' sx={{ minWidth: 140 }}>
