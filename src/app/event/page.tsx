@@ -58,7 +58,7 @@ export default function EventFeed() {
     })
   return (
     <>
-      <Box sx={{ maxWidth: 700, mx: 'auto' }}>
+      <Box sx={{ maxWidth: 700, mx: 'auto', paddingBottom: '100px' }}>
         {/*<TopNavigation />*/}
         <Box
           display='flex'

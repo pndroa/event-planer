@@ -37,7 +37,7 @@ const Page = () => {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   return (
-    <Box sx={{ maxWidth: 700, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 700, mx: 'auto', paddingBottom: '100px' }}>
       <Box
         display='flex'
         flexWrap='wrap'

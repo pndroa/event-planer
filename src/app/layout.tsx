@@ -26,7 +26,7 @@ export default async function RootLayout({
 
   return (
     <html lang='en'>
-      <body>
+      <body style={{ overflow: 'hidden' }}>
         {showNavigation && <Header />}
         <div>
           {showNavigation && <Sidebar />}
