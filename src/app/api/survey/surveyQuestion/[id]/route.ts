@@ -12,10 +12,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   if (!id) return NextResponse.json({ error: 'Missing question ID' }, { status: 400 })
 
-  //const { searchParams } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
 
-  //const answerOptionsParam = searchParams.get('answerOptions')
-  //const includeAnswerOptions = answerOptionsParam === 'true'
+  const answerOptionsParam = searchParams.get('answerOptions')
+  const includeAnswerOptions = answerOptionsParam === 'true'
 
   try {
     const question = await prisma.surveyQuestions.findUnique({
@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         questionId: id,
       },
       include: {
-        surveyAnswerOptions: true,
+        surveyAnswerOptions: includeAnswerOptions,
       },
     })
 
