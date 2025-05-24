@@ -7,6 +7,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
   if (errorResponse) return errorResponse
 
   const { id } = params
+  console.log('id')
+  console.log(id)
 
   if (!id) return NextResponse.json({ error: 'Missing question ID' }, { status: 400 })
 
@@ -24,6 +26,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
         surveyAnswerOptions: includeAnswerOptions,
       },
     })
+
+    console.log('question')
+    console.log(question)
 
     return NextResponse.json({ question }, { status: 200 })
   } catch (error) {
