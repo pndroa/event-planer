@@ -91,9 +91,7 @@ export default function EventDetailPage() {
     getUser()
   }, [])
 
-  const labelGrey = '#6d7580'
   const sectionLabelColor = '#233047'
-  const descBg = '#f5f8ff'
   const eventDatesBg = '#e9f6fd'
   const roomBg = '#fffbe7'
   const roomIconColor = '#ffd02a'
