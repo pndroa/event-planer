@@ -7,12 +7,12 @@ import type { SurveyStatistics } from '@/lib/types'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import Paper from '@mui/material/Paper'
 import Divider from '@mui/material/Divider'
 import { PieChart, pieArcLabelClasses } from '@mui/x-charts/PieChart'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
+import { Stack } from '@mui/material'
 
 export default function StatisticsPage() {
   const { id } = useParams()
@@ -79,112 +79,118 @@ export default function StatisticsPage() {
   }
 
   return (
-    <Box display='flex' flexDirection='column' alignItems='center' px={2} py={4}>
-      <Typography variant='h3' align='center' fontWeight='bold' gutterBottom>
-        📊 Statistics for: {data.title}
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: 800,
+        mx: 'auto',
+        mt: 6,
+        mb: 6,
+        p: 4,
+        backgroundColor: '#fff',
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+      }}
+    >
+      <Typography variant='h3' fontWeight={700} color='#2176d2' textAlign='center' mb={4}>
+        Statistics for: {data.title}
       </Typography>
 
-      <Box
-        mt={1}
-        mb={4}
-        px={3}
-        py={1}
-        borderRadius={3}
-        bgcolor='#555'
-        color='white'
-        fontSize='1.1rem'
-        fontWeight={500}
-      >
-        Total Participants: {data.eventParticipation.length}
+      <Box display='flex' justifyContent='center' mt={2} mb={4}>
+        <Box px={2} py={1} sx={{ backgroundColor: '#f5f8ff', borderRadius: 2 }}>
+          <Typography variant='subtitle1' color='black' fontWeight={500}>
+            Participants: {data.eventParticipation.length}
+          </Typography>
+        </Box>
       </Box>
 
-      {(data.surveys?.surveyQuestions ?? []).map((question, index) => {
-        const { questionText, type, surveyAnswerOptions, surveyAnswers } = question
-        const answerCount = surveyAnswers.length
+      <Stack spacing={4}>
+        {(data.surveys?.surveyQuestions ?? []).map((question, index) => {
+          const { questionText, type, surveyAnswerOptions, surveyAnswers } = question
+          const answerCount = surveyAnswers.length
 
-        const total = surveyAnswerOptions.reduce((sum, option) => {
-          return sum + surveyAnswers.filter((ans) => ans.answer === option.answerText).length
-        }, 0)
+          const total = surveyAnswerOptions.reduce((sum, option) => {
+            return sum + surveyAnswers.filter((ans) => ans.answer === option.answerText).length
+          }, 0)
 
-        const answerStats = surveyAnswerOptions.map((option) => {
-          const count = surveyAnswers.filter((ans) => ans.answer === option.answerText).length
-          const percent = total > 0 ? (count / total) * 100 : 0
-          return {
-            id: option.answerOptionsId,
-            value: percent,
-            label: option.answerText,
-          }
-        })
+          const answerStats = surveyAnswerOptions.map((option) => {
+            const count = surveyAnswers.filter((ans) => ans.answer === option.answerText).length
+            const percent = total > 0 ? (count / total) * 100 : 0
+            return {
+              id: option.answerOptionsId,
+              value: percent,
+              label: option.answerText,
+            }
+          })
 
-        const freeTextAnswers = type === 'text' ? surveyAnswers.map((ans) => ans.answer) : []
+          const freeTextAnswers = type === 'text' ? surveyAnswers.map((ans) => ans.answer) : []
 
-        return (
-          <Paper
-            key={question.questionId}
-            elevation={2}
-            style={{ padding: '1.5rem', margin: '1rem 0', width: '100%', maxWidth: '600px' }}
-          >
-            <Typography
-              variant='subtitle1'
-              gutterBottom
-              style={{ fontWeight: 600, fontSize: '1.1rem' }}
+          return (
+            <Box
+              key={question.questionId}
+              sx={{
+                backgroundColor: '#f5f8ff',
+                borderRadius: 3,
+                p: 3,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+              }}
             >
-              📝 Q{index + 1}: <span style={{ color: '#333' }}>{questionText}</span>
-            </Typography>
-            <Divider style={{ marginBottom: '1rem' }} />
+              <Typography fontSize={17} fontWeight={700} mb={1}>
+                Q{index + 1}: <span style={{ fontWeight: 500, color: '#333' }}>{questionText}</span>
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
 
-            {(type === 'multiple' || type === 'date') && (
-              <Box display='flex' flexDirection='column' alignItems='center'>
-                {answerCount === 0 ? (
-                  <Box width='100%' textAlign='left'>
-                    <Typography variant='body2' color='textSecondary'>
+              {(type === 'multiple' || type === 'date') && (
+                <Box display='flex' flexDirection='column' alignItems='center'>
+                  {answerCount === 0 ? (
+                    <Typography fontSize={15} color='text.secondary'>
                       No responses yet.
                     </Typography>
-                  </Box>
-                ) : (
-                  <PieChart
-                    series={[
-                      {
-                        arcLabel: (item) => `${item.value.toFixed(1)}%`,
-                        arcLabelMinAngle: 10,
-                        arcLabelRadius: '60%',
-                        data: answerStats,
-                      },
-                    ]}
-                    width={300}
-                    height={220}
-                    sx={{ [`& .${pieArcLabelClasses.root}`]: { fontSize: 14, fontWeight: 'bold' } }}
-                  />
-                )}
-                <Box mt={2} textAlign='center'>
-                  <Typography variant='body2'>Total answers: {answerCount}</Typography>
-                </Box>
-              </Box>
-            )}
-
-            {type === 'text' && (
-              <Box mt={1}>
-                {freeTextAnswers.length > 0 ? (
-                  <Box component='ul' style={{ paddingLeft: '1.2rem', margin: 0 }}>
-                    {freeTextAnswers.map((answer, i) => (
-                      <li key={i}>
-                        <Typography variant='body2'>{answer}</Typography>
-                      </li>
-                    ))}
-                  </Box>
-                ) : (
-                  <Typography variant='body2' color='textSecondary'>
-                    No responses yet.
+                  ) : (
+                    <PieChart
+                      series={[
+                        {
+                          arcLabel: (item) => `${item.value.toFixed(1)}%`,
+                          arcLabelMinAngle: 10,
+                          arcLabelRadius: '60%',
+                          data: answerStats,
+                        },
+                      ]}
+                      width={300}
+                      height={220}
+                      sx={{ [`& .${pieArcLabelClasses.root}`]: { fontSize: 14, fontWeight: 700 } }}
+                    />
+                  )}
+                  <Typography fontSize={15} mt={2}>
+                    Total answers: {answerCount}
                   </Typography>
-                )}
-                <Box mt={2} textAlign='center'>
-                  <Typography variant='body2'>Total answers: {answerCount}</Typography>
                 </Box>
-              </Box>
-            )}
-          </Paper>
-        )
-      })}
+              )}
+
+              {type === 'text' && (
+                <Box>
+                  {freeTextAnswers.length > 0 ? (
+                    <Box component='ul' sx={{ pl: 2, m: 0 }}>
+                      {freeTextAnswers.map((answer, i) => (
+                        <li key={i}>
+                          <Typography fontSize={15}>{answer}</Typography>
+                        </li>
+                      ))}
+                    </Box>
+                  ) : (
+                    <Typography fontSize={15} color='text.secondary'>
+                      No responses yet.
+                    </Typography>
+                  )}
+                  <Typography fontSize={15} mt={2} textAlign='center'>
+                    Total answers: {answerCount}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )
+        })}
+      </Stack>
     </Box>
   )
 }
