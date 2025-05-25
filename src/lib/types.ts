@@ -122,12 +122,19 @@ export interface multipleChoiceOption {
   delete?: boolean
 }
 
+export interface multipleDateOption {
+  answerDate: Date | null | string
+  questionId?: string
+  answerOptionsId?: string
+  delete?: boolean
+}
+
 export interface Question {
   questionId?: string
   type: 'multiple' | 'text' | 'date' | null
   question: string
   options?: multipleChoiceOption[]
-  dates?: (Date | null)[]
+  dates?: multipleDateOption[]
   selectedDateIndex?: number
   selectedOptionIndex?: number
 }

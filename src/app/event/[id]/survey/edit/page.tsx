@@ -76,20 +76,20 @@ const Page = () => {
                     editedQuestion.dates?.map((date) => {
                       const datePayload = {
                         questionId: editedQuestion.questionId,
-                        answerText: date?.toISOString().split('T')[0],
+                        answerText: date.answerDate?.toISOString().split('T')[0],
                       }
                       if (editedQuestion.dates === undefined) {
                         return api.post('/survey/surveyAnswerOption', datePayload)
                       } else {
                         return api.patch(
-                          `/survey/surveyAnswerOption/${dates.answerOptionId}`,
+                          `/survey/surveyAnswerOption/${date.answerOptionsId}`,
                           datePayload
                         )
                       }
                     })
                     if (deletedOptions !== undefined) {
-                      deletedOptions.forEach((option) => {
-                        return api.delete(`/survey/surveyAnswerOption/${dates.answerOptionId}`)
+                      deletedOptions.forEach((date) => {
+                        return api.delete(`/survey/surveyAnswerOption/${date.answerOptionsId}`)
                       })
                     }
                   }

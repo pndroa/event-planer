@@ -82,13 +82,13 @@ const SurveyForm = ({
     )
   }
 
-  const updateDate = (qIndex: number, dIndex: number, newDate: Date | null) => {
+  const updateDate = (qIndex: number, dIndex: number, newDate: Date) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
         i === qIndex
           ? {
               ...q,
-              dates: q.dates!.map((d, j) => (j === dIndex ? newDate : d)),
+              dates: q.dates!.map((d, j) => (j === dIndex ? { ...d, answerDate: newDate } : d)),
             }
           : q
       )
@@ -97,7 +97,9 @@ const SurveyForm = ({
 
   const addDateField = (index: number) => {
     setQuestions((prev) =>
-      prev.map((q, i) => (i === index ? { ...q, dates: [...(q.dates || []), null] } : q))
+      prev.map((q, i) =>
+        i === index ? { ...q, dates: [...(q.dates || []), { answerDate: '' }] } : q
+      )
     )
   }
 
@@ -224,7 +226,7 @@ const SurveyForm = ({
                         <Radio value={j} />
                         <pre>{JSON.stringify(date, null, 2)}</pre>
                         <DatePicker
-                          value={date}
+                          value={new Date(date.answerDate)}
                           onChange={(newDate) => updateDate(i, j, newDate)}
                         />
                         <IconButton
