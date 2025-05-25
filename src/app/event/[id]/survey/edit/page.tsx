@@ -5,24 +5,17 @@ import { api } from '@/lib/api'
 import { Box } from '@mui/material'
 import SurveyForm from '@/components/surveyForm'
 import { useState } from 'react'
-
-type QuestionType = 'multiple' | 'text' | 'date'
-
-type Question = {
-  questionId?: string
-  type: QuestionType | null
-  question: string
-  options?: string[]
-  dates?: (Date | null)[]
-  selectedDateIndex?: number
-  selectedOptionIndex?: number
-}
+import { Question } from '@/lib/types'
+import { multipleChoiceOption } from '@/lib/types'
 
 const Page = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const questionId = searchParams.get('questionId')
   const [question, setQuestion] = useState<Question[]>([])
+  const [oldMultipkeChoiceOptions, setOldMultipleChoiceOptions] = useState<multipleChoiceOption[]>(
+    []
+  )
 
   const handleEditQuestion = async (editedQuestion: Question) => {
     const payload = {
@@ -30,6 +23,20 @@ const Page = () => {
       options: editedQuestion.options,
       dates: editedQuestion.dates,
     }
+
+    console.log('oldMultipkeChoiceOptions')
+    console.log(oldMultipkeChoiceOptions)
+
+    const deletedOptions: multipleChoiceOption[] = oldMultipkeChoiceOptions.filter(
+      (oldOption) =>
+        !editedQuestion.options?.some(
+          (newOption) => newOption.answerOptionsId === oldOption.answerOptionsId
+        )
+    )
+
+    console.log('editedQuestion')
+    console.log(editedQuestion)
+
     try {
       await api
         .patch(`/survey/surveyQuestion/${editedQuestion.questionId}`, payload)
@@ -42,31 +49,50 @@ const Page = () => {
               })
               .then(async () => {
                 if (Array.isArray(editedQuestion.options) || Array.isArray(editedQuestion.dates)) {
-                  /**Delete all answer options to a question*/
-                  await api
-                    .delete('/survey/surveyAnswerOption', {
-                      params: { questionId: editedQuestion.questionId },
-                    })
-                    .then(() => {
-                      /**Create the questions new*/
-                      if (editedQuestion.type === 'multiple') {
-                        editedQuestion.options?.map((option) => {
-                          const answerPayload = {
-                            questionId: editedQuestion.questionId,
-                            answerText: option,
-                          }
-                          return api.post('/survey/surveyAnswerOption', answerPayload)
-                        })
-                      } else if (editedQuestion.type === 'date') {
-                        editedQuestion.dates?.map((date) => {
-                          const datePayload = {
-                            questionId: editedQuestion.questionId,
-                            answerText: date?.toISOString().split('T')[0],
-                          }
-                          return api.post('/survey/surveyAnswerOption', datePayload)
-                        })
+                  if (editedQuestion.type === 'multiple') {
+                    editedQuestion.options?.map((option) => {
+                      const answerPayload = {
+                        questionId: editedQuestion.questionId,
+                        answerText: option.answerText,
+                      }
+
+                      if (option.answerOptionsId === undefined) {
+                        return api.post('/survey/surveyAnswerOption', answerPayload)
+                      } else if (option.delete) {
+                        return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
+                      } else {
+                        return api.patch(
+                          `/survey/surveyAnswerOption/${option.answerOptionsId}`,
+                          answerPayload
+                        )
                       }
                     })
+                    if (deletedOptions !== undefined) {
+                      deletedOptions.forEach((option) => {
+                        return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
+                      })
+                    }
+                  } else if (editedQuestion.type === 'date') {
+                    editedQuestion.dates?.map((date) => {
+                      const datePayload = {
+                        questionId: editedQuestion.questionId,
+                        answerText: date?.toISOString().split('T')[0],
+                      }
+                      if (editedQuestion.dates === undefined) {
+                        return api.post('/survey/surveyAnswerOption', datePayload)
+                      } else {
+                        return api.patch(
+                          `/survey/surveyAnswerOption/${dates.answerOptionId}`,
+                          datePayload
+                        )
+                      }
+                    })
+                    if (deletedOptions !== undefined) {
+                      deletedOptions.forEach((option) => {
+                        return api.delete(`/survey/surveyAnswerOption/${dates.answerOptionId}`)
+                      })
+                    }
+                  }
                 }
               })
           }
@@ -92,6 +118,10 @@ const Page = () => {
           return
         }
 
+        console.log('res')
+        console.log(res.data)
+        setOldMultipleChoiceOptions(res.data.question.surveyAnswerOptions)
+
         setQuestion([
           {
             questionId: res.data.question.questionId,
@@ -99,16 +129,11 @@ const Page = () => {
             question: res.data.question.questionText,
             ...(res.data.question.type === 'multiple'
               ? {
-                  options: res.data.question.surveyAnswerOptions.map(
-                    (surveyAnswerOption: { answerText: string }) => surveyAnswerOption.answerText
-                  ),
+                  options: res.data.question.surveyAnswerOptions,
                 }
               : res.data.question.type === 'date'
                 ? {
-                    dates: res.data.question.surveyAnswerOptions.map(
-                      (surveyAnswerOption: { answerText: string }) =>
-                        new Date(surveyAnswerOption.answerText)
-                    ),
+                    dates: res.data.question.surveyAnswerOptions,
                   }
                 : {}),
           },

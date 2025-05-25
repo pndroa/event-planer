@@ -17,18 +17,9 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import DatePicker from './datePicker'
 import EditButton from './button'
+import { Question } from '@/lib/types'
 
 type QuestionType = 'multiple' | 'text' | 'date'
-
-type Question = {
-  questionId?: string
-  type: QuestionType | null
-  question: string
-  options?: string[]
-  dates?: (Date | null)[]
-  selectedDateIndex?: number
-  selectedOptionIndex?: number
-}
 
 const SurveyForm = ({
   questions,
@@ -55,7 +46,9 @@ const SurveyForm = ({
         i === qIndex
           ? {
               ...q,
-              options: q.options!.map((opt, j) => (j === optIndex ? text : opt)),
+              options: q.options!.map((opt, j) =>
+                j === optIndex ? { ...opt, answerText: text } : opt
+              ),
             }
           : q
       )
@@ -64,7 +57,9 @@ const SurveyForm = ({
 
   const addOption = (index: number) => {
     setQuestions((prev) =>
-      prev.map((q, i) => (i === index ? { ...q, options: [...(q.options || []), ''] } : q))
+      prev.map((q, i) =>
+        i === index ? { ...q, options: [...(q.options || []), { answerText: '' }] } : q
+      )
     )
   }
 
@@ -192,7 +187,7 @@ const SurveyForm = ({
                       <Box key={j} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                         <Radio value={j} />
                         <TextField
-                          value={option}
+                          value={option.answerText}
                           onChange={(e) => updateOption(i, j, e.target.value)}
                           placeholder={`Option ${j + 1}`}
                           size='small'
@@ -227,6 +222,7 @@ const SurveyForm = ({
                     {q.dates?.map((date, j) => (
                       <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <Radio value={j} />
+                        <pre>{JSON.stringify(date, null, 2)}</pre>
                         <DatePicker
                           value={date}
                           onChange={(newDate) => updateDate(i, j, newDate)}
