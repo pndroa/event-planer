@@ -17,7 +17,7 @@ const Page = () => {
   const { id } = useParams() as { id: string }
   const router = useRouter()
   const [surveyQuestions, setSurveyQuestions] = useState<SurveyQuestions[]>([])
-  const [surveyTitle, setSurveyTitle] = useState<string>('')
+  const [surveyTitle, setSurveyTitle] = useState<string>('Survey not started')
   const [surveyId, setSurveyId] = useState<string>('')
   const [loading, setLoading] = useState(true)
 

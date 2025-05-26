@@ -83,14 +83,20 @@ const Page = () => {
       if (!questionId) return
 
       try {
-        const res = await api.get(`/survey/surveyQuestion/${questionId}`)
+        const res = await api.get(`/survey/surveyQuestion/${questionId}`, {
+          params: { answerOptions: true },
+        })
+
+        if (res.status !== 200) {
+          console.error('Failed to load question', res)
+          return
+        }
 
         setQuestion([
           {
             questionId: res.data.question.questionId,
             type: res.data.question.type,
             question: res.data.question.questionText,
-            selectedOptionIndex: 0,
             ...(res.data.question.type === 'multiple'
               ? {
                   options: res.data.question.surveyAnswerOptions.map(
