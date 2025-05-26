@@ -7,8 +7,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
   if (errorResponse) return errorResponse
 
   const { id } = params
-  console.log('id')
-  console.log(id)
 
   if (!id) return NextResponse.json({ error: 'Missing question ID' }, { status: 400 })
 
@@ -26,9 +24,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
         surveyAnswerOptions: includeAnswerOptions,
       },
     })
-
-    console.log('question')
-    console.log(question)
 
     return NextResponse.json({ question }, { status: 200 })
   } catch (error) {
@@ -53,7 +48,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         questionId: id,
       },
     })
-    return NextResponse.json({ message: 'succesfully deleted question', question }, { status: 204 })
+    return NextResponse.json({ message: 'Succesfully deleted question', question }, { status: 204 })
   } catch (error) {
     return NextResponse.json({ error })
   }

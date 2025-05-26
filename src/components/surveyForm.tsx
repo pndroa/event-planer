@@ -232,7 +232,6 @@ const SurveyForm = ({
                     {q.dates?.map((date, j) => (
                       <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <Radio value={j} />
-                        <pre>{JSON.stringify(date, null, 2)}</pre>
                         <DatePicker
                           value={
                             date.answerText ? new Date(date.answerText) : (null as Date | null)

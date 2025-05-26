@@ -128,8 +128,6 @@ const Page = () => {
           return
         }
 
-        console.log('res')
-        console.log(res.data)
         setOldMultipleChoiceOptions(res.data.question.surveyAnswerOptions)
 
         setQuestion([

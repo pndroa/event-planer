@@ -6,16 +6,9 @@ import { Box, Typography } from '@mui/material'
 import Button from '@/components/button'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Question } from '@/lib/types'
 
 type QuestionType = 'multiple' | 'text' | 'date'
-
-type Question = {
-  type: QuestionType | null
-  question: string
-  options?: string[]
-  dates?: (Date | null)[]
-  selectedDateIndex?: number
-}
 
 const Page = () => {
   const { id: eventId } = useParams<{ id: string }>()
@@ -40,8 +33,8 @@ const Page = () => {
           ? {
               ...q,
               type,
-              ...(type === 'multiple' ? { options: [''] } : {}),
-              ...(type === 'date' ? { dates: [null], selectedDateIndex: undefined } : {}),
+              ...(type === 'multiple' ? { options: [] } : {}),
+              ...(type === 'date' ? { dates: [], selectedDateIndex: undefined } : {}),
             }
           : q
       )
@@ -75,7 +68,7 @@ const Page = () => {
               q.options.map((option) => {
                 const answerPayload = {
                   questionId,
-                  answerText: option,
+                  answerText: option.answerText,
                 }
                 return api.post('/survey/surveyAnswerOption', answerPayload)
               })
@@ -87,7 +80,7 @@ const Page = () => {
               q.dates.map((date) => {
                 const datePayload = {
                   questionId,
-                  answerText: date?.toISOString().split('T')[0],
+                  answerText: new Date(date.answerText as string).toISOString().split('T')[0],
                 }
                 return api.post('/survey/surveyAnswerOption', datePayload)
               })
