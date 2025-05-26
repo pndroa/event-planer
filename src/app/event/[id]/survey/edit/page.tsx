@@ -7,6 +7,7 @@ import SurveyForm from '@/components/surveyForm'
 import { useState } from 'react'
 import { Question } from '@/lib/types'
 import { multipleChoiceOption } from '@/lib/types'
+import { multipleDateOption } from '@/lib/types'
 
 const Page = () => {
   const searchParams = useSearchParams()
@@ -24,19 +25,6 @@ const Page = () => {
       dates: editedQuestion.dates,
     }
 
-    console.log('oldMultipkeChoiceOptions')
-    console.log(oldMultipkeChoiceOptions)
-
-    const deletedOptions: multipleChoiceOption[] = oldMultipkeChoiceOptions.filter(
-      (oldOption) =>
-        !editedQuestion.options?.some(
-          (newOption) => newOption.answerOptionsId === oldOption.answerOptionsId
-        )
-    )
-
-    console.log('editedQuestion')
-    console.log(editedQuestion)
-
     try {
       await api
         .patch(`/survey/surveyQuestion/${editedQuestion.questionId}`, payload)
@@ -50,45 +38,67 @@ const Page = () => {
               .then(async () => {
                 if (Array.isArray(editedQuestion.options) || Array.isArray(editedQuestion.dates)) {
                   if (editedQuestion.type === 'multiple') {
-                    editedQuestion.options?.map((option) => {
-                      const answerPayload = {
-                        questionId: editedQuestion.questionId,
-                        answerText: option.answerText,
-                      }
-
-                      if (option.answerOptionsId === undefined) {
-                        return api.post('/survey/surveyAnswerOption', answerPayload)
-                      } else if (option.delete) {
-                        return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
-                      } else {
-                        return api.patch(
-                          `/survey/surveyAnswerOption/${option.answerOptionsId}`,
-                          answerPayload
+                    const deletedOptions: multipleChoiceOption[] = oldMultipkeChoiceOptions.filter(
+                      (oldOption) =>
+                        !editedQuestion.options?.some(
+                          (newOption) => newOption.answerOptionsId === oldOption.answerOptionsId
                         )
-                      }
-                    })
+                    )
+
+                    const updatePromises =
+                      editedQuestion.options?.map((option) => {
+                        const answerPayload = {
+                          questionId: editedQuestion.questionId,
+                          answerText: option.answerText,
+                        }
+
+                        if (option.answerOptionsId === undefined) {
+                          return api.post('/survey/surveyAnswerOption', answerPayload)
+                        } else if (option.delete) {
+                          return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
+                        } else {
+                          return api.patch(
+                            `/survey/surveyAnswerOption/${option.answerOptionsId}`,
+                            answerPayload
+                          )
+                        }
+                      }) ?? []
+
+                    await Promise.all(updatePromises)
                     if (deletedOptions !== undefined) {
                       deletedOptions.forEach((option) => {
                         return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
                       })
                     }
                   } else if (editedQuestion.type === 'date') {
-                    editedQuestion.dates?.map((date) => {
-                      const datePayload = {
-                        questionId: editedQuestion.questionId,
-                        answerText: date.answerDate?.toISOString().split('T')[0],
-                      }
-                      if (editedQuestion.dates === undefined) {
-                        return api.post('/survey/surveyAnswerOption', datePayload)
-                      } else {
-                        return api.patch(
-                          `/survey/surveyAnswerOption/${date.answerOptionsId}`,
-                          datePayload
+                    const deletedDates: multipleDateOption[] = oldMultipkeChoiceOptions.filter(
+                      (oldDate) =>
+                        !editedQuestion.dates?.some(
+                          (newDate) => newDate.answerOptionsId === oldDate.answerOptionsId
                         )
-                      }
-                    })
-                    if (deletedOptions !== undefined) {
-                      deletedOptions.forEach((date) => {
+                    )
+
+                    const updatePromises =
+                      editedQuestion.dates?.map((date) => {
+                        const datePayload = {
+                          questionId: editedQuestion.questionId,
+                          answerText: new Date(date.answerText as string)
+                            .toISOString()
+                            .split('T')[0],
+                        }
+                        if (date.answerOptionsId === undefined) {
+                          return api.post('/survey/surveyAnswerOption', datePayload)
+                        } else {
+                          return api.patch(
+                            `/survey/surveyAnswerOption/${date.answerOptionsId}`,
+                            datePayload
+                          )
+                        }
+                      }) ?? []
+
+                    await Promise.all(updatePromises)
+                    if (deletedDates !== undefined) {
+                      deletedDates.forEach((date) => {
                         return api.delete(`/survey/surveyAnswerOption/${date.answerOptionsId}`)
                       })
                     }

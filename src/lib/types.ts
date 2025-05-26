@@ -123,7 +123,7 @@ export interface multipleChoiceOption {
 }
 
 export interface multipleDateOption {
-  answerDate: Date | null | string
+  answerText: Date | null | string
   questionId?: string
   answerOptionsId?: string
   delete?: boolean
