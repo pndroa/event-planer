@@ -28,7 +28,7 @@ export default async function RootLayout({
     <html lang='en'>
       <body>
         {showNavigation && <Header />}
-        <div>
+        <div style={{ display: 'flex', width: '100%' }}>
           {showNavigation && <Sidebar />}
           <ContentWrapper showNavigation={showNavigation}>
             <ErrorBoundaryWrapper>
