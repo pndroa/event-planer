@@ -2,7 +2,7 @@
 import FormCard from '@/components/formCard'
 import { TextField, Grid, Box } from '@mui/material'
 import Button from '@/components/button'
-import { useLayoutEffect, useState, FormEvent } from 'react'
+import React, { useLayoutEffect, useState, FormEvent } from 'react'
 import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { useRouter } from 'next/navigation'
@@ -19,8 +19,10 @@ const Page = () => {
   const router = useRouter()
   const user = useUser()
   const { showBoundary } = useErrorBoundary()
-
   const [isClient, setIsClient] = useState(false)
+  const [title, setTitle] = useState('')
+  const [error, setError] = useState(false)
+  const [disabled, setDisabled] = useState(true)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -62,6 +64,17 @@ const Page = () => {
     return <Box>Loading...</Box>
   }
 
+  const checkInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(event.target.value)
+
+    if (event.target.value.trim() === '') {
+      setError(true)
+    } else {
+      setError(false)
+      setDisabled(false)
+    }
+  }
+
   return (
     <Grid container minHeight='80vh' justifyContent='center' alignItems='center' margin='auto'>
       <Grid
@@ -76,6 +89,9 @@ const Page = () => {
               variant='outlined'
               margin='normal'
               name='title'
+              onChange={checkInput}
+              value={title}
+              error={error}
               required
               fullWidth
             />
@@ -88,7 +104,9 @@ const Page = () => {
               multiline
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button type='submit'>Create Wish</Button>
+              <Button type='submit' disabled={disabled}>
+                Create Wish
+              </Button>
             </Box>
           </Box>
         </FormCard>

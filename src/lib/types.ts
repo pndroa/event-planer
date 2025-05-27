@@ -138,3 +138,31 @@ export interface Question {
   selectedDateIndex?: number
   selectedOptionIndex?: number
 }
+
+export interface SurveyStatistics {
+  eventId: string
+  title: string
+  trainerId: string
+  eventParticipation: {
+    participantId: string
+  }[]
+  surveys: {
+    title: string
+    surveyQuestions: SurveyQuestion[]
+  } | null
+}
+
+export interface SurveyQuestion {
+  questionId: string
+  type: 'multiple' | 'text' | 'date'
+  questionText: string
+  surveyAnswerOptions: {
+    answerOptionsId: string
+    answerText: string
+  }[]
+  surveyAnswers: {
+    answerId: string
+    userId: string
+    answer: string
+  }[]
+}
