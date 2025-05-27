@@ -2,28 +2,25 @@ import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
+import { getEventWithParticipation } from '@/lib/eventParticipationService'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const { errorResponse } = await getServerAuth()
+  const { user, errorResponse } = await getServerAuth()
 
   if (errorResponse) return errorResponse
 
   const { id } = params
 
   if (!id) {
-    throw new Error('Invalid or missing id parameter')
+    return NextResponse.json({ error: 'Invalid or missing id parameter' }, { status: 400 })
   }
 
   try {
-    const event = await prisma.events.findUnique({
-      where: {
-        eventId: id,
-      },
-      include: {
-        eventDates: true,
-        users: true,
-      },
-    })
+    const event = await getEventWithParticipation(user.id, id)
+
+    if (!event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    }
 
     return NextResponse.json({ event }, { status: 200 })
   } catch (error) {

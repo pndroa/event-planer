@@ -23,6 +23,7 @@ const Page = () => {
       if (!user?.id) return
       try {
         const res = await api.get('/survey')
+
         setSurveys(res.data.notAnsweredSurveys)
       } catch (error) {
         console.error('Error loading surveys:', error)
@@ -60,7 +61,6 @@ const Page = () => {
         </FormControl>
       </Box>
 
-      {/* Feed */}
       <Stack spacing={2}>
         {filteredSurveys.map((survey) => (
           <SurveyCard
@@ -68,7 +68,7 @@ const Page = () => {
             title={survey.title}
             createdAt={survey.created_at}
             actionButton={
-              <Button onClick={() => route.push(`/event/${survey.surveyId}/survey`)}>Answer</Button>
+              <Button onClick={() => route.push(`/event/${survey.eventId}/survey`)}>Answer</Button>
             }
           />
         ))}
