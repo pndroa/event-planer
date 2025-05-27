@@ -24,7 +24,7 @@ import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import CreateIcon from '@mui/icons-material/AddCircleOutline'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
 import DeleteOverlay from '@/components/deleteOverlay'
 import Button from '@/components/button'
 
@@ -37,6 +37,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [joined, setJoined] = useState<boolean>(false)
 
   // Drei-Punkte-Menü State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -49,6 +50,7 @@ export default function EventDetailPage() {
       try {
         const res = await api.get(`/event/${id}`)
         setEvent(res.data.event)
+        setJoined(res.data.event.joined)
       } catch (err) {
         setError('Fehler beim Laden des Events.')
         console.error(err)
@@ -57,6 +59,24 @@ export default function EventDetailPage() {
     }
     fetchEvent()
   }, [id])
+
+  const createParticipation = async () => {
+    try {
+      const res = await api.post('/event/participation', { eventId: id })
+      setJoined(res.data.joined)
+    } catch (err) {
+      console.error('Error joining event:', err)
+    }
+  }
+
+  const deleteParticipation = async () => {
+    try {
+      const res = await api.delete(`/event/participation?eventId=${id}`)
+      setJoined(res.data.joined)
+    } catch (err) {
+      console.error('Error leaving event:', err)
+    }
+  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -71,9 +91,7 @@ export default function EventDetailPage() {
     getUser()
   }, [])
 
-  const labelGrey = '#6d7580'
   const sectionLabelColor = '#233047'
-  const descBg = '#f5f8ff'
   const eventDatesBg = '#e9f6fd'
   const roomBg = '#fffbe7'
   const roomIconColor = '#ffd02a'
@@ -96,9 +114,9 @@ export default function EventDetailPage() {
     setAnchorEl(null)
     setDeleteEvent(true)
   }
-  const handleCreateSurvey = () => {
+  const handleView = () => {
     setAnchorEl(null)
-    router.push(`/event/${id}/survey`)
+    router.push(`/event/${id}/statistics`)
   }
 
   if (loading)
@@ -114,54 +132,20 @@ export default function EventDetailPage() {
     <Box
       sx={{
         width: '100%',
-        maxWidth: 950,
+        maxWidth: 800,
         mx: 'auto',
-        mt: 4,
+        mt: 6,
         mb: 6,
-        pt: 4,
-        px: { xs: 2, sm: 3, md: 4 },
-        position: 'relative',
-        background: '#fff',
-        borderTop: '2px solid #e0e4ea',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
-        overflow: 'hidden',
-        '::before': {
-          content: '""',
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          height: '100%',
-          width: '4px',
-          borderTopLeftRadius: 24,
-          borderBottomLeftRadius: 0,
-          background: 'linear-gradient(to bottom, #e0e4ea 80%, transparent 100%)',
-          zIndex: 1,
-        },
-        '::after': {
-          content: '""',
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          height: '100%',
-          width: '4px',
-          borderTopRightRadius: 24,
-          borderBottomRightRadius: 0,
-          background: 'linear-gradient(to bottom, #e0e4ea 80%, transparent 100%)',
-          zIndex: 1,
-        },
+        p: 4,
+        backgroundColor: '#fff',
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
       }}
     >
       {/* Organizer left, Menu right  */}
       <Box display='flex' alignItems='center' justifyContent='space-between' width='100%' mb={2}>
-        <Typography fontSize={15} fontWeight={700} color={labelGrey} sx={{ fontStyle: 'italic' }}>
-          Organizer:
-          <span style={{ fontStyle: 'normal', fontWeight: 500, color: labelGrey }}>
-            {' '}
-            @{event.users?.name || 'Unknown'}
-          </span>
+        <Typography fontSize={15} fontWeight={700} color='#666' mb={2}>
+          Event by: <span style={{ fontWeight: 500 }}>@{event.users?.name || 'Unknown'}</span>
         </Typography>
 
         {userId === event.trainerId && (
@@ -201,11 +185,11 @@ export default function EventDetailPage() {
                 </ListItemIcon>
                 Delete Event
               </MenuItem>
-              <MenuItem onClick={handleCreateSurvey}>
+              <MenuItem onClick={handleView}>
                 <ListItemIcon>
-                  <CreateIcon fontSize='small' />
+                  <ShowChartIcon fontSize='small' />
                 </ListItemIcon>
-                View Survey
+                View Statistics
               </MenuItem>
             </Menu>
           </>
@@ -218,7 +202,12 @@ export default function EventDetailPage() {
         fontWeight={700}
         color='#2176d2'
         textAlign='center'
-        sx={{ letterSpacing: 1, mb: 3, mt: 3 }}
+        mb={4}
+        sx={{
+          whiteSpace: 'normal',
+          wordBreak: 'break-word',
+          overflowWrap: 'break-word',
+        }}
       >
         {event.title}
       </Typography>
@@ -226,35 +215,27 @@ export default function EventDetailPage() {
       {/* Description */}
       <Box
         sx={{
-          background: descBg,
+          backgroundColor: '#f5f8ff',
           borderRadius: 3,
-          px: 3,
-          py: 2.3,
-          mb: 4,
+          p: 3,
+          mb: 3,
         }}
       >
-        <Typography
-          fontWeight={700}
-          color={sectionLabelColor}
-          fontSize={17}
-          letterSpacing={0.4}
-          mb={1}
-        >
+        <Typography fontWeight={700} fontSize={17} mb={1}>
           Description:
         </Typography>
         <Typography
           fontSize={15.5}
           color='#222'
           textAlign='justify'
-          sx={{ opacity: event.description ? 1 : 0.68 }}
+          sx={{
+            opacity: event.description ? 1 : 0.68,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
+          }}
         >
-          {event.description ? (
-            event.description
-          ) : (
-            <Box component='span' fontStyle='italic' color='text.disabled'>
-              No description yet... <br /> <br /> <br /> <br />
-            </Box>
-          )}
+          {event.description ? event.description : <i>No description yet...</i>}
         </Typography>
       </Box>
 
@@ -283,15 +264,10 @@ export default function EventDetailPage() {
           }}
         >
           <CalendarMonthIcon sx={{ color: dateColor, fontSize: 34, mb: 0.5 }} />
-          <Typography
-            fontWeight={700}
-            color={sectionLabelColor}
-            fontSize={18}
-            mb={1.5}
-            letterSpacing={0.5}
-          >
+          <Typography fontWeight={700} color='#233047' fontSize={17} mb={1.5}>
             Event Dates
           </Typography>
+
           {event.eventDates.length > 0 ? (
             <Stack spacing={1} alignItems='center' width='100%'>
               {event.eventDates.map((dateObj) => (
@@ -307,7 +283,7 @@ export default function EventDetailPage() {
                   {/* Date */}
                   <Box display='flex' alignItems='center' gap={0.7}>
                     <EventNoteIcon sx={{ color: dateColor, fontSize: 22, mb: '1px' }} />
-                    <span style={{ color: 'black', minWidth: 90 }}>
+                    <span style={{ color: '#222', fontSize: 15 }}>
                       {new Date(dateObj.date).toLocaleDateString()}
                     </span>
                   </Box>
@@ -363,8 +339,25 @@ export default function EventDetailPage() {
           </Typography>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-        <Button onClick={() => router.push(`/event/${id}/survey`)}>To Surveys</Button>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          mt: 5,
+          flexWrap: 'wrap',
+          gap: 1,
+        }}
+      >
+        <Button
+          {...(joined ? { color: 'orange' } : {})}
+          onClick={joined ? deleteParticipation : createParticipation}
+        >
+          {joined ? 'Leave' : 'Participate'}
+        </Button>
+
+        {(joined || userId === event.trainerId) && (
+          <Button onClick={() => router.push(`/event/${id}/survey`)}>To Surveys</Button>
+        )}
       </Box>
 
       {/* Delete Overlay */}
