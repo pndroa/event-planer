@@ -21,6 +21,7 @@ export default function SurveyCard({ title, createdAt, actionButton = null }: Su
         boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
         '&:hover': { backgroundColor: '#e0eaff', transform: 'scale(1.01)' },
         transition: '0.2s',
+        cursor: 'pointer',
       }}
     >
       <Box display='flex' justifyContent='flex-end' alignItems='flex-end'>
@@ -34,7 +35,7 @@ export default function SurveyCard({ title, createdAt, actionButton = null }: Su
       >
         {title}
       </Typography>
-      <Box display='flex' justifyContent='flex-end'>
+      <Box display='flex' justifyContent='flex-start' mt={3}>
         {actionButton}
       </Box>
     </Card>

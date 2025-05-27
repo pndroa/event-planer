@@ -4,25 +4,18 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { fetchUser } from '@/lib/user'
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Stack,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogActions,
-} from '@mui/material'
+import { Box, Typography, CircularProgress, Alert, Stack, IconButton } from '@mui/material'
 import { blue } from '@mui/material/colors'
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt'
-import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
+import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpOutlined'
 import Button from '@/components/button'
 import { Wishes } from '@/lib/types'
+import DeleteOverlay from '@/components/deleteOverlay'
 
 export default function WishDetailPage() {
   const { id } = useParams() as { id: string }
+  const router = useRouter()
+
   const [wish, setWish] = useState<Wishes | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +23,6 @@ export default function WishDetailPage() {
   const [isUpvoted, setIsUpvoted] = useState(false)
   const [upvoteCount, setUpvoteCount] = useState(0)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const router = useRouter()
 
   // 1) Fetch wish data
   useEffect(() => {
@@ -74,16 +66,8 @@ export default function WishDetailPage() {
     }
   }
 
-  // 4) Delete handler
-  const handleDelete = async () => {
-    try {
-      await api.delete(`/wish/${id}`)
-      router.push('/wish') // back to list or wherever
-    } catch (err) {
-      console.error('Delete failed:', err)
-      alert('Delete failed.')
-    }
-  }
+  // 4) Only show delete for the creator
+  const isCreator = userId === wish?.users?.userId
 
   if (loading) {
     return (
@@ -92,11 +76,9 @@ export default function WishDetailPage() {
       </Box>
     )
   }
+
   if (error) return <Alert severity='error'>{error}</Alert>
   if (!wish) return <Alert severity='info'>Wish not found.</Alert>
-
-  // Only show delete for the creator
-  const isCreator = userId === wish.users?.userId
 
   return (
     <>
@@ -140,8 +122,8 @@ export default function WishDetailPage() {
             backgroundColor: '#f5f8ff',
             borderRadius: 3,
             p: 3,
+            mb: 3,
           }}
-          mb={3}
         >
           <Typography fontWeight={700} fontSize={17} mb={1}>
             Description:
@@ -200,16 +182,25 @@ export default function WishDetailPage() {
         </Stack>
       </Box>
 
-      {/* Confirmation dialog */}
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Are you sure you want to delete this wish?</DialogTitle>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button color='red' onClick={handleDelete}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* DeleteOverlay statt Dialog */}
+      {confirmOpen && (
+        <DeleteOverlay
+          onClose={() => setConfirmOpen(false)}
+          onDeleteClick={async (e) => {
+            e.stopPropagation()
+            try {
+              await api.delete(`/wish/${id}`)
+              setConfirmOpen(false)
+              setTimeout(() => {
+                window.location.href = '/wish'
+              }, 100)
+            } catch (err) {
+              console.error('Delete failed:', err)
+              alert('Delete failed.')
+            }
+          }}
+        />
+      )}
     </>
   )
 }
