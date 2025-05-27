@@ -3,6 +3,7 @@ import prisma from '@/lib/client'
 import { PostEventDates } from '@/lib/types'
 import { getServerAuth } from '@/lib/auth'
 import { addWishUpvotersAsParticipants } from '@/lib/eventParticipationService'
+import { getEventsWithParticipation } from '@/lib/eventParticipationService'
 
 export async function GET() {
   const { user, errorResponse } = await getServerAuth()
@@ -10,23 +11,9 @@ export async function GET() {
   if (errorResponse) return errorResponse
 
   try {
-    // asynchrone Datenabfrage, parallele Ausführung, nicht seriell!
-    const [events, participations] = await Promise.all([
-      prisma.events.findMany({ include: { users: true, eventDates: true } }),
-      prisma.eventParticipation.findMany({
-        where: { participantId: user.id },
-        select: { eventId: true },
-      }),
-    ])
+    const events = await getEventsWithParticipation(user.id)
 
-    const joinedSet = new Set(participations.map((p) => p.eventId)) // Set.has(id) ist schneller als Array.includes(id)
-
-    const eventsWithJoined = events.map((event) => ({
-      ...event,
-      joined: joinedSet.has(event.eventId),
-    }))
-
-    return NextResponse.json(eventsWithJoined, { status: 200 })
+    return NextResponse.json(events, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })
   }
