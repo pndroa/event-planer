@@ -3,6 +3,9 @@ import { Box } from '@mui/material'
 import { IsMobile } from '@/lib/styles'
 import React from 'react'
 
+const drawerWidth = 200
+const headerHeight = 64
+
 const ContentWrapper = ({
   children,
   showNavigation,
@@ -13,13 +16,11 @@ const ContentWrapper = ({
   return (
     <Box
       sx={{
-        minHeight: showNavigation ? 'calc(100vh - 64px)' : '100vh',
-        marginLeft: showNavigation && !IsMobile() ? 'auto' : -2,
-        marginTop: showNavigation ? '80px' : 0,
+        marginLeft: showNavigation && !IsMobile() ? `${drawerWidth}px` : 0,
+        marginTop: showNavigation ? `${headerHeight}px` : 0,
         px: IsMobile() ? 2 : 4,
         py: 2,
         flexGrow: 1,
-        width: '100%',
         overflowX: 'hidden',
       }}
     >

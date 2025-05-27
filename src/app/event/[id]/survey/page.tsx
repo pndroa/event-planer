@@ -12,23 +12,26 @@ import { fetchUser } from '@/lib/user'
 import { SurveyQuestions } from '@/lib/types'
 import SurveyAnswerCard from '@/components/surveyAnswerCard'
 import Button from '@/components/button'
+import DeleteOverlay from '@/components/deleteOverlay'
 
 const Page = () => {
   const { id } = useParams() as { id: string }
   const router = useRouter()
+
   const [surveyQuestions, setSurveyQuestions] = useState<SurveyQuestions[]>([])
   const [surveyTitle, setSurveyTitle] = useState<string>('Survey not started')
   const [surveyId, setSurveyId] = useState<string>('')
   const [loading, setLoading] = useState(true)
-
   const [activeAnswerId, setActiveAnswerId] = useState<string | null>(null)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [userId, setUserId] = useState<string>()
   const [trainerId, setTrainerId] = useState<string | null>(null)
+  const [deleteSurvey, setDeleteSurvey] = useState<boolean>(false)
+  const [deleteQuestion, setDeleteQuestion] = useState<boolean>(false)
+  const [questionIdToDelete, setQuestionIdToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchSurveyData = async () => {
-      setLoading(true)
       try {
         const user = await fetchUser()
         const res = await api.get(`/survey/${id}`)
@@ -59,22 +62,10 @@ const Page = () => {
     fetchSurveyData()
   }, [id])
 
-  const handleDeleteSurvey = async () => {
-    const confirm = window.confirm('Are you sure you want to delete this survey?')
-    if (!confirm) return
-
-    try {
-      await api.delete(`/survey/${surveyId}`)
-      router.push('/event')
-    } catch (err) {
-      console.error('Failed to delete survey', err)
-    }
-  }
+  const handleDeleteSurvey = async () => setDeleteSurvey(true)
 
   const handleDeleteQuestion = async (questionId: string) => {
-    const confirm = window.confirm('Delete this question?')
-    if (!confirm) return
-
+    setDeleteQuestion(false)
     try {
       await api.delete(`/survey/surveyQuestion/${questionId}`)
       setSurveyQuestions((prev) => prev.filter((q) => q.questionId !== questionId))
@@ -153,7 +144,10 @@ const Page = () => {
                           </IconButton>
                           <IconButton
                             color='error'
-                            onClick={() => handleDeleteQuestion(q.questionId)}
+                            onClick={() => {
+                              setQuestionIdToDelete(q.questionId)
+                              setDeleteQuestion(true)
+                            }}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -185,6 +179,46 @@ const Page = () => {
           </Box>
         )}
       </Box>
+
+      {/* Delete Overlays */}
+      {deleteSurvey && (
+        <DeleteOverlay
+          onDeleteClick={async (e) => {
+            e.stopPropagation()
+            try {
+              await api.delete(`/survey/${surveyId}`)
+            } catch (err) {
+              console.error('Survey delete failed:', err)
+            }
+
+            setDeleteSurvey(false)
+
+            setTimeout(() => {
+              window.location.reload()
+            }, 100)
+          }}
+          onClose={() => setDeleteSurvey(false)}
+        />
+      )}
+
+      {deleteQuestion && questionIdToDelete && (
+        <DeleteOverlay
+          onClose={() => {
+            setDeleteQuestion(false)
+            setQuestionIdToDelete(null)
+          }}
+          onDeleteClick={async (e) => {
+            e.stopPropagation()
+            try {
+              await handleDeleteQuestion(questionIdToDelete)
+            } catch (err) {
+              console.error('Delete failed:', err)
+            }
+            setDeleteQuestion(false)
+            setQuestionIdToDelete(null)
+          }}
+        />
+      )}
     </Box>
   )
 }

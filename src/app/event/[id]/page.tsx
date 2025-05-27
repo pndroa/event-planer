@@ -360,9 +360,20 @@ export default function EventDetailPage() {
         )}
       </Box>
 
-      {/* Delete Overlay */}
-      {deleteEvent && (
-        <DeleteOverlay eventId={event.eventId} onClose={() => setDeleteEvent(false)} />
+      {deleteEvent && event?.eventId && (
+        <DeleteOverlay
+          onDeleteClick={async (e) => {
+            e.stopPropagation()
+            try {
+              await api.delete(`/event/${event.eventId}`)
+              setDeleteEvent(false)
+              router.push('/event')
+            } catch (err) {
+              console.error('Failed to delete event:', err)
+            }
+          }}
+          onClose={() => setDeleteEvent(false)}
+        />
       )}
     </Box>
   )

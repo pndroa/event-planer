@@ -40,6 +40,7 @@ export default function WishCard({
         boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
         '&:hover': { backgroundColor: '#e0eaff', transform: 'scale(1.01)' },
         transition: '0.2s',
+        cursor: 'pointer',
       }}
     >
       <Box display='flex' justifyContent='space-between' alignItems='flex-start'>

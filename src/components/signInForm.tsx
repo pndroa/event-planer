@@ -76,12 +76,6 @@ const SignIn = () => {
             <Button onClick={handleLogin} disabled={isLoading}>
               <Image src='/icons/googleIcon.svg' alt='Google Icon' width={40} height={40} />
             </Button>
-            <Button>
-              <Image src='/icons/microsoftIcon.svg' alt='Microsoft Icon' width={40} height={40} />
-            </Button>
-            <Button>
-              <Image src='/icons/githubIcon.svg' alt='Github Icon' width={40} height={40} />
-            </Button>
           </Box>
         </FormControl>
       </Box>
