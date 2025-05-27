@@ -17,18 +17,10 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import DatePicker from './datePicker'
 import EditButton from './button'
+import { Question } from '@/lib/types'
+import { multipleDateOption } from '@/lib/types'
 
 type QuestionType = 'multiple' | 'text' | 'date'
-
-type Question = {
-  questionId?: string
-  type: QuestionType | null
-  question: string
-  options?: string[]
-  dates?: (Date | null)[]
-  selectedDateIndex?: number
-  selectedOptionIndex?: number
-}
 
 const SurveyForm = ({
   questions,
@@ -55,7 +47,9 @@ const SurveyForm = ({
         i === qIndex
           ? {
               ...q,
-              options: q.options!.map((opt, j) => (j === optIndex ? text : opt)),
+              options: q.options!.map((opt, j) =>
+                j === optIndex ? { ...opt, answerText: text } : opt
+              ),
             }
           : q
       )
@@ -64,7 +58,9 @@ const SurveyForm = ({
 
   const addOption = (index: number) => {
     setQuestions((prev) =>
-      prev.map((q, i) => (i === index ? { ...q, options: [...(q.options || []), ''] } : q))
+      prev.map((q, i) =>
+        i === index ? { ...q, options: [...(q.options || []), { answerText: '' }] } : q
+      )
     )
   }
 
@@ -93,7 +89,7 @@ const SurveyForm = ({
         i === qIndex
           ? {
               ...q,
-              dates: q.dates!.map((d, j) => (j === dIndex ? newDate : d)),
+              dates: q.dates!.map((d, j) => (j === dIndex ? { ...d, answerText: newDate } : d)),
             }
           : q
       )
@@ -102,7 +98,9 @@ const SurveyForm = ({
 
   const addDateField = (index: number) => {
     setQuestions((prev) =>
-      prev.map((q, i) => (i === index ? { ...q, dates: [...(q.dates || []), null] } : q))
+      prev.map((q, i) =>
+        i === index ? { ...q, dates: [...(q.dates || []), { answerText: null as Date | null }] } : q
+      )
     )
   }
 
@@ -144,7 +142,14 @@ const SurveyForm = ({
           ? {
               ...q,
               type: 'date',
-              dates: [null],
+              dates: [
+                {
+                  answerText: null as Date | null,
+                  questionId: '',
+                  answerOptionsId: '',
+                  delete: false,
+                },
+              ] as multipleDateOption[],
               selectedDateIndex: undefined,
             }
           : q
@@ -192,7 +197,7 @@ const SurveyForm = ({
                       <Box key={j} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                         <Radio value={j} />
                         <TextField
-                          value={option}
+                          value={option.answerText}
                           onChange={(e) => updateOption(i, j, e.target.value)}
                           placeholder={`Option ${j + 1}`}
                           size='small'
@@ -228,7 +233,9 @@ const SurveyForm = ({
                       <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         <Radio value={j} />
                         <DatePicker
-                          value={date}
+                          value={
+                            date.answerText ? new Date(date.answerText) : (null as Date | null)
+                          }
                           onChange={(newDate) => updateDate(i, j, newDate)}
                         />
                         <IconButton

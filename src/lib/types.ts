@@ -115,6 +115,30 @@ export interface SurveyAnswer {
   users: Users
 }
 
+export interface multipleChoiceOption {
+  answerText: string
+  questionId?: string
+  answerOptionsId?: string
+  delete?: boolean
+}
+
+export interface multipleDateOption {
+  answerText: Date | null | string
+  questionId?: string
+  answerOptionsId?: string
+  delete?: boolean
+}
+
+export interface Question {
+  questionId?: string
+  type: 'multiple' | 'text' | 'date' | null
+  question: string
+  options?: multipleChoiceOption[]
+  dates?: multipleDateOption[]
+  selectedDateIndex?: number
+  selectedOptionIndex?: number
+}
+
 export interface SurveyStatistics {
   eventId: string
   title: string
