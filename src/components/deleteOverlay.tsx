@@ -1,38 +1,22 @@
 'use client'
+
 import { Box, Modal, Typography } from '@mui/material'
 import Button from '@/components/button'
-import { api } from '@/lib/api'
-import { useRouter } from 'next/navigation'
+import { MouseEvent } from 'react'
 
 interface DeleteOverlayProps {
-  eventId?: string
+  onDeleteClick: (e: MouseEvent) => void
   onClose: () => void
 }
 
-export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayProps) {
-  const router = useRouter()
-  const deleteEvent = async () => {
-    try {
-      if (eventId == '') {
-        console.error('Event ID is required to delete an event')
-      }
-      const res = await api.delete(`/event/${eventId}`)
-
-      if (res.status === 200) {
-        router.push('/event')
-      }
-    } catch (error) {
-      console.error('Error deleting Events:', error)
-    }
-  }
-
+export default function DeleteOverlay({ onDeleteClick, onClose }: DeleteOverlayProps) {
   return (
     <Modal open onClose={onClose}>
       <Box
         sx={{
           position: 'absolute',
           top: '50%',
-          left: '50%',
+          left: '55%',
           transform: 'translate(-50%, -50%)',
           bgcolor: 'background.paper',
           boxShadow: 24,
@@ -44,9 +28,11 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
         }}
       >
         <Typography>
-          Do you really want to delete this Event? <br></br>
+          Do you really want to delete?
+          <br />
           This action is irreversible.
         </Typography>
+
         <Box
           sx={{
             display: 'flex',
@@ -65,13 +51,7 @@ export default function DeleteOverlay({ onClose, eventId = '' }: DeleteOverlayPr
           >
             Cancel
           </Button>
-          <Button
-            color='red'
-            onClick={(e) => {
-              e.stopPropagation()
-              deleteEvent()
-            }}
-          >
+          <Button color='red' onClick={onDeleteClick}>
             Delete
           </Button>
         </Box>

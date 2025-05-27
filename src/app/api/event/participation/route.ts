@@ -63,10 +63,25 @@ export async function DELETE(req: NextRequest) {
         eventId,
       },
     })
-
     if (!existing) {
       return NextResponse.json({ error: 'Not joined yet' }, { status: 404 })
     }
+
+    const questions = await prisma.surveyQuestions.findMany({
+      where: {
+        surveys: { eventId },
+      },
+      select: { questionId: true },
+    })
+
+    const questionIds = questions.map((q) => q.questionId)
+
+    await prisma.surveyAnswers.deleteMany({
+      where: {
+        userId: user.id,
+        questionId: { in: questionIds },
+      },
+    })
 
     await prisma.eventParticipation.delete({
       where: {
