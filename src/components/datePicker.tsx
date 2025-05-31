@@ -11,6 +11,7 @@ const DatePicker = (props: DatePickerProps) => {
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enUS}>
         <MuiDatePicker
+          format='dd.MM.yyyy'
           slotProps={{
             field: { clearable: true },
             textField: { required: false },
