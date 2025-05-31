@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { fetchUser } from '@/lib/user'
 import { Box, Typography, CircularProgress, Alert, Stack, IconButton } from '@mui/material'
-import { blue } from '@mui/material/colors'
+import { blue, grey } from '@mui/material/colors'
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpOutlined'
 import Button from '@/components/button'
@@ -144,24 +144,28 @@ export default function WishDetailPage() {
         </Box>
 
         {/* Buttons */}
-        <Stack direction='row' spacing={2} alignItems='center'>
+        <Stack direction='row' spacing={1} alignItems='center'>
           {/* Upvote */}
           <IconButton
             size='small'
             onClick={(e) => {
               e.stopPropagation()
-              handleUpvote()
+              if (!isCreator) {
+                handleUpvote()
+              }
             }}
             sx={{
               p: 0.5,
               transition: 'transform 150ms ease-in-out',
-              '&:hover': { transform: 'scale(1.1)' },
+              '&:hover': !isCreator ? { transform: 'scale(1.1)' } : undefined,
             }}
           >
             {isUpvoted ? (
               <ThumbUpAltIcon sx={{ color: blue[800], fontSize: 20 }} />
             ) : (
-              <ThumbUpAltOutlinedIcon sx={{ color: blue[500], fontSize: 20 }} />
+              <ThumbUpAltOutlinedIcon
+                sx={{ color: isCreator ? grey[500] : blue[500], fontSize: 20 }}
+              />
             )}
           </IconButton>
           <Typography variant='body2' color='text.secondary'>

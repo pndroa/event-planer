@@ -17,6 +17,8 @@ interface WishCardProps {
   deleteButton?: boolean
   actionButton?: ReactNode
   onClick?: () => void
+  currentUserId?: string | null
+  wishCreatorId: string
 }
 
 export default function WishCard({
@@ -29,7 +31,11 @@ export default function WishCard({
   deleteButton = false,
   actionButton = null,
   onClick,
+  currentUserId,
+  wishCreatorId,
 }: WishCardProps) {
+  const isOwnWish = currentUserId === wishCreatorId
+
   return (
     <Card
       onClick={onClick}
@@ -65,14 +71,18 @@ export default function WishCard({
           size='small'
           onClick={(e) => {
             e.stopPropagation()
-            onUpvote?.()
+            if (!isOwnWish) {
+              onUpvote?.()
+            }
           }}
           sx={{ p: 0.5, mr: 0.5 }}
         >
           {isUpvoted ? (
             <ThumbUpAltIcon sx={{ color: blue[800], fontSize: 20 }} />
           ) : (
-            <ThumbUpAltOutlinedIcon sx={{ color: blue[500], fontSize: 20 }} />
+            <ThumbUpAltOutlinedIcon
+              sx={{ color: isOwnWish ? grey[500] : blue[500], fontSize: 20 }}
+            />
           )}
         </IconButton>
 

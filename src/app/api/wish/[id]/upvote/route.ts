@@ -14,6 +14,21 @@ export async function POST(_req: Request, { params }: RouteContext) {
   const userId = user.id
 
   try {
+    // Ersteller-Schutz!
+    const wish = await prisma.wishes.findUnique({
+      where: { wishId: id },
+      include: { users: true },
+    })
+
+    if (!wish) {
+      return NextResponse.json({ error: 'Wish not found' }, { status: 404 })
+    }
+
+    if (wish.users.userId === userId) {
+      return NextResponse.json({ error: 'Cannot upvote own wish' }, { status: 403 })
+    }
+    // Ersteller-Schutz!
+
     const existing = await prisma.wishUpvote.findFirst({
       where: { wishId: id, userId },
     })

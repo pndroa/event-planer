@@ -14,6 +14,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
+  // Ersteller-Schutz!
+  const event = await prisma.events.findUnique({
+    where: { eventId },
+    include: { users: true },
+  })
+
+  if (!event) {
+    return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+  }
+
+  if (event.users.userId === user.id) {
+    return NextResponse.json({ error: 'Organizer cannot join own event' }, { status: 403 })
+  }
+  // Ersteller-Schutz!
+
   try {
     const existing = await prisma.eventParticipation.findFirst({
       where: {
