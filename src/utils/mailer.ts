@@ -1,6 +1,10 @@
 import nodemailer from 'nodemailer'
 
-export async function mailer(receiver: string | null | undefined, mailTemplate: string) {
+export async function mailer(
+  receiver: string | null | undefined,
+  mailTemplate: string,
+  subject: string
+) {
   if (receiver == null) {
     throw new Error('No receiver found')
   }
@@ -16,7 +20,7 @@ export async function mailer(receiver: string | null | undefined, mailTemplate: 
   const mailOptions = {
     from: process.env.GMAIL,
     to: receiver,
-    subject: 'Sending Email using Node.js',
+    subject: subject,
     html: mailTemplate,
   }
 

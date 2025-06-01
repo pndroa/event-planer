@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     const receiver = await getUser(user.id)
     if (receiver) {
       const mailTemplate = await createEventEmail(receiver.name, title)
-      mailer(receiver.email, mailTemplate)
+      mailer(receiver.email, mailTemplate,"Event created successfully")
     }
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
