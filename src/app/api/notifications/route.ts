@@ -8,7 +8,7 @@ export async function GET() {
 
   const notes = await prisma.notifications.findMany({
     where: { recipientId: user.id },
-    orderBy: { created_at: 'desc' },
+    orderBy: { createdAt: 'desc' },
   })
 
   return NextResponse.json(notes)
