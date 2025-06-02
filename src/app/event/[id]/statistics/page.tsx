@@ -36,7 +36,7 @@ export default function StatisticsPage() {
     }
 
     fetchData()
-  }, [])
+  }, [id])
 
   if (loading) {
     return (
