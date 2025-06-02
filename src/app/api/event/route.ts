@@ -4,6 +4,9 @@ import { PostEventDates } from '@/lib/types'
 import { getServerAuth } from '@/lib/auth'
 import { addWishUpvotersAsParticipants } from '@/lib/eventParticipationService'
 import { getEventsWithParticipation } from '@/lib/eventParticipationService'
+import { mailer } from '@/utils/mailer'
+import { getUser } from '@/utils/getUser'
+import { createEventEmail } from '@/utils/createEventEmail'
 
 export async function GET() {
   const { user, errorResponse } = await getServerAuth()
@@ -60,6 +63,12 @@ export async function POST(req: Request) {
       })
 
       await addWishUpvotersAsParticipants(wishId, createdEvent.eventId)
+    }
+
+    const receiver = await getUser(user.id)
+    if (receiver) {
+      const mailTemplate = await createEventEmail(receiver.name, title)
+      mailer(receiver.email, mailTemplate,"Event created successfully")
     }
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
