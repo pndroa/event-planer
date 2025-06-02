@@ -178,3 +178,12 @@ export interface SurveyQuestion {
     answer: string
   }[]
 }
+
+export interface Notification {
+  id: string
+  senderId?: string
+  eventId?: string
+  message: string
+  read: boolean
+  created_at: string
+}
