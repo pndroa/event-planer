@@ -3,23 +3,24 @@ import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  //const { errorResponse } = await getServerAuth()
-
-  //if (errorResponse) return errorResponse
-
   const { searchParams } = new URL(request.url)
   const answerOptionsParam = searchParams.get('answerOptions')
   const includeAnswerOptions = answerOptionsParam === 'true'
 
+  const surveyId = searchParams.get('surveyId')
+
   try {
     const surveyQuestions = await prisma.surveyQuestions.findMany({
+      where: surveyId ? { surveyId } : undefined,
       include: {
         surveyAnswerOptions: includeAnswerOptions,
       },
     })
-    return NextResponse.json({ surveyQuestions }, { status: 200 })
+
+    return NextResponse.json({ data: surveyQuestions }, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ error })
+    console.error(error)
+    return NextResponse.json({ error: 'Error loading questions' }, { status: 500 })
   }
 }
 

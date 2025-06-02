@@ -124,9 +124,8 @@ export default function Header() {
                     key={n.id}
                     onClick={() => {
                       setAnchorEl(null)
-                      // hier evtl. Navigation zum Event:
                       if (n.eventId) {
-                        window.location.href = `/events/${n.eventId}`
+                        window.location.href = `/event/${n.eventId}/survey`
                       }
                     }}
                     sx={{

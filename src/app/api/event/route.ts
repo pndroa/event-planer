@@ -6,7 +6,9 @@ import { addWishUpvotersAsParticipants } from '@/lib/eventParticipationService'
 import { getEventsWithParticipation } from '@/lib/eventParticipationService'
 import { mailer } from '@/utils/mailer'
 import { getUser } from '@/utils/getUser'
-import { createEventEmail } from '@/utils/createEventEmail'
+import ejs from 'ejs'
+import path from 'path'
+import fs from 'fs'
 
 export async function GET() {
   const { user, errorResponse } = await getServerAuth()
@@ -29,7 +31,6 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-
     const { title, description, room, eventDates, wishId } = body
 
     const createdEvent = await prisma.events.create({
@@ -61,18 +62,21 @@ export async function POST(req: Request) {
         where: { wishId },
         data: { isConvertedToEvent: true },
       })
-
       await addWishUpvotersAsParticipants(wishId, createdEvent.eventId)
     }
 
     const receiver = await getUser(user.id)
+    const templatePath = path.join(process.cwd(), 'public', 'emailTemplates', 'eventEmail.ejs')
+    const template = fs.readFileSync(templatePath, 'utf-8')
+    const view = ejs.render(template, { name: receiver?.name ?? '', eventTitle: title })
+
     if (receiver) {
-      const mailTemplate = await createEventEmail(receiver.name, title)
-      mailer(receiver.email, mailTemplate, 'Event created successfully')
+      await mailer(receiver.email, view, 'Event created successfully')
     }
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error }, { status: 500 })
   }
 }

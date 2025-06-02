@@ -1,121 +1,25 @@
 'use client'
+
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Box, Typography } from '@mui/material'
 import { api } from '@/lib/api'
-import { Box } from '@mui/material'
 import SurveyForm from '@/components/surveyForm'
-import { useState } from 'react'
-import { Question } from '@/lib/types'
-import { multipleChoiceOption } from '@/lib/types'
-import { multipleDateOption } from '@/lib/types'
+import { Question, multipleChoiceOption, multipleDateOption } from '@/lib/types'
 
 const Page = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const questionId = searchParams.get('questionId')
+
   const [question, setQuestion] = useState<Question[]>([])
-  const [oldMultipkeChoiceOptions, setOldMultipleChoiceOptions] = useState<multipleChoiceOption[]>(
-    []
-  )
+  const [oldAnswerOptions, setOldAnswerOptions] = useState<
+    multipleChoiceOption[] | multipleDateOption[]
+  >([])
 
-  const handleEditQuestion = async (editedQuestion: Question) => {
-    const payload = {
-      questionText: editedQuestion.question,
-      options: editedQuestion.options,
-      dates: editedQuestion.dates,
-    }
-
-    try {
-      await api
-        .patch(`/survey/surveyQuestion/${editedQuestion.questionId}`, payload)
-        .then(async (res) => {
-          if (res.status === 200) {
-            /**Delete all answers given to aquestion */
-            await api
-              .delete(`/survey/surveyAnswer`, {
-                params: { questionId: editedQuestion.questionId },
-              })
-              .then(async () => {
-                if (Array.isArray(editedQuestion.options) || Array.isArray(editedQuestion.dates)) {
-                  if (editedQuestion.type === 'multiple') {
-                    const deletedOptions: multipleChoiceOption[] = oldMultipkeChoiceOptions.filter(
-                      (oldOption) =>
-                        !editedQuestion.options?.some(
-                          (newOption) => newOption.answerOptionsId === oldOption.answerOptionsId
-                        )
-                    )
-
-                    const updatePromises =
-                      editedQuestion.options?.map((option) => {
-                        const answerPayload = {
-                          questionId: editedQuestion.questionId,
-                          answerText: option.answerText,
-                        }
-
-                        if (option.answerOptionsId === undefined) {
-                          return api.post('/survey/surveyAnswerOption', answerPayload)
-                        } else if (option.delete) {
-                          return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
-                        } else {
-                          return api.patch(
-                            `/survey/surveyAnswerOption/${option.answerOptionsId}`,
-                            answerPayload
-                          )
-                        }
-                      }) ?? []
-
-                    await Promise.all(updatePromises)
-                    if (deletedOptions !== undefined) {
-                      deletedOptions.forEach((option) => {
-                        return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
-                      })
-                    }
-                  } else if (editedQuestion.type === 'date') {
-                    const deletedDates: multipleDateOption[] = oldMultipkeChoiceOptions.filter(
-                      (oldDate) =>
-                        !editedQuestion.dates?.some(
-                          (newDate) => newDate.answerOptionsId === oldDate.answerOptionsId
-                        )
-                    )
-
-                    const updatePromises =
-                      editedQuestion.dates?.map((date) => {
-                        const datePayload = {
-                          questionId: editedQuestion.questionId,
-                          answerText: new Date(date.answerText as string)
-                            .toISOString()
-                            .split('T')[0],
-                        }
-                        if (date.answerOptionsId === undefined) {
-                          return api.post('/survey/surveyAnswerOption', datePayload)
-                        } else {
-                          return api.patch(
-                            `/survey/surveyAnswerOption/${date.answerOptionsId}`,
-                            datePayload
-                          )
-                        }
-                      }) ?? []
-
-                    await Promise.all(updatePromises)
-                    if (deletedDates !== undefined) {
-                      deletedDates.forEach((date) => {
-                        return api.delete(`/survey/surveyAnswerOption/${date.answerOptionsId}`)
-                      })
-                    }
-                  }
-                }
-              })
-          }
-        })
-
-      router.back()
-    } catch (err) {
-      console.error('Failed to edit question', err)
-    }
-  }
-
+  // Lade Frage-Daten für Bearbeitung
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchQuestion = async () => {
       if (!questionId) return
 
       try {
@@ -124,47 +28,147 @@ const Page = () => {
         })
 
         if (res.status !== 200) {
-          console.error('Failed to load question', res)
+          console.error('Failed to load question:', res)
           return
         }
 
-        setOldMultipleChoiceOptions(res.data.question.surveyAnswerOptions)
+        const { question: q } = res.data
+        setOldAnswerOptions(q.surveyAnswerOptions)
 
         setQuestion([
           {
-            questionId: res.data.question.questionId,
-            type: res.data.question.type,
-            question: res.data.question.questionText,
-            ...(res.data.question.type === 'multiple'
+            questionId: q.questionId,
+            type: q.type,
+            question: q.questionText,
+            ...(q.type === 'multiple'
               ? {
-                  options: res.data.question.surveyAnswerOptions,
+                  options:
+                    q.surveyAnswerOptions.length >= 2
+                      ? q.surveyAnswerOptions
+                      : [{ answerText: '' }, { answerText: '' }],
                 }
-              : res.data.question.type === 'date'
+              : q.type === 'date'
                 ? {
-                    dates: res.data.question.surveyAnswerOptions,
+                    dates:
+                      q.surveyAnswerOptions.length >= 2
+                        ? q.surveyAnswerOptions
+                        : [{ answerText: null }, { answerText: null }],
                   }
                 : {}),
           },
         ])
       } catch (err) {
-        console.error('Failed to load questions', err)
+        console.error('Failed to load question:', err)
       }
     }
 
-    fetchQuestions()
+    fetchQuestion()
   }, [questionId])
 
+  // Speichern der Änderungen
+  const handleEditQuestion = async (editedQuestion: Question) => {
+    try {
+      const payload = {
+        questionText: editedQuestion.question,
+        options: editedQuestion.options,
+        dates: editedQuestion.dates,
+      }
+
+      const res = await api.patch(`/survey/surveyQuestion/${editedQuestion.questionId}`, payload)
+      if (res.status !== 200) throw new Error('Failed to update question')
+
+      // Alle Antworten zu dieser Frage löschen
+      await api.delete('/survey/surveyAnswer', {
+        params: { questionId: editedQuestion.questionId },
+      })
+
+      if (editedQuestion.type === 'multiple' && editedQuestion.options) {
+        const deletedOptions = oldAnswerOptions.filter(
+          (oldOpt) =>
+            !editedQuestion.options?.some(
+              (newOpt) => newOpt.answerOptionsId === oldOpt.answerOptionsId
+            )
+        )
+
+        const updatePromises = editedQuestion.options.map((option) => {
+          const answerPayload = {
+            questionId: editedQuestion.questionId,
+            answerText: option.answerText,
+          }
+
+          if (!option.answerOptionsId) {
+            return api.post('/survey/surveyAnswerOption', answerPayload)
+          } else if (option.delete) {
+            return api.delete(`/survey/surveyAnswerOption/${option.answerOptionsId}`)
+          } else {
+            return api.patch(`/survey/surveyAnswerOption/${option.answerOptionsId}`, answerPayload)
+          }
+        })
+
+        await Promise.all(updatePromises)
+
+        // Gelöschte Optionen in DB löschen
+        await Promise.all(
+          deletedOptions.map((opt) =>
+            api.delete(`/survey/surveyAnswerOption/${opt.answerOptionsId}`)
+          )
+        )
+      }
+
+      if (editedQuestion.type === 'date' && editedQuestion.dates) {
+        const deletedDates = oldAnswerOptions.filter(
+          (oldDate) =>
+            !editedQuestion.dates?.some(
+              (newDate) => newDate.answerOptionsId === oldDate.answerOptionsId
+            )
+        )
+
+        const updatePromises = editedQuestion.dates.map((date) => {
+          const datePayload = {
+            questionId: editedQuestion.questionId,
+            answerText: date.answerText
+              ? new Date(date.answerText).toISOString().split('T')[0]
+              : null,
+          }
+
+          if (!date.answerOptionsId) {
+            return api.post('/survey/surveyAnswerOption', datePayload)
+          } else if (date.delete) {
+            return api.delete(`/survey/surveyAnswerOption/${date.answerOptionsId}`)
+          } else {
+            return api.patch(`/survey/surveyAnswerOption/${date.answerOptionsId}`, datePayload)
+          }
+        })
+
+        await Promise.all(updatePromises)
+
+        // Gelöschte Dates in DB löschen
+        await Promise.all(
+          deletedDates.map((date) =>
+            api.delete(`/survey/surveyAnswerOption/${date.answerOptionsId}`)
+          )
+        )
+      }
+
+      router.back()
+    } catch (err) {
+      console.error('Failed to edit question:', err)
+    }
+  }
+
   return (
-    <div>
-      <Box sx={{ px: 2, py: 4, maxWidth: '800px', mx: 'auto' }}>
-        <SurveyForm
-          questions={question}
-          setQuestions={setQuestion}
-          onEditQuestion={handleEditQuestion}
-          editButton={true}
-        />
-      </Box>
-    </div>
+    <Box sx={{ px: 2, py: 4, maxWidth: '800px', mx: 'auto' }}>
+      <Typography variant='h5' gutterBottom>
+        Edit Question
+      </Typography>
+      <SurveyForm
+        questions={question}
+        setQuestions={setQuestion}
+        onEditQuestion={handleEditQuestion}
+        editButton={true}
+      />
+    </Box>
   )
 }
+
 export default Page

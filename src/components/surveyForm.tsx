@@ -11,14 +11,14 @@ import {
   Stack,
   TextField,
   Typography,
+  Paper,
+  Divider,
 } from '@mui/material'
 import Button from '@/components/button'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import DatePicker from './datePicker'
-import EditButton from './button'
-import { Question } from '@/lib/types'
-import { multipleDateOption } from '@/lib/types'
+import { Question, multipleDateOption } from '@/lib/types'
 
 type QuestionType = 'multiple' | 'text' | 'date'
 
@@ -29,6 +29,7 @@ const SurveyForm = ({
   onDeleteQuestion,
   onEditQuestion,
   editButton = false,
+  existingQuestions = [],
 }: {
   questions: Question[]
   setQuestions: React.Dispatch<React.SetStateAction<Question[]>>
@@ -36,24 +37,10 @@ const SurveyForm = ({
   onDeleteQuestion?: (index: number) => void
   onEditQuestion?: (editedQuestion: Question) => void
   editButton?: boolean
+  existingQuestions?: string[]
 }) => {
   const updateQuestionText = (index: number, text: string) => {
     setQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, question: text } : q)))
-  }
-
-  const updateOption = (qIndex: number, optIndex: number, text: string) => {
-    setQuestions((prev) =>
-      prev.map((q, i) =>
-        i === qIndex
-          ? {
-              ...q,
-              options: q.options!.map((opt, j) =>
-                j === optIndex ? { ...opt, answerText: text } : opt
-              ),
-            }
-          : q
-      )
-    )
   }
 
   const addOption = (index: number) => {
@@ -64,21 +51,17 @@ const SurveyForm = ({
     )
   }
 
-  const removeOption = (qIndex: number, optIndex: number) => {
+  const updateOption = (qIndex: number, optIndex: number, text: string) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
-        i === qIndex
-          ? {
+        i !== qIndex
+          ? q
+          : {
               ...q,
-              options: q.options!.filter((_, j) => j !== optIndex),
-              selectedOptionIndex:
-                q.selectedOptionIndex === optIndex
-                  ? undefined
-                  : q.selectedOptionIndex! > optIndex
-                    ? q.selectedOptionIndex! - 1
-                    : q.selectedOptionIndex,
+              options: q.options!.map((opt, j) =>
+                j === optIndex ? { ...opt, answerText: text } : opt
+              ),
             }
-          : q
       )
     )
   }
@@ -86,12 +69,12 @@ const SurveyForm = ({
   const updateDate = (qIndex: number, dIndex: number, newDate: Date | null) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
-        i === qIndex
-          ? {
+        i !== qIndex
+          ? q
+          : {
               ...q,
               dates: q.dates!.map((d, j) => (j === dIndex ? { ...d, answerText: newDate } : d)),
             }
-          : q
       )
     )
   }
@@ -99,7 +82,17 @@ const SurveyForm = ({
   const addDateField = (index: number) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
-        i === index ? { ...q, dates: [...(q.dates || []), { answerText: null as Date | null }] } : q
+        i === index ? { ...q, dates: [...(q.dates || []), { answerText: null }] } : q
+      )
+    )
+  }
+
+  const removeOption = (qIndex: number, optIndex: number) => {
+    setQuestions((prev) =>
+      prev.map((q, i) =>
+        i === qIndex && q.options!.length > 2
+          ? { ...q, options: q.options!.filter((_, j) => j !== optIndex) }
+          : q
       )
     )
   }
@@ -107,17 +100,8 @@ const SurveyForm = ({
   const removeDateField = (qIndex: number, dIndex: number) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
-        i === qIndex && q.dates!.length > 1
-          ? {
-              ...q,
-              dates: q.dates!.filter((_, j) => j !== dIndex),
-              selectedDateIndex:
-                q.selectedDateIndex === dIndex
-                  ? undefined
-                  : q.selectedDateIndex! > dIndex
-                    ? q.selectedDateIndex! - 1
-                    : q.selectedDateIndex,
-            }
+        i === qIndex && q.dates!.length > 2
+          ? { ...q, dates: q.dates!.filter((_, j) => j !== dIndex) }
           : q
       )
     )
@@ -142,39 +126,38 @@ const SurveyForm = ({
           ? {
               ...q,
               type: 'date',
-              dates: [
-                {
-                  answerText: null as Date | null,
-                  questionId: '',
-                  answerOptionsId: '',
-                  delete: false,
-                },
-              ] as multipleDateOption[],
-              selectedDateIndex: undefined,
+              dates: [{ answerText: null }, { answerText: null }] as multipleDateOption[],
             }
           : q
       )
     )
   }
 
+  const isDuplicateQuestion = (text: string, index: number) => {
+    const currentText = text.trim().toLowerCase()
+    const localDuplicate = questions.some(
+      (q, i) => i !== index && q.question.trim().toLowerCase() === currentText
+    )
+    const existingDuplicate = existingQuestions.includes(currentText)
+    return localDuplicate || existingDuplicate
+  }
+
   return (
-    <Stack spacing={4}>
+    <Stack spacing={3}>
       {questions.map((q, i) => (
-        <Box
-          key={i}
-          sx={{
-            border: '1px solid #ccc',
-            p: 2,
-            borderRadius: 2,
-            backgroundColor: '#fafafa',
-          }}
-        >
+        <Paper key={i} elevation={3} sx={{ p: 3, borderRadius: 2, bgcolor: '#f5f5f5' }}>
           {!q.type ? (
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-              <Typography>Select question type:</Typography>
-              <Button onClick={() => onSelectType?.(i, 'multiple')}>Multiple Choice</Button>
-              <Button onClick={() => onSelectType?.(i, 'text')}>Text</Button>
-              <Button onClick={() => handleDateTypeSelect(i)}>Date</Button>
+              <Typography variant='subtitle1'>Select question type:</Typography>
+              <Button size='small' onClick={() => onSelectType?.(i, 'multiple')}>
+                Multiple
+              </Button>
+              <Button size='small' onClick={() => onSelectType?.(i, 'text')}>
+                Text
+              </Button>
+              <Button size='small' onClick={() => handleDateTypeSelect(i)}>
+                Date
+              </Button>
             </Box>
           ) : (
             <>
@@ -183,39 +166,57 @@ const SurveyForm = ({
                 label='Question'
                 value={q.question}
                 onChange={(e) => updateQuestionText(i, e.target.value)}
+                error={isDuplicateQuestion(q.question, i)}
+                helperText={isDuplicateQuestion(q.question, i) ? 'Duplicate question!' : ''}
                 sx={{ mb: 2 }}
               />
 
               {q.type === 'multiple' && (
-                <FormControl component='fieldset'>
-                  <FormLabel>Answer options</FormLabel>
+                <FormControl>
+                  <FormLabel>Answer options (min. 2)</FormLabel>
                   <RadioGroup
                     value={q.selectedOptionIndex ?? -1}
                     onChange={(e) => handleSelectOption(i, parseInt(e.target.value))}
                   >
-                    {q.options!.map((option, j) => (
-                      <Box key={j} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Radio value={j} />
-                        <TextField
-                          value={option.answerText}
-                          onChange={(e) => updateOption(i, j, e.target.value)}
-                          placeholder={`Option ${j + 1}`}
-                          size='small'
-                          sx={{ flex: 1, mr: 1 }}
-                        />
-                        <IconButton
-                          onClick={() => removeOption(i, j)}
-                          disabled={q.options!.length <= 1}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    ))}
+                    {q.options!.map((option, j) => {
+                      const isDuplicate =
+                        q.options!.filter(
+                          (o, idx) =>
+                            o.answerText.trim().toLowerCase() ===
+                              option.answerText.trim().toLowerCase() && idx !== j
+                        ).length > 0
+
+                      return (
+                        <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                          <Radio value={j} />
+                          <TextField
+                            value={option.answerText}
+                            onChange={(e) => updateOption(i, j, e.target.value)}
+                            error={isDuplicate || !option.answerText.trim()}
+                            helperText={
+                              !option.answerText.trim()
+                                ? 'Required'
+                                : isDuplicate
+                                  ? 'Duplicate'
+                                  : ''
+                            }
+                            size='small'
+                          />
+                          <IconButton
+                            onClick={() => removeOption(i, j)}
+                            disabled={q.options!.length <= 2}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      )
+                    })}
                   </RadioGroup>
                   <Button
                     startIcon={<AddIcon />}
                     onClick={() => addOption(i)}
-                    sx={{ mt: 1, alignSelf: 'flex-start' }}
+                    size='small'
+                    sx={{ mt: 1 }}
                   >
                     Add option
                   </Button>
@@ -223,58 +224,84 @@ const SurveyForm = ({
               )}
 
               {q.type === 'date' && (
-                <FormControl fullWidth>
-                  <FormLabel>Date selection (only one selectable)</FormLabel>
+                <FormControl>
+                  <FormLabel>Dates (min. 2)</FormLabel>
                   <RadioGroup
                     value={q.selectedDateIndex ?? -1}
                     onChange={(e) => handleSelectDate(i, parseInt(e.target.value))}
                   >
-                    {q.dates?.map((date, j) => (
-                      <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Radio value={j} />
-                        <DatePicker
-                          value={
-                            date.answerText ? new Date(date.answerText) : (null as Date | null)
-                          }
-                          onChange={(newDate) => updateDate(i, j, newDate)}
-                        />
-                        <IconButton
-                          onClick={() => removeDateField(i, j)}
-                          disabled={q.dates!.length <= 1}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    ))}
+                    {q.dates!.map((date, j) => {
+                      const isDuplicate =
+                        q.dates!.filter(
+                          (d, idx) =>
+                            d.answerText &&
+                            date.answerText &&
+                            new Date(d.answerText as string | Date).toISOString() ===
+                              new Date(date.answerText as string | Date).toISOString() &&
+                            idx !== j
+                        ).length > 0
+
+                      return (
+                        <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                          <Radio value={j} />
+                          <DatePicker
+                            value={date.answerText ? new Date(date.answerText) : null}
+                            onChange={(newDate) => updateDate(i, j, newDate)}
+                          />
+                          <IconButton
+                            onClick={() => removeDateField(i, j)}
+                            disabled={q.dates!.length <= 2}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                          {(!date.answerText || isDuplicate) && (
+                            <Typography color='error' variant='caption'>
+                              {!date.answerText ? 'Required' : 'Duplicate date!'}
+                            </Typography>
+                          )}
+                        </Box>
+                      )
+                    })}
                   </RadioGroup>
                   <Button
                     startIcon={<AddIcon />}
                     onClick={() => addDateField(i)}
-                    sx={{ mt: 1, alignSelf: 'flex-start' }}
+                    size='small'
+                    sx={{ mt: 1 }}
                   >
-                    Add another date
+                    Add date
                   </Button>
                 </FormControl>
               )}
             </>
           )}
-
-          {editButton && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
-              <EditButton color='green' onClick={() => onEditQuestion?.(q)}>
+          {editButton ? (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Button
+                color='green'
+                onClick={() => onEditQuestion?.(q)}
+                startIcon={<AddIcon />}
+                size='small'
+              >
                 Save
-              </EditButton>
-            </Box>
-          )}
-
-          {!editButton && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
-              <Button color='red' onClick={() => onDeleteQuestion?.(i)} startIcon={<DeleteIcon />}>
-                Delete
               </Button>
             </Box>
+          ) : (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  color='red'
+                  onClick={() => onDeleteQuestion?.(i)}
+                  startIcon={<DeleteIcon />}
+                  size='small'
+                >
+                  Delete question
+                </Button>
+              </Box>
+            </>
           )}
-        </Box>
+        </Paper>
       ))}
     </Stack>
   )
