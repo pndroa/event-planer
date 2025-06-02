@@ -43,6 +43,48 @@ export async function POST(request: Request) {
       },
     })
 
+    // ----- BEGIN: Neue Benachrichtigungs-Logik -----
+
+    // Hole das Survey samt Event und Trainer
+    const surveyWithEvent = await prisma.surveys.findUnique({
+      where: { surveyId },
+      include: {
+        Events: {
+          select: {
+            title: true,
+            eventId: true,
+            trainerId: true,
+          },
+        },
+      },
+    })
+
+    if (surveyWithEvent?.Events) {
+      const { eventId, title, trainerId } = surveyWithEvent.Events
+
+      // Finde alle Teilnehmer dieses Events
+      const participants = await prisma.eventParticipation.findMany({
+        where: { eventId },
+        select: { participantId: true },
+      })
+
+      // Erstelle Benachrichtigungen für jeden Teilnehmer
+      const notifications = participants.map(({ participantId }) =>
+        prisma.notifications.create({
+          data: {
+            recipientId: participantId,
+            eventId,
+            senderId: trainerId,
+            message: `A new question has been added to the survey for the event "${title}".`,
+          },
+        })
+      )
+
+      await Promise.all(notifications)
+    }
+
+    // ----- ENDE: Neue Benachrichtigungs-Logik -----
+
     return NextResponse.json(
       {
         message: 'Question created',
