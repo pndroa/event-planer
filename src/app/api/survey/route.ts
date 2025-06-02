@@ -2,46 +2,28 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { getServerAuth } from '@/lib/auth'
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const { user, errorResponse } = await getServerAuth()
 
   if (errorResponse) return errorResponse
 
-  const { searchParams } = new URL(request.url)
-  const eventId = searchParams.get('eventId')
-  const field = searchParams.get('field')
-
   try {
-    if (eventId) {
-      if (field && field !== 'surveyQuestions') {
-        return NextResponse.json(
-          { error: `Invalid field: ${field}. Only 'surveyQuestions' is allowed.` },
-          { status: 400 }
-        )
-      }
-
-      const include = field ? { [field]: true } : undefined
-
-      const survey = await prisma.surveys.findMany({
-        where: { eventId },
-        include,
-      })
-
-      return NextResponse.json({ survey }, { status: 200 })
-    }
-
-    const participatedEventsWithouSurveyAnswers = await prisma.events.findMany({
+    const participations = await prisma.eventParticipation.findMany({
+      where: {
+        participantId: user.id,
+      },
       include: {
-        surveys: {
+        events: {
           include: {
-            surveyQuestions: {
+            surveys: {
               include: {
-                surveyAnswers: {
-                  where: {
-                    userId: user.id,
-                  },
+                surveyQuestions: {
                   include: {
-                    users: true,
+                    surveyAnswers: {
+                      where: {
+                        userId: user.id,
+                      },
+                    },
                   },
                 },
               },
@@ -49,20 +31,38 @@ export async function GET(request: Request) {
           },
         },
       },
-      where: {
-        eventParticipation: {
-          some: {
-            participantId: user.id,
-          },
-        },
-      },
     })
 
-    const notAnsweredSurveys = participatedEventsWithouSurveyAnswers.map((event) => event.surveys)
+    const surveys = participations
+      .map((participation) => {
+        const survey = participation.events.surveys
+        if (!survey) return null
 
-    return NextResponse.json({ notAnsweredSurveys }, { status: 200 })
+        const questions = survey.surveyQuestions.map((question) => {
+          const hasAnswered = question.surveyAnswers.length > 0
+          return {
+            questionText: question.questionText,
+            answered: hasAnswered,
+          }
+        })
+
+        const answered = questions.every((q) => q.answered)
+
+        return {
+          surveyId: survey.surveyId,
+          eventId: participation.eventId,
+          title: survey.title,
+          createdAt: survey.created_at,
+          answered,
+          surveyQuestions: questions,
+        }
+      })
+      .filter((s) => s !== null)
+
+    return NextResponse.json({ surveys }, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ error }, { status: 500 })
+    console.error(error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
