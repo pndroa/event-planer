@@ -175,7 +175,7 @@ export default function WishDetailPage() {
           <Box sx={{ flexGrow: 1 }} />
 
           {/* Organize */}
-          <Button onClick={() => router.push(`/event/create?wishId=${id}`)}>ORGANIZE</Button>
+          <Button onClick={() => router.push(`/event/create?wishId=${id}`)}>ORGANIZE EVENT</Button>
 
           {/* Delete only for creator */}
           {isCreator && (
