@@ -2,12 +2,58 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/client'
 import { getServerAuth } from '@/lib/auth'
 
-export async function GET(_request: Request) {
+export async function GET(request: Request) {
   const { user, errorResponse } = await getServerAuth()
-
   if (errorResponse) return errorResponse
 
+  const { searchParams } = new URL(request.url)
+  const eventId = searchParams.get('eventId')
+
   try {
+    // Wenn eventId mitgegeben wird, nur dieses Survey holen:
+    if (eventId) {
+      const survey = await prisma.surveys.findFirst({
+        where: { eventId },
+        include: {
+          surveyQuestions: {
+            include: {
+              surveyAnswers: {
+                where: {
+                  userId: user.id,
+                },
+              },
+            },
+          },
+        },
+      })
+
+      if (!survey) {
+        return NextResponse.json({ data: null }, { status: 200 })
+      }
+
+      const questions = survey.surveyQuestions.map((question) => {
+        const hasAnswered = question.surveyAnswers.length > 0
+        return {
+          questionText: question.questionText,
+          answered: hasAnswered,
+        }
+      })
+
+      const answered = questions.every((q) => q.answered)
+
+      const surveyResponse = {
+        surveyId: survey.surveyId,
+        eventId: survey.eventId,
+        title: survey.title,
+        createdAt: survey.created_at,
+        answered,
+        surveyQuestions: questions,
+      }
+
+      return NextResponse.json({ data: surveyResponse }, { status: 200 })
+    }
+
+    // Bisheriges Verhalten für alle Events des Users:
     const participations = await prisma.eventParticipation.findMany({
       where: {
         participantId: user.id,

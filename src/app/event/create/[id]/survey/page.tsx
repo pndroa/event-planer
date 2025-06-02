@@ -5,8 +5,8 @@ import { api } from '@/lib/api'
 import { Box, Typography } from '@mui/material'
 import Button from '@/components/button'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { Question } from '@/lib/types'
+import { useEffect, useState } from 'react'
+import { Question, SurveyQuestions } from '@/lib/types'
 
 type QuestionType = 'multiple' | 'text' | 'date'
 
@@ -15,7 +15,35 @@ const Page = () => {
   const router = useRouter()
   const [questions, setQuestions] = useState<Question[]>([])
   const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [existingQuestions, setExistingQuestions] = useState<string[]>([])
+  const [surveyId, setSurveyId] = useState<string | null>(null)
 
+  // Lade alle existierenden Fragen (um Duplikate zu verhindern)
+  useEffect(() => {
+    const fetchExistingQuestions = async () => {
+      try {
+        const surveyRes = await api.get(`/survey?eventId=${eventId}`)
+        const foundSurveyId = surveyRes.data.data?.surveyId
+
+        if (foundSurveyId) {
+          setSurveyId(foundSurveyId)
+          const questionsRes = await api.get<{ data: SurveyQuestions[] }>(
+            `/survey/surveyQuestion?surveyId=${foundSurveyId}`
+          )
+          const questionsFromDB: string[] = questionsRes.data.data.map((q) =>
+            q.questionText.toLowerCase().trim()
+          )
+          setExistingQuestions(questionsFromDB)
+        }
+      } catch (err) {
+        console.error('Fehler beim Laden der bestehenden Fragen:', err)
+      }
+    }
+
+    fetchExistingQuestions()
+  }, [eventId])
+
+  // Neue Frage hinzufügen
   const handleAddQuestion = () => {
     setQuestions((prev) => [
       ...prev,
@@ -26,6 +54,7 @@ const Page = () => {
     ])
   }
 
+  // Frage-Typ auswählen
   const handleSelectType = (index: number, type: QuestionType) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
@@ -33,30 +62,99 @@ const Page = () => {
           ? {
               ...q,
               type,
-              ...(type === 'multiple' ? { options: [] } : {}),
-              ...(type === 'date' ? { dates: [], selectedDateIndex: undefined } : {}),
+              ...(type === 'multiple' ? { options: [{ answerText: '' }, { answerText: '' }] } : {}),
+              ...(type === 'date'
+                ? {
+                    dates: [{ answerText: null }, { answerText: null }],
+                    selectedDateIndex: undefined,
+                  }
+                : {}),
             }
           : q
       )
     )
   }
 
+  // Frage löschen
   const handleDeleteQuestion = (index: number) => {
     setQuestions((prev) => prev.filter((_, i) => i !== index))
   }
 
+  // Prüfe Duplikate & Validierung
+  const hasDuplicateQuestions = () => {
+    const questionTexts = questions.map((q) => q.question.trim().toLowerCase())
+    return new Set(questionTexts).size !== questionTexts.length
+  }
+
+  const hasDuplicateOptions = () => {
+    return questions.some(
+      (q) =>
+        q.type === 'multiple' &&
+        q.options!.some(
+          (opt, idx, arr) =>
+            arr.findIndex(
+              (o) => o.answerText.trim().toLowerCase() === opt.answerText.trim().toLowerCase()
+            ) !== idx
+        )
+    )
+  }
+
+  const hasDuplicateDates = () => {
+    return questions.some(
+      (q) =>
+        q.type === 'date' &&
+        q.dates!.some(
+          (d, idx, arr) =>
+            d.answerText &&
+            arr.findIndex(
+              (o) =>
+                o.answerText &&
+                new Date(o.answerText as string | Date).toISOString() ===
+                  new Date(d.answerText as string | Date).toISOString()
+            ) !== idx
+        )
+    )
+  }
+
+  const hasDuplicateWithExisting = () => {
+    return questions.some((q) => existingQuestions.includes(q.question.trim().toLowerCase()))
+  }
+
+  const hasEmptyOptionsOrDates = () => {
+    return questions.some((q) => {
+      if (q.type === 'multiple') {
+        return !q.options || q.options.length < 2 || q.options.some((opt) => !opt.answerText.trim())
+      }
+      if (q.type === 'date') {
+        return !q.dates || q.dates.length < 2 || q.dates.some((d) => !d.answerText)
+      }
+      return false
+    })
+  }
+
+  const hasDuplicateData = () =>
+    hasDuplicateQuestions() ||
+    hasDuplicateOptions() ||
+    hasDuplicateDates() ||
+    hasDuplicateWithExisting()
+
+  // Speichern der Survey
   const handleSaveSurvey = async () => {
     setIsSaving(true)
-
     try {
-      const survey = await api.post('/survey/', { eventId })
-      const surveyId = survey.data.data.surveyId
+      let finalSurveyId = surveyId
+
+      if (!finalSurveyId) {
+        const survey = await api.post('/survey/', { eventId })
+        finalSurveyId = survey.data.data.surveyId
+        setSurveyId(finalSurveyId)
+      }
 
       await Promise.all(
         questions.map(async (q: Question) => {
           const questionPayload = {
             questionText: q.question,
-            surveyId,
+            surveyId: finalSurveyId,
             type: q.type,
           }
 
@@ -133,7 +231,11 @@ const Page = () => {
             color='green'
             onClick={handleSaveSurvey}
             disabled={
-              isSaving || questions.length === 0 || questions.some((q) => !q.question.trim())
+              isSaving ||
+              questions.length === 0 ||
+              questions.some((q) => !q.question.trim()) ||
+              hasDuplicateData() ||
+              hasEmptyOptionsOrDates()
             }
           >
             {isSaving ? 'Saving...' : 'Save'}
@@ -145,6 +247,7 @@ const Page = () => {
           setQuestions={setQuestions}
           onSelectType={handleSelectType}
           onDeleteQuestion={handleDeleteQuestion}
+          existingQuestions={existingQuestions}
         />
       </Box>
     </Box>
