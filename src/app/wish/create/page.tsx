@@ -69,6 +69,7 @@ const Page = () => {
 
     if (event.target.value.trim() === '') {
       setError(true)
+      setDisabled(true)
     } else {
       setError(false)
       setDisabled(false)
