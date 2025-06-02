@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Neue Survey erstellen
+    // Create new survey
     const createSurvey = await prisma.surveys.create({
       data: {
         eventId,
@@ -102,9 +102,32 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json({ message: 'Survey created', data: createSurvey }, { status: 201 })
+    // Find all participants of the event
+    const participants = await prisma.eventParticipation.findMany({
+      where: { eventId },
+      select: { participantId: true },
+    })
+
+    // Notify all participants
+    const notifications = participants.map(({ participantId }) =>
+      prisma.notifications.create({
+        data: {
+          recipientId: participantId,
+          eventId,
+          message: `A new survey has been created for the event "${existingEvent.title}".`,
+          senderId: existingEvent.trainerId,
+        },
+      })
+    )
+
+    await Promise.all(notifications)
+
+    return NextResponse.json(
+      { message: 'Survey created and notifications sent', data: createSurvey },
+      { status: 201 }
+    )
   } catch (error) {
-    console.error('Fehler beim Erstellen der Survey:', error)
+    console.error('Error creating survey:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
