@@ -15,6 +15,8 @@ interface EventCardProps {
   createdAt: string
   initialJoined: boolean
   onParticipationChange?: (eventId: string, joined: boolean) => void
+  currentUserId?: string | null
+  trainerId: string
 }
 
 export default function EventCard({
@@ -24,9 +26,12 @@ export default function EventCard({
   createdAt,
   initialJoined,
   onParticipationChange,
+  currentUserId,
+  trainerId,
 }: EventCardProps) {
   const [joined, setJoined] = useState(initialJoined)
   const router = useRouter()
+  const isOwnEvent = currentUserId === trainerId
 
   const createParticipation = async () => {
     try {
@@ -100,7 +105,12 @@ export default function EventCard({
             <Button
               onClick={(e) => {
                 e.stopPropagation()
-                createParticipation()
+                if (!isOwnEvent) createParticipation()
+              }}
+              sx={{
+                backgroundColor: isOwnEvent ? 'lightgrey' : 'primary.main',
+                color: isOwnEvent ? 'dimgray' : 'white',
+                cursor: 'pointer',
               }}
             >
               Participate
