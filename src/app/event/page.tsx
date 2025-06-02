@@ -113,6 +113,8 @@ export default function EventFeed() {
               createdAt={event.createdAt}
               initialJoined={event.joined}
               onParticipationChange={handleParticipationChange}
+              currentUserId={userId}
+              trainerId={event.users.userId}
             />
           ))}
         </Stack>

@@ -32,6 +32,29 @@ export async function POST(request: Request) {
   const body = await request.json()
   const { questionId, answer } = body
 
+  // Ersteller-Schutz!
+  const question = await prisma.surveyQuestions.findUnique({
+    where: { questionId },
+    include: {
+      surveys: {
+        include: {
+          Events: true,
+        },
+      },
+    },
+  })
+
+  if (!question || !question.surveys?.Events) {
+    return NextResponse.json({ error: 'Invalid survey or event' }, { status: 404 })
+  }
+
+  const trainerId = question.surveys.Events.trainerId
+
+  if (user.id === trainerId) {
+    return NextResponse.json({ error: 'Trainer cannot answer own survey' }, { status: 403 })
+  }
+  // Ersteller-Schutz!
+
   try {
     const surveyAnswers = await prisma.surveyAnswers.create({
       data: {

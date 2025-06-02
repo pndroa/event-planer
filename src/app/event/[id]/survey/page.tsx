@@ -130,13 +130,15 @@ const Page = () => {
                   >
                     <Typography>{q.questionText}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <IconButton
-                        onClick={() =>
-                          setActiveAnswerId(activeAnswerId === q.questionId ? null : q.questionId)
-                        }
-                      >
-                        <QuestionAnswerIcon />
-                      </IconButton>
+                      {userId !== trainerId && (
+                        <IconButton
+                          onClick={() =>
+                            setActiveAnswerId(activeAnswerId === q.questionId ? null : q.questionId)
+                          }
+                        >
+                          <QuestionAnswerIcon />
+                        </IconButton>
+                      )}
                       {userId === trainerId && (
                         <>
                           <IconButton onClick={() => handleEditQuestion(q.questionId)}>

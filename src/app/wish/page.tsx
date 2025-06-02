@@ -115,6 +115,8 @@ export default function WishFeed() {
               onUpvote={() => handleUpvote(wish.wishId)}
               currentUpvotes={wish.currentUpvotes}
               onClick={() => router.push(`/wish/${wish.wishId}`)} //Nur noch routing zur [wishId] page
+              currentUserId={userId}
+              wishCreatorId={wish.users.userId}
             />
           ))}
         </Stack>

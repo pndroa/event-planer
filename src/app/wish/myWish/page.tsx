@@ -90,6 +90,7 @@ const Page = () => {
               createdAt={wish.createdAt}
               onClick={() => setSelectedMyWishes(wish)}
               deleteButton={true}
+              wishCreatorId={wish.users.userId}
             />
           ))}
         </Stack>

@@ -89,6 +89,18 @@ export interface Survey {
   surveyQuestions?: SurveyQuestions[]
 }
 
+export interface SurveyResponse {
+  surveyId: string
+  eventId: string
+  title: string
+  created_at: string
+  answered: boolean
+  surveyQuestions: {
+    questionText: string
+    answered: boolean
+  }[]
+}
+
 export interface SurveyQuestions {
   questionId: string
   surveyId: string
@@ -165,4 +177,13 @@ export interface SurveyQuestion {
     userId: string
     answer: string
   }[]
+}
+
+export interface Notification {
+  id: string
+  senderId?: string
+  eventId?: string
+  message: string
+  read: boolean
+  created_at: string
 }

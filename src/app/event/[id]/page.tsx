@@ -348,16 +348,21 @@ export default function EventDetailPage() {
           gap: 1,
         }}
       >
-        <Button
-          {...(joined ? { color: 'orange' } : {})}
-          onClick={joined ? deleteParticipation : createParticipation}
-        >
-          {joined ? 'Leave' : 'Participate'}
-        </Button>
-
-        {(joined || userId === event.trainerId) && (
-          <Button onClick={() => router.push(`/event/${id}/survey`)}>To Surveys</Button>
-        )}
+        <Box>
+          {userId !== event.trainerId && (
+            <Button
+              {...(joined ? { color: 'orange' } : {})}
+              onClick={joined ? deleteParticipation : createParticipation}
+            >
+              {joined ? 'Leave' : 'Participate'}
+            </Button>
+          )}
+        </Box>
+        <Box>
+          {(joined || userId === event.trainerId) && (
+            <Button onClick={() => router.push(`/event/${id}/survey`)}>To Surveys</Button>
+          )}
+        </Box>
       </Box>
 
       {deleteEvent && event?.eventId && (
