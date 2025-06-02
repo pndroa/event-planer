@@ -3,7 +3,7 @@ import { Locale, enUS } from 'date-fns/locale'
 
 const localeImportMap: Record<string, () => Promise<Locale>> = {
   de: async () => (await import('date-fns/locale/de')).de,
-  en: async () => (await import('date-fns/locale/en-US')).enUS,
+  enUs: async () => (await import('date-fns/locale/en-US')).enUS,
   fr: async () => (await import('date-fns/locale/fr')).fr,
   es: async () => (await import('date-fns/locale/es')).es,
   it: async () => (await import('date-fns/locale/it')).it,
@@ -14,6 +14,7 @@ const localeImportMap: Record<string, () => Promise<Locale>> = {
   zh: async () => (await import('date-fns/locale/zh-CN')).zhCN,
   ru: async () => (await import('date-fns/locale/ru')).ru,
   ar: async () => (await import('date-fns/locale/ar-SA')).arSA,
+  enGB: async () => (await import('date-fns/locale/en-GB')).enGB,
 }
 
 export const loadLocale = async (lang: string): Promise<Locale> => {
