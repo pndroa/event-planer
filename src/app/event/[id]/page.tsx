@@ -145,7 +145,10 @@ export default function EventDetailPage() {
       {/* Organizer left, Menu right  */}
       <Box display='flex' alignItems='center' justifyContent='space-between' width='100%' mb={2}>
         <Typography fontSize={15} fontWeight={700} color='#666' mb={2}>
-          Event by: <span style={{ fontWeight: 500 }}>@{event.users?.name || 'Unknown'}</span>
+          Event by:{' '}
+          <Typography component='span' fontWeight={500} display='inline'>
+            @{event.users?.name || 'Unknown'}
+          </Typography>
         </Typography>
 
         {userId === event.trainerId && (
@@ -213,20 +216,13 @@ export default function EventDetailPage() {
       </Typography>
 
       {/* Description */}
-      <Box
-        sx={{
-          backgroundColor: '#f5f8ff',
-          borderRadius: 3,
-          p: 3,
-          mb: 3,
-        }}
-      >
+      <Box sx={{ backgroundColor: '#f5f8ff', borderRadius: 3, p: 3, mb: 3 }}>
         <Typography fontWeight={700} fontSize={17} mb={1}>
           Description:
         </Typography>
         <Typography
           fontSize={15.5}
-          color='#222'
+          color='text.primary'
           textAlign='justify'
           sx={{
             opacity: event.description ? 1 : 0.68,
@@ -264,7 +260,7 @@ export default function EventDetailPage() {
           }}
         >
           <CalendarMonthIcon sx={{ color: dateColor, fontSize: 34, mb: 0.5 }} />
-          <Typography fontWeight={700} color='#233047' fontSize={17} mb={1.5}>
+          <Typography fontWeight={700} color={sectionLabelColor} fontSize={17} mb={1.5}>
             Event Dates
           </Typography>
 
@@ -276,23 +272,22 @@ export default function EventDetailPage() {
                   display='flex'
                   alignItems='center'
                   gap={2}
-                  fontSize={15.5}
                   width='100%'
                   justifyContent='center'
                 >
                   {/* Date */}
                   <Box display='flex' alignItems='center' gap={0.7}>
                     <EventNoteIcon sx={{ color: dateColor, fontSize: 22, mb: '1px' }} />
-                    <span style={{ color: '#222', fontSize: 15 }}>
+                    <Typography fontSize={15} color='text.primary'>
                       {new Date(dateObj.date).toLocaleDateString()}
-                    </span>
+                    </Typography>
                   </Box>
                   {/* Time */}
                   <Box display='flex' alignItems='center' gap={0.5}>
                     <AccessTimeFilledIcon sx={{ color: dateColor, fontSize: 20 }} />
-                    <span style={{ color: 'black', minWidth: 80 }}>
+                    <Typography fontSize={15} color='text.primary' sx={{ minWidth: 80 }}>
                       {dateObj.startTime || '–'} – {dateObj.endTime || '–'}
-                    </span>
+                    </Typography>
                   </Box>
                 </Box>
               ))}
@@ -331,7 +326,7 @@ export default function EventDetailPage() {
           </Typography>
           <Typography
             fontSize={15}
-            color={event.room ? 'text.primary' : '#00000061'}
+            color={event.room ? 'text.primary' : 'text.disabled'}
             textAlign='center'
             fontStyle={event.room ? 'normal' : 'italic'}
           >
@@ -339,14 +334,9 @@ export default function EventDetailPage() {
           </Typography>
         </Box>
       </Box>
+
       <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          mt: 5,
-          flexWrap: 'wrap',
-          gap: 1,
-        }}
+        sx={{ display: 'flex', justifyContent: 'space-between', mt: 5, flexWrap: 'wrap', gap: 1 }}
       >
         <Box>
           {userId !== event.trainerId && (
