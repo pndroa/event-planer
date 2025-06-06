@@ -1,6 +1,6 @@
 'use server'
 import { getURL } from '@/lib/url'
-import { createClientForServer } from '@/utils/supabase/server'
+import { createAdminClientForServer, createClientForServer } from '@/utils/supabase/server'
 import { Provider } from '@supabase/supabase-js'
 
 export async function getOAuthSignInUrl(provider: Provider) {
@@ -22,6 +22,28 @@ export async function getOAuthSignInUrl(provider: Provider) {
     return { url: data.url }
   } catch (error) {
     return { error, message: 'Authentication failed' }
+  }
+}
+
+export async function signUp(name: string, email: string, password: string) {
+  const supabaseAdmin = createAdminClientForServer()
+  try {
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      // eslint-disable-next-line camelcase
+      user_metadata: {
+        name,
+      },
+      // eslint-disable-next-line camelcase
+      email_confirm: false,
+    })
+
+    if (error) return { success: false, error: error.message }
+
+    return { success: true, data }
+  } catch (error) {
+    return { success: false, error, message: 'Admin user creation failed' }
   }
 }
 

@@ -1,5 +1,5 @@
 'use client'
-import { getOAuthSignInUrl, signOut } from './authServer'
+import { getOAuthSignInUrl, signOut, signUp } from './authServer'
 
 export async function signInWithGoogle() {
   try {
@@ -22,6 +22,22 @@ export async function signInWithGoogle() {
   }
 }
 
+export async function handleSignUp(name: string, email: string, password: string) {
+  try {
+    const result = await signUp(name, email, password)
+
+    if (result.success) {
+      window.location.href = '/signIn?registered=true'
+    } else {
+      console.error(result.error || 'Unkown Error')
+    }
+
+    return result
+  } catch (error) {
+    return { success: false, error, message: 'Sign up failed' }
+  }
+}
+
 export async function handleSignOut() {
   try {
     const result = await signOut()
@@ -31,7 +47,6 @@ export async function handleSignOut() {
     }
     return { success: false }
   } catch (error) {
-    console.error('Failed to sign out:', error)
-    return { success: false, error: 'Sign out failed' }
+    return { success: false, error, message: 'Sign out failed' }
   }
 }
