@@ -161,7 +161,7 @@ export default function WishDetailPage() {
             }}
           >
             {isUpvoted ? (
-              <ThumbUpAltIcon sx={{ color: blue[800], fontSize: 20 }} />
+              <ThumbUpAltIcon sx={{ color: isCreator ? grey[500] : blue[800], fontSize: 20 }} />
             ) : (
               <ThumbUpAltOutlinedIcon
                 sx={{ color: isCreator ? grey[500] : blue[500], fontSize: 20 }}
