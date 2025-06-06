@@ -36,7 +36,7 @@ export async function signUp(name: string, email: string, password: string) {
         name,
       },
       // eslint-disable-next-line camelcase
-      email_confirm: false,
+      email_confirm: true,
     })
 
     if (error) return { success: false, error: error.message }
@@ -44,6 +44,22 @@ export async function signUp(name: string, email: string, password: string) {
     return { success: true, data }
   } catch (error) {
     return { success: false, error, message: 'Admin user creation failed' }
+  }
+}
+
+export async function signIn(email: string, password: string) {
+  const supabase = await createClientForServer()
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) return { success: false, error: error.message }
+
+    return { success: true, data }
+  } catch (error) {
+    return { success: false, error, message: 'login failed' }
   }
 }
 
