@@ -33,7 +33,6 @@ const Page = () => {
         } else if (error.toLowerCase().includes('email')) {
           setEmailError(error)
         } else {
-          // fallback: optional globaler Fehler
           console.error(error)
         }
       }
@@ -43,6 +42,9 @@ const Page = () => {
 
     setIsLoading(false)
   }
+
+  const isSignUpDisabled =
+    !firstName.trim() || !lastName.trim() || !email.trim() || !password.trim() || isLoading
 
   return (
     <AuthForm title='Sign Up'>
@@ -86,7 +88,12 @@ const Page = () => {
           error={!!passwordError}
           helperText={passwordError}
         />
-        <Button onClick={handleSubmit} sx={{ marginY: '1rem' }} disabled={isLoading} fullWidth>
+        <Button
+          onClick={handleSubmit}
+          sx={{ marginY: '1rem' }}
+          disabled={isSignUpDisabled}
+          fullWidth
+        >
           Sign Up
         </Button>
         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1 }}>
