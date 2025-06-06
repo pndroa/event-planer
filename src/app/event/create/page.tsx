@@ -29,6 +29,9 @@ const Page = () => {
   const [prefilledTitle, setPrefilledTitle] = useState('')
   const [prefilledDescription, setPrefilledDescription] = useState('')
 
+  const [error, setError] = useState(false)
+  const [disabled, setDisabled] = useState(true)
+
   useLayoutEffect(() => {
     setIsClient(true)
   }, [])
@@ -104,6 +107,16 @@ const Page = () => {
     )
   }
 
+  const checkInput = (event: string) => {
+    if (event.trim() === '') {
+      setError(true)
+      setDisabled(true)
+    } else {
+      setError(false)
+      setDisabled(false)
+    }
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -149,7 +162,7 @@ const Page = () => {
       const response = await api.post('/event', payload)
 
       if (response.status === 201) {
-        router.push(`/event/create/${response.data.data.eventId}/survey`)
+        router.push(`/event`)
       }
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -177,8 +190,12 @@ const Page = () => {
               margin='normal'
               name='title'
               required
+              error={error}
               value={prefilledTitle}
-              onChange={(e) => setPrefilledTitle(e.target.value)}
+              onChange={(e) => {
+                setPrefilledTitle(e.target.value)
+                checkInput(e.target.value)
+              }}
             />
             <TextField
               label='Description'
@@ -221,7 +238,9 @@ const Page = () => {
               dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
             )}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button type='submit'>Create Event</Button>
+              <Button type='submit' disabled={disabled}>
+                Create Event
+              </Button>
             </Box>
           </Box>
         </FormCard>

@@ -78,7 +78,7 @@ export default function WishCard({
           sx={{ p: 0.5, mr: 0.5 }}
         >
           {isUpvoted ? (
-            <ThumbUpAltIcon sx={{ color: blue[800], fontSize: 20 }} />
+            <ThumbUpAltIcon sx={{ color: isOwnWish ? grey[500] : blue[800], fontSize: 20 }} />
           ) : (
             <ThumbUpAltOutlinedIcon
               sx={{ color: isOwnWish ? grey[500] : blue[500], fontSize: 20 }}

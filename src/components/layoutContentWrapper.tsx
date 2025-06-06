@@ -17,11 +17,14 @@ const ContentWrapper = ({
     <Box
       sx={{
         marginLeft: showNavigation && !IsMobile() ? `${drawerWidth}px` : 0,
-        marginTop: showNavigation ? `${headerHeight}px` : 0,
+        height: showNavigation ? `calc(100vh - ${headerHeight}px)` : '100vh',
+        overflowY: 'auto',
         px: IsMobile() ? 2 : 4,
+        scrollbarGutter: 'stable',
         py: 2,
         flexGrow: 1,
-        overflowX: 'hidden',
+        paddingTop: 2,
+        mt: `${headerHeight}px`,
       }}
     >
       {children}

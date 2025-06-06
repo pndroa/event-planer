@@ -59,6 +59,13 @@ export async function POST(req: Request) {
       },
     })
 
+    await prisma.wishUpvote.create({
+      data: {
+        wishId: wish.wishId,
+        userId: user.id,
+      },
+    })
+
     return NextResponse.json({ message: 'created wish', wish }, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })
