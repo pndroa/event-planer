@@ -6,6 +6,7 @@ import ErrorBoundaryWrapper from '@/components/errorBoundaryWrapper'
 import Header from '@/components/header'
 import Sidebar from '@/components/sidebar'
 import ContentWrapper from '@/components/layoutContentWrapper'
+import MuiThemeProvider from './providers/theme-provider'
 
 export const metadata: Metadata = {
   title: 'Event Planer',
@@ -27,15 +28,17 @@ export default async function RootLayout({
   return (
     <html lang='en'>
       <body>
-        {showNavigation && <Header />}
-        <div style={{ display: 'flex', width: '100%' }}>
-          {showNavigation && <Sidebar />}
-          <ContentWrapper showNavigation={showNavigation}>
-            <ErrorBoundaryWrapper>
-              <NuqsAdapter>{children}</NuqsAdapter>
-            </ErrorBoundaryWrapper>
-          </ContentWrapper>
-        </div>
+        <MuiThemeProvider>
+          {showNavigation && <Header />}
+          <div style={{ display: 'flex', width: '100%' }}>
+            {showNavigation && <Sidebar />}
+            <ContentWrapper showNavigation={showNavigation}>
+              <ErrorBoundaryWrapper>
+                <NuqsAdapter>{children}</NuqsAdapter>
+              </ErrorBoundaryWrapper>
+            </ContentWrapper>
+          </div>
+        </MuiThemeProvider>
       </body>
     </html>
   )
