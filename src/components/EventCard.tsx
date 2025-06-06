@@ -91,31 +91,27 @@ export default function EventCard({
         </Typography>
 
         <Box display='flex' justifyContent='space-between' mt={2}>
-          {joined ? (
-            <Button
-              color='orange'
-              onClick={(e) => {
-                e.stopPropagation()
-                deleteParticipation()
-              }}
-            >
-              Leave
-            </Button>
-          ) : (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation()
-                if (!isOwnEvent) createParticipation()
-              }}
-              sx={{
-                backgroundColor: isOwnEvent ? 'lightgrey' : 'primary.main',
-                color: isOwnEvent ? 'dimgray' : 'white',
-                cursor: 'pointer',
-              }}
-            >
-              Participate
-            </Button>
-          )}
+          {!isOwnEvent &&
+            (joined ? (
+              <Button
+                color='orange'
+                onClick={(e) => {
+                  e.stopPropagation()
+                  deleteParticipation()
+                }}
+              >
+                Leave
+              </Button>
+            ) : (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  createParticipation()
+                }}
+              >
+                Participate
+              </Button>
+            ))}
         </Box>
       </Card>
     </Box>
