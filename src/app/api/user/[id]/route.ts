@@ -22,6 +22,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
       where: {
         userId: id,
       },
+      select: {
+        userId: true,
+        name: true,
+      },
     })
 
     console.log('user')
