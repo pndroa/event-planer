@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     const w = await prisma.wishes.findUnique({
       where: { wishId: id },
       include: {
-        users: true,
+        users: { select: { userId: true, name: true } },
         _count: { select: { wishUpvote: true } },
         wishUpvote: user.id ? { where: { userId: user.id } } : false,
       },
@@ -31,7 +31,6 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       createdAt: w.createdAt,
       users: {
         userId: w.users.userId,
-        email: w.users.email,
         name: w.users.name,
       },
       currentUpvotes: w._count.wishUpvote,
