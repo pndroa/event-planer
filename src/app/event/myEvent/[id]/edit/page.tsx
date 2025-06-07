@@ -153,6 +153,9 @@ const Page = () => {
       try {
         const res = await api.get(`/event/${id}`)
 
+        console.log('res')
+        console.log(res.data)
+
         setTitle(res.data.event.title ?? '')
         setDescription(res.data.event.description ?? '')
         setRoom(res.data.event.room ?? '')

@@ -23,8 +23,22 @@
   </head>
   <body>
     <div class="container">
-      <h1>Congratulations <%= name %></h1>
-      <p>You created a new event with the name: <strong><%= eventTitle %></strong></p>
+      <h1>Dates have changed</h1>
+      <p>
+        Hallo <%= name %>,<br />
+        dates for the event <strong><%= eventTitle %></strong> in which you are participating have
+        changed<br />
+        These is the current date for this event:
+      </p>
+      <div>
+        <% eventDates.forEach(function(dateObj) { %>
+          <p>
+            <strong>Date:</strong> <%= dateObj.date %><br />
+            <strong>Start:</strong> <%= dateObj.startTime %><br />
+            <strong>End:</strong> <%= dateObj.endTime %>
+          </p>
+        <% }) %>
+      </div>
     </div>
   </body>
 </html>

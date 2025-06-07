@@ -65,14 +65,14 @@ export async function POST(req: Request) {
       await addWishUpvotersAsParticipants(wishId, createdEvent.eventId)
     }
 
-    const receiver = await getUser(user.id)
+    /*const receiver = await getUser(user.id)
     const templatePath = path.join(process.cwd(), 'public', 'emailTemplates', 'eventEmail.ejs')
     const template = fs.readFileSync(templatePath, 'utf-8')
     const view = ejs.render(template, { name: receiver?.name ?? '', eventTitle: title })
-
+    
     if (receiver) {
       await mailer(receiver.email, view, 'Event created successfully')
-    }
+    }*/
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
   } catch (error) {
