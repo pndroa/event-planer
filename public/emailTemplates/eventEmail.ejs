@@ -3,39 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <title>Event Created</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
-
-      .container {
-        max-width: 600px;
+  </head>
+  <body style="font-family: Arial, sans-serif;">
+    <div style="max-width: 600px;
         margin: auto;
         padding: 24px;
         background-color: #f5f5f5;
-        border-radius: 8px;
-      }
-
-      h1 {
-        color: #333;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Dates have changed</h1>
-      <p>
+        border-radius: 8px;">
+      <h1 style="color: #333;">
+        Dates have changed
+      </h1>
+      <p style="color: #333;">
         Hallo <%= name %>,<br />
-        dates for the event <strong><%= eventTitle %></strong> in which you are participating have
-        changed<br />
-        These is the current date for this event:
+        dates for the event <strong><%= eventTitle %></strong> in which you are participating have changed
+      </p>
+      <p style="color: #333;">
+        <strong>These is/are the current date/s for this event:</strong>
       </p>
       <div>
         <% eventDates.forEach(function(dateObj) { %>
-          <p>
-            <strong>Date:</strong> <%= dateObj.date %><br />
-            <strong>Start:</strong> <%= dateObj.startTime %><br />
-            <strong>End:</strong> <%= dateObj.endTime %>
+          <p style="color: #333;">
+            <strong>Date:</strong> <span style="color: #333;"><%= dateObj.date.toDateString() %></span><br />
+            <strong>Start:</strong> <span style="color: #333;"><%= dateObj.startTime.replace(':', '.') %></span><br />
+            <strong>End:</strong> <span style="color: #333;"><%= dateObj.endTime.replace(':', '.') %></span>
           </p>
         <% }) %>
       </div>
