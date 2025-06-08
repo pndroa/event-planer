@@ -60,3 +60,20 @@ export async function getEventWithParticipation(userId: string, eventId: string)
     joined: Boolean(participation),
   }
 }
+
+export async function getParticipantsForEvent(eventId: string) {
+  console.log('getParticipantsForEvent')
+  console.log(eventId)
+
+  if (typeof eventId !== 'string') {
+    return []
+  }
+
+  const participants = await prisma.eventParticipation.findMany({
+    where: {
+      eventId,
+    },
+  })
+
+  return participants
+}
