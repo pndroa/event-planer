@@ -242,23 +242,35 @@ const SurveyForm = ({
                         ).length > 0
 
                       return (
-                        <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <Radio value={j} />
-                          <DatePicker
-                            value={date.answerText ? new Date(date.answerText) : null}
-                            onChange={(newDate) => updateDate(i, j, newDate)}
-                          />
+                        <Box
+                          key={j}
+                          sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}
+                        >
+                          <Radio value={j} sx={{ mt: 2 }} />
+                          <Box sx={{ flex: 1 }}>
+                            <DatePicker
+                              value={date.answerText ? new Date(date.answerText) : null}
+                              onChange={(newDate) => updateDate(i, j, newDate)}
+                              slotProps={{
+                                textField: {
+                                  error: !date.answerText || isDuplicate,
+                                  helperText: !date.answerText
+                                    ? 'Required'
+                                    : isDuplicate
+                                      ? 'Duplicate date'
+                                      : '',
+                                  size: 'small',
+                                },
+                              }}
+                            />
+                          </Box>
                           <IconButton
                             onClick={() => removeDateField(i, j)}
                             disabled={q.dates!.length <= 2}
+                            sx={{ mt: 1 }}
                           >
                             <DeleteIcon />
                           </IconButton>
-                          {(!date.answerText || isDuplicate) && (
-                            <Typography color='error' variant='caption'>
-                              {!date.answerText ? 'Required' : 'Duplicate date!'}
-                            </Typography>
-                          )}
                         </Box>
                       )
                     })}
