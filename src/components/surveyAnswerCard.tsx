@@ -73,8 +73,10 @@ const SurveyAnswerCard = ({
       (questionType === 'text' && localAnswer.trim() === '') ||
       ((questionType === 'multiple' || questionType === 'date') && !localAnswer)
     ) {
+      console.log('save survey false')
       return true
     } else {
+      console.log('save survey true')
       return false
     }
   }
@@ -115,7 +117,7 @@ const SurveyAnswerCard = ({
               <FormControlLabel
                 key={opt.answerOptionsId}
                 value={opt.answerText}
-                control={<Radio disabled={isDisabled} />}
+                control={<Radio />}
                 label={opt.answerText}
               />
             ))}
@@ -129,13 +131,6 @@ const SurveyAnswerCard = ({
             value={localAnswer}
             onChange={(e) => setLocalAnswer(e.target.value)}
             disabled={isDisabled}
-            slotProps={{
-              input: {
-                sx: {
-                  backgroundColor: isDisabled ? undefined : 'white',
-                },
-              },
-            }}
           />
         )}
 
