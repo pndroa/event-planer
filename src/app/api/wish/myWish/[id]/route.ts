@@ -12,7 +12,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
   try {
     const myWishes = await prisma.wishes.findMany({
       include: {
-        users: true,
+        users: {
+          select: {
+            userId: true,
+            name: true,
+          },
+        },
       },
       where: {
         users: {
