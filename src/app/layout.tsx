@@ -7,6 +7,7 @@ import Header from '@/components/header'
 import Sidebar from '@/components/sidebar'
 import ContentWrapper from '@/components/layoutContentWrapper'
 import MuiThemeProvider from '@/providers/theme-provider'
+import { Box } from '@mui/material'
 
 export const metadata: Metadata = {
   title: 'Event Planer',
@@ -27,17 +28,17 @@ export default async function RootLayout({
 
   return (
     <html lang='en'>
-      <body style={{ margin: 0, overflow: 'hidden' }}>
+      <body style={{ margin: 0 }}>
         <MuiThemeProvider>
           {showNavigation && <Header />}
-          <div style={{ display: 'flex', width: '100%', height: '100vh' }}>
+          <Box sx={{ display: 'flex', width: '100%', height: 'calc(100vh - 64px)', mt: '64px' }}>
             {showNavigation && <Sidebar />}
             <ContentWrapper showNavigation={showNavigation}>
               <ErrorBoundaryWrapper>
                 <NuqsAdapter>{children}</NuqsAdapter>
               </ErrorBoundaryWrapper>
             </ContentWrapper>
-          </div>
+          </Box>
         </MuiThemeProvider>
       </body>
     </html>
