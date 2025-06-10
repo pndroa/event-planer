@@ -62,8 +62,6 @@ const Page = () => {
     fetchSurveyData()
   }, [id])
 
-  const handleDeleteSurvey = async () => setDeleteSurvey(true)
-
   const handleDeleteQuestion = async (questionId: string) => {
     setDeleteQuestion(false)
     try {
@@ -101,7 +99,7 @@ const Page = () => {
               onClick={() => router.push(`/event/create/${id}/survey`)}
               sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
             >
-              {surveyQuestions.length === 0 ? 'Create Survey' : 'Add Question'}
+              {surveyQuestions.length === 0 ? 'Add first Question' : 'Add Question'}
             </Button>
           )}
         </Box>
@@ -172,14 +170,6 @@ const Page = () => {
             ))
           )}
         </Stack>
-
-        {userId === trainerId && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button color='red' variant='contained' onClick={handleDeleteSurvey}>
-              Delete Survey
-            </Button>
-          </Box>
-        )}
       </Box>
 
       {/* Delete Overlays */}

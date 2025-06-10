@@ -17,8 +17,17 @@ const Page = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [existingQuestions, setExistingQuestions] = useState<string[]>([])
   const [surveyId, setSurveyId] = useState<string | null>(null)
+  const [title, setTitle] = useState<string>('')
 
-  // Lade alle existierenden Fragen (um Duplikate zu verhindern)
+  useEffect(() => {
+    const fetchEvent = async () => {
+      const res = await api.get(`/event/${eventId}`)
+      console.log(res)
+      setTitle(res.data.event.title)
+    }
+    fetchEvent()
+  }, [eventId])
+
   useEffect(() => {
     const fetchExistingQuestions = async () => {
       try {
@@ -43,7 +52,6 @@ const Page = () => {
     fetchExistingQuestions()
   }, [eventId])
 
-  // Neue Frage hinzufügen
   const handleAddQuestion = () => {
     setQuestions((prev) => [
       ...prev,
@@ -54,7 +62,6 @@ const Page = () => {
     ])
   }
 
-  // Frage-Typ auswählen
   const handleSelectType = (index: number, type: QuestionType) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
@@ -80,7 +87,6 @@ const Page = () => {
     setQuestions((prev) => prev.filter((_, i) => i !== index))
   }
 
-  // Prüfe Duplikate & Validierung
   const hasDuplicateQuestions = () => {
     const questionTexts = questions.map((q) => q.question.trim().toLowerCase())
     return new Set(questionTexts).size !== questionTexts.length
@@ -138,7 +144,6 @@ const Page = () => {
     hasDuplicateDates() ||
     hasDuplicateWithExisting()
 
-  // Speichern der Survey
   const handleSaveSurvey = async () => {
     setIsSaving(true)
     try {
@@ -223,7 +228,7 @@ const Page = () => {
         >
           <Box>
             <Typography variant='h5' gutterBottom>
-              Create new Survey
+              Create new Questions for Event: {title}
             </Typography>
             <Button onClick={handleAddQuestion}>Add Question</Button>
           </Box>
