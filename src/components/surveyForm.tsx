@@ -169,6 +169,13 @@ const SurveyForm = ({
                 error={isDuplicateQuestion(q.question, i)}
                 helperText={isDuplicateQuestion(q.question, i) ? 'Duplicate question!' : ''}
                 sx={{ mb: 2 }}
+                slotProps={{
+                  input: {
+                    sx: {
+                      backgroundColor: 'white',
+                    },
+                  },
+                }}
               />
 
               {q.type === 'multiple' && (
@@ -201,6 +208,13 @@ const SurveyForm = ({
                                   : ''
                             }
                             size='small'
+                            slotProps={{
+                              input: {
+                                sx: {
+                                  backgroundColor: 'white',
+                                },
+                              },
+                            }}
                           />
                           <IconButton
                             onClick={() => removeOption(i, j)}
@@ -244,30 +258,35 @@ const SurveyForm = ({
                       return (
                         <Box
                           key={j}
-                          sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            marginY: 1,
+                          }}
                         >
-                          <Radio value={j} sx={{ mt: 2 }} />
-                          <Box sx={{ flex: 1 }}>
-                            <DatePicker
-                              value={date.answerText ? new Date(date.answerText) : null}
-                              onChange={(newDate) => updateDate(i, j, newDate)}
-                              slotProps={{
-                                textField: {
-                                  error: !date.answerText || isDuplicate,
-                                  helperText: !date.answerText
-                                    ? 'Required'
-                                    : isDuplicate
-                                      ? 'Duplicate date'
-                                      : '',
-                                  size: 'small',
+                          <Radio value={j} />
+                          <DatePicker
+                            value={date.answerText ? new Date(date.answerText) : null}
+                            onChange={(newDate) => updateDate(i, j, newDate)}
+                            slotProps={{
+                              textField: {
+                                error: !date.answerText || isDuplicate,
+                                helperText: !date.answerText
+                                  ? 'Required'
+                                  : isDuplicate
+                                    ? 'Duplicate date'
+                                    : '',
+                                size: 'small',
+                                InputProps: {
+                                  sx: { backgroundColor: 'white' },
                                 },
-                              }}
-                            />
-                          </Box>
+                              },
+                            }}
+                          />
                           <IconButton
                             onClick={() => removeDateField(i, j)}
                             disabled={q.dates!.length <= 2}
-                            sx={{ mt: 1 }}
                           >
                             <DeleteIcon />
                           </IconButton>
