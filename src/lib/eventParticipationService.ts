@@ -18,7 +18,17 @@ export async function addWishUpvotersAsParticipants(wishId: string, eventId: str
 
 export async function getEventsWithParticipation(userId: string) {
   const [events, participations] = await Promise.all([
-    prisma.events.findMany({ include: { users: true, eventDates: true } }),
+    prisma.events.findMany({
+      include: {
+        users: {
+          select: {
+            userId: true,
+            name: true,
+          },
+        },
+        eventDates: true,
+      },
+    }),
     prisma.eventParticipation.findMany({
       where: { participantId: userId },
       select: { eventId: true },
@@ -38,7 +48,7 @@ export async function getEventWithParticipation(userId: string, eventId: string)
     prisma.events.findUnique({
       where: { eventId },
       include: {
-        users: true,
+        users: { select: { userId: true, name: true } },
         eventDates: true,
       },
     }),
@@ -59,4 +69,21 @@ export async function getEventWithParticipation(userId: string, eventId: string)
     ...event,
     joined: Boolean(participation),
   }
+}
+
+export async function getParticipantsForEvent(eventId: string) {
+  console.log('getParticipantsForEvent')
+  console.log(eventId)
+
+  if (typeof eventId !== 'string') {
+    return []
+  }
+
+  const participants = await prisma.eventParticipation.findMany({
+    where: {
+      eventId,
+    },
+  })
+
+  return participants
 }

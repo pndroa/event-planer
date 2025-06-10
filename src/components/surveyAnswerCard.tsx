@@ -61,6 +61,30 @@ const SurveyAnswerCard = ({
     }
   }
 
+  function manageSaveSurveyQuestionButton(
+    loading: boolean,
+    isDisabled: boolean,
+    questionType: string,
+    localAnswer: string
+  ): boolean {
+    if (
+      loading ||
+      isDisabled ||
+      (questionType === 'text' && localAnswer.trim() === '') ||
+      ((questionType === 'multiple' || questionType === 'date') && !localAnswer)
+    ) {
+      console.log('save survey false')
+      return true
+    } else {
+      console.log('save survey true')
+      return false
+    }
+  }
+
+  function enableSaveSurveyQuestionButton() {
+    setIsDisabled(false)
+  }
+
   return (
     <Box
       sx={{
@@ -82,7 +106,13 @@ const SurveyAnswerCard = ({
         </Box>
 
         {(question.type === 'multiple' || question.type === 'date') && (
-          <RadioGroup value={localAnswer} onChange={(e) => setLocalAnswer(e.target.value)}>
+          <RadioGroup
+            value={localAnswer}
+            onChange={(e) => {
+              setLocalAnswer(e.target.value)
+              enableSaveSurveyQuestionButton()
+            }}
+          >
             {question.surveyAnswerOptions?.map((opt) => (
               <FormControlLabel
                 key={opt.answerOptionsId}
@@ -107,12 +137,12 @@ const SurveyAnswerCard = ({
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
             onClick={handleSave}
-            disabled={
-              loading ||
-              isDisabled ||
-              (question.type === 'text' && localAnswer.trim() === '') ||
-              ((question.type === 'multiple' || question.type === 'date') && !localAnswer)
-            }
+            disabled={manageSaveSurveyQuestionButton(
+              loading,
+              isDisabled,
+              question.type,
+              localAnswer
+            )}
           >
             {loading ? 'Saving...' : 'Save answer'}
           </Button>

@@ -2,7 +2,12 @@ import { getServerAuth } from '@/lib/auth'
 import prisma from '@/lib/client'
 import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
-import { getEventWithParticipation } from '@/lib/eventParticipationService'
+import { getEventWithParticipation, getParticipantsForEvent } from '@/lib/eventParticipationService'
+import { mailer } from '@/utils/mailer'
+import { getUser } from '@/utils/getUser'
+import ejs from 'ejs'
+import path from 'path'
+import fs from 'fs'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { user, errorResponse } = await getServerAuth()
@@ -66,55 +71,94 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
 
     const { trainerId, title, description, room } = body
 
-    const createdEvent = await prisma.$transaction([
-      prisma.eventDates.deleteMany({
-        where: {
-          dateId: {
-            in: eventDatesToDelete.map((d: { id: string }) => d.id),
-          },
-        },
-      }),
-      prisma.events.update({
-        where: {
-          eventId: id,
-        },
-        data: {
-          trainerId: trainerId,
-          title: title,
-          description: description,
-          room: room,
-          eventDates: {
-            create: nonExistingEventDates.map(
-              (d: { date: string; startTime: string | null; endTime: string | null }) => ({
-                date: new Date(d.date),
-                startTime: d.startTime,
-                endTime: d.endTime,
-              })
-            ),
-            update: eventDatesToUpdate.map(
-              (d: {
-                id: string
-                date: string
-                startTime: string | null
-                endTime: string | null
-              }) => ({
-                where: { dateId: d.id },
-                data: {
-                  date: new Date(d.date),
-                  startTime: d.startTime,
-                  endTime: d.endTime,
-                },
-              })
-            ),
-          },
-        },
-        include: {
-          eventDates: true,
-        },
-      }),
-    ])
+    //update general info in event
+    await prisma.events.update({
+      where: { eventId: id },
+      data: {
+        trainerId,
+        title,
+        description,
+        room,
+      },
+    })
 
-    return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
+    interface dateData {
+      id: string
+      date: string
+      startTime: string
+      endTime: string
+    }
+
+    // create new date
+    await prisma.eventDates.createMany({
+      data: nonExistingEventDates.map((newDate: dateData) => ({
+        eventId: id,
+        date: new Date(newDate.date),
+        startTime: newDate.startTime,
+        endTime: newDate.endTime,
+      })),
+    })
+
+    // update existing dates
+    const updatedDates = await Promise.all(
+      eventDatesToUpdate.map((updatedDate: dateData) =>
+        prisma.eventDates.update({
+          where: { dateId: updatedDate.id },
+          data: {
+            date: new Date(updatedDate.date),
+            startTime: updatedDate.startTime,
+            endTime: updatedDate.endTime,
+          },
+        })
+      )
+    )
+
+    await Promise.all(
+      eventDatesToDelete.map((deletedDate: dateData) =>
+        prisma.eventDates.deleteMany({
+          where: { dateId: deletedDate.id },
+        })
+      )
+    )
+
+    interface Participant {
+      created_at: Date
+      participantId: string
+      eventId: string
+    }
+
+    if (updatedDates.length > 0) {
+      const participants: Participant[] = await getParticipantsForEvent(id)
+
+      if (participants.length > 0) {
+        const eventDates = await prisma.eventDates.findMany({
+          where: {
+            eventId: id,
+          },
+        })
+
+        for (const participant of participants) {
+          const receiver = await getUser(participant.participantId)
+          const templatePath = path.join(
+            process.cwd(),
+            'public',
+            'emailTemplates',
+            'eventEmail.ejs'
+          )
+          const template = fs.readFileSync(templatePath, 'utf-8')
+          const view = ejs.render(template, {
+            name: receiver?.name ?? '',
+            eventTitle: title,
+            eventDates: eventDates,
+          })
+          if (receiver) {
+            await mailer(receiver.email, view, 'Event times changed')
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({ message: 'Event created' }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 })
   }

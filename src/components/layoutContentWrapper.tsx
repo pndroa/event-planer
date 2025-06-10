@@ -4,7 +4,6 @@ import { IsMobile } from '@/lib/styles'
 import React from 'react'
 
 const drawerWidth = 200
-const headerHeight = 64
 
 const ContentWrapper = ({
   children,
@@ -17,14 +16,14 @@ const ContentWrapper = ({
     <Box
       sx={{
         marginLeft: showNavigation && !IsMobile() ? `${drawerWidth}px` : 0,
-        height: showNavigation ? `calc(100vh - ${headerHeight}px)` : '100vh',
         overflowY: 'auto',
-        px: IsMobile() ? 2 : 4,
+        overflowX: 'hidden',
         scrollbarGutter: 'stable',
-        py: 2,
+        px: IsMobile() ? 2 : 4,
+        pt: 2,
+        pb: 8,
         flexGrow: 1,
-        paddingTop: 2,
-        mt: `${headerHeight}px`,
+        minHeight: 0,
       }}
     >
       {children}

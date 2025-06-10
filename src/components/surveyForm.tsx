@@ -169,6 +169,13 @@ const SurveyForm = ({
                 error={isDuplicateQuestion(q.question, i)}
                 helperText={isDuplicateQuestion(q.question, i) ? 'Duplicate question!' : ''}
                 sx={{ mb: 2 }}
+                slotProps={{
+                  input: {
+                    sx: {
+                      backgroundColor: 'white',
+                    },
+                  },
+                }}
               />
 
               {q.type === 'multiple' && (
@@ -201,6 +208,13 @@ const SurveyForm = ({
                                   : ''
                             }
                             size='small'
+                            slotProps={{
+                              input: {
+                                sx: {
+                                  backgroundColor: 'white',
+                                },
+                              },
+                            }}
                           />
                           <IconButton
                             onClick={() => removeOption(i, j)}
@@ -242,11 +256,33 @@ const SurveyForm = ({
                         ).length > 0
 
                       return (
-                        <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Box
+                          key={j}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            marginY: 1,
+                          }}
+                        >
                           <Radio value={j} />
                           <DatePicker
                             value={date.answerText ? new Date(date.answerText) : null}
                             onChange={(newDate) => updateDate(i, j, newDate)}
+                            slotProps={{
+                              textField: {
+                                error: !date.answerText || isDuplicate,
+                                helperText: !date.answerText
+                                  ? 'Required'
+                                  : isDuplicate
+                                    ? 'Duplicate date'
+                                    : '',
+                                size: 'small',
+                                InputProps: {
+                                  sx: { backgroundColor: 'white' },
+                                },
+                              },
+                            }}
                           />
                           <IconButton
                             onClick={() => removeDateField(i, j)}
@@ -254,11 +290,6 @@ const SurveyForm = ({
                           >
                             <DeleteIcon />
                           </IconButton>
-                          {(!date.answerText || isDuplicate) && (
-                            <Typography color='error' variant='caption'>
-                              {!date.answerText ? 'Required' : 'Duplicate date!'}
-                            </Typography>
-                          )}
                         </Box>
                       )
                     })}

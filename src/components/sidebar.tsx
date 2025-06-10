@@ -30,8 +30,7 @@ const Sidebar = () => {
   const [open, setOpen] = React.useState(false)
 
   const isSelected = (href: string) => {
-    if (href === '/event') return path === href
-    return path.startsWith(href)
+    return path === href || path.startsWith(href + '/')
   }
 
   const sidebarInnerContent = (
@@ -93,7 +92,6 @@ const Sidebar = () => {
     )
   }
 
-  // Desktop-Sidebar
   return (
     <Box
       sx={{
