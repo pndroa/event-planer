@@ -63,7 +63,7 @@ export default function Header() {
     <Box>
       <AppBar position='fixed' sx={{ zIndex: 1300, pl: 2 }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant='h6' sx={{ flexGrow: 1, textAlign: 'center', color: 'white' }}>
+          <Typography variant='h6' sx={{ flexGrow: 1, textAlign: 'start', color: 'white' }}>
             Event Planner
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
