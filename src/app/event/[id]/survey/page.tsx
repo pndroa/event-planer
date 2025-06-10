@@ -101,7 +101,7 @@ const Page = () => {
               onClick={() => router.push(`/event/create/${id}/survey`)}
               sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
             >
-              Create Survey
+              {surveyQuestions.length === 0 ? 'Create Survey' : 'Add Question'}
             </Button>
           )}
         </Box>
