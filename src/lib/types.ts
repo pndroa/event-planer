@@ -187,3 +187,10 @@ export interface Notification {
   read: boolean
   created_at: string
 }
+
+ export interface dateData {
+    id: string
+    date: string
+    startTime: string
+    endTime: string
+  }
