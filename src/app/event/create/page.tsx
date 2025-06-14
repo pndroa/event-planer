@@ -31,6 +31,7 @@ const Page = () => {
 
   const [error, setError] = useState(false)
   const [disabled, setDisabled] = useState(true)
+  const [titleTouched, setTitleTouched] = useState(false)
 
   useLayoutEffect(() => {
     setIsClient(true)
@@ -43,8 +44,11 @@ const Page = () => {
         try {
           const res = await api.get(`/wish/${wishId}`)
           const wish = res.data
-          setPrefilledTitle(wish.title || '')
-          setPrefilledDescription(wish.description || '')
+          const title = wish.title || ''
+          const description = wish.description || ''
+
+          setPrefilledTitle(title)
+          setPrefilledDescription(description)
         } catch (error) {
           console.error('Fehler beim Laden des Wishes:', error)
         }
@@ -52,6 +56,16 @@ const Page = () => {
       fetchWish()
     }
   }, [searchParams])
+
+  useEffect(() => {
+    if (prefilledTitle.trim() === '') {
+      setError(true)
+      setDisabled(true)
+    } else {
+      setError(false)
+      setDisabled(false)
+    }
+  }, [prefilledTitle])
 
   if (!isClient) return <Box>Loading...</Box>
 
@@ -105,16 +119,6 @@ const Page = () => {
         </Box>
       </Box>
     )
-  }
-
-  const checkInput = (event: string) => {
-    if (event.trim() === '') {
-      setError(true)
-      setDisabled(true)
-    } else {
-      setError(false)
-      setDisabled(false)
-    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -190,13 +194,14 @@ const Page = () => {
               margin='normal'
               name='title'
               required
-              error={error}
+              error={titleTouched && error}
               value={prefilledTitle}
               onChange={(e) => {
                 setPrefilledTitle(e.target.value)
-                checkInput(e.target.value)
+                setTitleTouched(true)
               }}
             />
+
             <TextField
               label='Description'
               variant='outlined'

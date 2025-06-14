@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         where: { wishId },
         data: { isConvertedToEvent: true },
       })
-      await addWishUpvotersAsParticipants(wishId, createdEvent.eventId)
+      await addWishUpvotersAsParticipants(wishId, createdEvent.eventId, user.id)
     }
 
     /*
