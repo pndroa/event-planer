@@ -65,7 +65,6 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
 
   try {
     const body = await req.json()
-    console.log('Request body: \n', body)
 
     const nonExistingEventDates = body.eventDates.filter((d: { id?: string }) => !d.id)
 
@@ -102,8 +101,6 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
         endTime: newDate.endTime,
       })),
     })
-    console.log('createdDates')
-    console.log(createdDates)
 
     // update existing dates
     const updatedDates = await Promise.all(
