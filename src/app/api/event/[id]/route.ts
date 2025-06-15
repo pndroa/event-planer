@@ -10,6 +10,7 @@ import path from 'path'
 import fs from 'fs'
 import { getDatesToUpdate } from '@/lib/getDatesToUpdate'
 import { dateData } from '@/lib/types'
+import { PostEventDates } from '@/lib/types'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { user, errorResponse } = await getServerAuth()
@@ -64,6 +65,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
 
   try {
     const body = await req.json()
+    console.log('Request body: \n', body)
 
     const nonExistingEventDates = body.eventDates.filter((d: { id?: string }) => !d.id)
 
@@ -93,13 +95,15 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
 
     // create new date
     const createdDates = await prisma.eventDates.createMany({
-      data: nonExistingEventDates.map((newDate: dateData) => ({
+      data: nonExistingEventDates.map((newDate: PostEventDates) => ({
         eventId: id,
-        date: new Date(newDate.date),
+        date: newDate.date != null ? new Date(newDate.date) : null,
         startTime: newDate.startTime,
         endTime: newDate.endTime,
       })),
     })
+    console.log('createdDates')
+    console.log(createdDates)
 
     // update existing dates
     const updatedDates = await Promise.all(
@@ -150,8 +154,8 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
           const template = fs.readFileSync(templatePath, 'utf-8')
           const view = ejs.render(template, {
             name: receiver?.name ?? '',
-            eventTitle: title,
-            eventDates: eventDates,
+            eventTitle: title ,
+            eventDates: eventDates ,
           })
           if (receiver) {
             await mailer(receiver.email, view, 'Event times changed')

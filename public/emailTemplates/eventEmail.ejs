@@ -24,8 +24,8 @@
         <% eventDates.forEach(function(dateObj) { %>
           <p style="color: #333;">
             <strong>Date:</strong> <span style="color: #333;"><%= dateObj.date.toDateString() %></span><br />
-            <strong>Start:</strong> <span style="color: #333;"><%= dateObj.startTime.replace(':', '.') %></span><br />
-            <strong>End:</strong> <span style="color: #333;"><%= dateObj.endTime.replace(':', '.') %></span>
+            <strong>Start:</strong> <span style="color: #333;"><%= dateObj.startTime ? dateObj.startTime.replace(':', '.') : '--' %></span><br />
+            <strong>End:</strong> <span style="color: #333;"><%= dateObj.endTime ? dateObj.endTime.replace(':', '.') : '--' %></span>
           </p>
         <% }) %>
       </div>
