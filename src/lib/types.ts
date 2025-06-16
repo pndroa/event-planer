@@ -185,5 +185,5 @@ export interface Notification {
   eventId?: string
   message: string
   read: boolean
-  created_at: string
+  createdAt: string
 }
