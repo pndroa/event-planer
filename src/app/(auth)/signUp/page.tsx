@@ -1,7 +1,7 @@
 'use client'
 import { handleSignUp } from '@/utils/authClient'
 import { Box, FormControl, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AuthForm from '@/components/authForm'
 import Button from '@/components/button'
 import Link from 'next/link'
@@ -12,39 +12,59 @@ const Page = () => {
   const [lastName, setLastName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
-
+  const [passwordVerification, setPasswordVerification] = useState<string>('')
+  const [doMatch, setDoMatch] = useState<boolean>(true)
   const [emailError, setEmailError] = useState<string>('')
   const [passwordError, setPasswordError] = useState<string>('')
 
-  const handleSubmit = async () => {
-    setIsLoading(true)
-    setEmailError('')
-    setPasswordError('')
-
-    const name = firstName + ' ' + lastName
-
-    try {
-      const result = await handleSignUp(name, email, password)
-      if (!result.success) {
-        const error = result.error as string
-
-        if (error.toLowerCase().includes('password')) {
-          setPasswordError(error)
-        } else if (error.toLowerCase().includes('email')) {
-          setEmailError(error)
-        } else {
-          console.error(error)
-        }
-      }
-    } catch (error) {
-      console.error(error)
+  useEffect(() => {
+    if (!password || !passwordVerification) {
+      setDoMatch(true)
+      return
     }
 
-    setIsLoading(false)
+    setDoMatch(password === passwordVerification)
+  }, [password, passwordVerification])
+
+  const handleSubmit = async () => {
+    if (doMatch) {
+      setIsLoading(true)
+      setEmailError('')
+      setPasswordError('')
+
+      const name = firstName + ' ' + lastName
+
+      try {
+        const result = await handleSignUp(name, email, password)
+        if (!result.success) {
+          const error = result.error as string
+
+          if (error.toLowerCase().includes('password')) {
+            setPasswordError(error)
+          } else if (error.toLowerCase().includes('email')) {
+            setEmailError(error)
+          } else {
+            console.error(error)
+          }
+        }
+      } catch (error) {
+        console.error(error)
+      }
+
+      setIsLoading(false)
+    } else {
+      setPasswordError('The passwords do not match.')
+    }
   }
 
   const isSignUpDisabled =
-    !firstName.trim() || !lastName.trim() || !email.trim() || !password.trim() || isLoading
+    !firstName.trim() ||
+    !lastName.trim() ||
+    !email.trim() ||
+    !password.trim() ||
+    !passwordVerification.trim() ||
+    !doMatch ||
+    isLoading
 
   return (
     <AuthForm title='Sign Up'>
@@ -87,6 +107,16 @@ const Page = () => {
           onChange={(e) => setPassword(e.target.value)}
           error={!!passwordError}
           helperText={passwordError}
+        />
+        <TextField
+          label='Verify Password'
+          placeholder='Password'
+          type='password'
+          required
+          margin='normal'
+          onChange={(e) => setPasswordVerification(e.target.value)}
+          error={!doMatch}
+          helperText={!doMatch ? 'The passwords do not match.' : ''}
         />
         <Button
           onClick={handleSubmit}
