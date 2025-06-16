@@ -194,7 +194,16 @@ const SurveyForm = ({
                         ).length > 0
 
                       return (
-                        <Box key={j} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Box
+                          key={j}
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'flex-start',
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
                           <Radio value={j} />
                           <TextField
                             value={option.answerText}
@@ -260,7 +269,8 @@ const SurveyForm = ({
                           key={j}
                           sx={{
                             display: 'flex',
-                            alignItems: 'center',
+                            flexDirection: 'row',
+                            alignItems: 'flex-start',
                             gap: 1,
                             marginY: 1,
                           }}

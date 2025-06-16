@@ -74,7 +74,7 @@ const Page = () => {
   ) => {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
-        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
           <DatePicker
             value={date}
             onChange={(newDate) => handleChange(index, 'date', newDate)}
@@ -196,7 +196,7 @@ const Page = () => {
         justifyContent: 'center',
       }}
     >
-      <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
+      <Box sx={{ maxWidth: 900, width: '100%', px: 3, pt: 2, pb: 3 }}>
         <FormCard title='Edit Event'>
           <Box component='form' onSubmit={handleSubmit}>
             <TextField
@@ -234,7 +234,7 @@ const Page = () => {
               dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
             )}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
                 <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
                 <TimePicker
                   value={startTime}

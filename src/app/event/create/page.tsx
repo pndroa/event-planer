@@ -31,6 +31,7 @@ const Page = () => {
 
   const [error, setError] = useState(false)
   const [disabled, setDisabled] = useState(true)
+  const [titleTouched, setTitleTouched] = useState(false)
 
   useLayoutEffect(() => {
     setIsClient(true)
@@ -43,8 +44,11 @@ const Page = () => {
         try {
           const res = await api.get(`/wish/${wishId}`)
           const wish = res.data
-          setPrefilledTitle(wish.title || '')
-          setPrefilledDescription(wish.description || '')
+          const title = wish.title || ''
+          const description = wish.description || ''
+
+          setPrefilledTitle(title)
+          setPrefilledDescription(description)
         } catch (error) {
           console.error('Fehler beim Laden des Wishes:', error)
         }
@@ -52,6 +56,16 @@ const Page = () => {
       fetchWish()
     }
   }, [searchParams])
+
+  useEffect(() => {
+    if (prefilledTitle.trim() === '') {
+      setError(true)
+      setDisabled(true)
+    } else {
+      setError(false)
+      setDisabled(false)
+    }
+  }, [prefilledTitle])
 
   if (!isClient) return <Box>Loading...</Box>
 
@@ -80,7 +94,7 @@ const Page = () => {
   ) => {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
-        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
           <DatePicker
             value={date}
             onChange={(newDate) => handleChange(index, 'date', newDate)}
@@ -105,16 +119,6 @@ const Page = () => {
         </Box>
       </Box>
     )
-  }
-
-  const checkInput = (event: string) => {
-    if (event.trim() === '') {
-      setError(true)
-      setDisabled(true)
-    } else {
-      setError(false)
-      setDisabled(false)
-    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -181,7 +185,7 @@ const Page = () => {
         justifyContent: 'center',
       }}
     >
-      <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
+      <Box sx={{ maxWidth: 900, width: '100%', px: 3, pt: 2, pb: 3 }}>
         <FormCard title='Create Event'>
           <Box component='form' onSubmit={handleSubmit}>
             <TextField
@@ -190,13 +194,14 @@ const Page = () => {
               margin='normal'
               name='title'
               required
-              error={error}
+              error={titleTouched && error}
               value={prefilledTitle}
               onChange={(e) => {
                 setPrefilledTitle(e.target.value)
-                checkInput(e.target.value)
+                setTitleTouched(true)
               }}
             />
+
             <TextField
               label='Description'
               variant='outlined'
@@ -217,7 +222,7 @@ const Page = () => {
               sx={{ marginBottom: '1.5rem' }}
             />
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
                 <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
                 <TimePicker
                   value={startTime}

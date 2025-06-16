@@ -10,8 +10,16 @@ export async function GET(request: Request) {
   const eventId = searchParams.get('eventId')
 
   try {
-    // Wenn eventId mitgegeben wird, nur dieses Survey holen:
     if (eventId) {
+      const event = await prisma.events.findUnique({
+        where: { eventId },
+        select: { trainerId: true },
+      })
+
+      if (event?.trainerId === user.id) {
+        return NextResponse.json({ data: null }, { status: 200 })
+      }
+
       const survey = await prisma.surveys.findFirst({
         where: { eventId },
         include: {
@@ -53,14 +61,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ data: surveyResponse }, { status: 200 })
     }
 
-    // Bisheriges Verhalten für alle Events des Users:
     const participations = await prisma.eventParticipation.findMany({
       where: {
         participantId: user.id,
       },
       include: {
         events: {
-          include: {
+          select: {
+            eventId: true,
+            trainerId: true,
             surveys: {
               include: {
                 surveyQuestions: {
@@ -81,7 +90,11 @@ export async function GET(request: Request) {
 
     const surveys = participations
       .map((participation) => {
-        const survey = participation.events.surveys
+        const event = participation.events
+
+        if (event.trainerId === user.id) return null
+
+        const survey = event.surveys
         if (!survey) return null
 
         const questions = survey.surveyQuestions.map((question) => {
@@ -96,7 +109,7 @@ export async function GET(request: Request) {
 
         return {
           surveyId: survey.surveyId,
-          eventId: participation.eventId,
+          eventId: event.eventId,
           title: survey.title,
           createdAt: survey.created_at,
           answered,
