@@ -30,6 +30,12 @@ const Sidebar = () => {
   const [open, setOpen] = React.useState(false)
 
   const isSelected = (href: string) => {
+    if (href === '/event/mySurvey') {
+      return path === href
+    }
+    if (href === '/event') {
+      return path === href || (path.startsWith('/event/') && !path.startsWith('/event/mySurvey'))
+    }
     return path === href || path.startsWith(href + '/')
   }
 
