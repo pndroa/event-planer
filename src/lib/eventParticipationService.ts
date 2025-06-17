@@ -78,9 +78,6 @@ export async function getEventWithParticipation(userId: string, eventId: string)
 }
 
 export async function getParticipantsForEvent(eventId: string) {
-  console.log('getParticipantsForEvent')
-  console.log(eventId)
-
   if (typeof eventId !== 'string') {
     return []
   }

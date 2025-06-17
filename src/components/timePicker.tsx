@@ -22,6 +22,9 @@ const TimePicker = (props: TimePickerProps) => {
         <MuiTimePicker
           slotProps={{
             field: { clearable: true },
+            textField: {
+              error: false,
+            },
           }}
           {...props}
           sx={{ maxWidth: '245px' }}
