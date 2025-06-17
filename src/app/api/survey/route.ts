@@ -10,7 +10,9 @@ export async function GET(request: Request) {
   const eventId = searchParams.get('eventId')
 
   try {
+    // 🔹 Einzelnes Event (Detail)
     if (eventId) {
+      // Prüfe, ob User der Trainer dieses Events ist
       const event = await prisma.events.findUnique({
         where: { eventId },
         select: { trainerId: true },
@@ -61,6 +63,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ data: surveyResponse }, { status: 200 })
     }
 
+    // 🔹 Alle Events, an denen der User teilnimmt
     const participations = await prisma.eventParticipation.findMany({
       where: {
         participantId: user.id,
@@ -92,6 +95,7 @@ export async function GET(request: Request) {
       .map((participation) => {
         const event = participation.events
 
+        // ⛔ User ist Trainer → keine Survey anzeigen
         if (event.trainerId === user.id) return null
 
         const survey = event.surveys

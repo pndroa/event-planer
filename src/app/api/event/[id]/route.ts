@@ -151,8 +151,8 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
           const template = fs.readFileSync(templatePath, 'utf-8')
           const view = ejs.render(template, {
             name: receiver?.name ?? '',
-            eventTitle: title ,
-            eventDates: eventDates ,
+            eventTitle: title,
+            eventDates: eventDates,
           })
           if (receiver) {
             await mailer(receiver.email, view, 'Event times changed')

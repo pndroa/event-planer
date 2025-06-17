@@ -188,9 +188,9 @@ export interface Notification {
   createdAt: string
 }
 
- export interface dateData {
-    id: string
-    date: string
-    startTime: string
-    endTime: string
-  }
+export interface dateData {
+  id: string
+  date: string
+  startTime: string
+  endTime: string
+}
