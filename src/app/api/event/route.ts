@@ -4,11 +4,6 @@ import { PostEventDates } from '@/lib/types'
 import { getServerAuth } from '@/lib/auth'
 import { addWishUpvotersAsParticipants } from '@/lib/eventParticipationService'
 import { getEventsWithParticipation } from '@/lib/eventParticipationService'
-/*import { mailer } from '@/utils/mailer'
-import { getUser } from '@/utils/getUser'
-import ejs from 'ejs'
-import path from 'path'
-import fs from 'fs'*/
 
 export async function GET() {
   const { user, errorResponse } = await getServerAuth()
@@ -62,18 +57,8 @@ export async function POST(req: Request) {
         where: { wishId },
         data: { isConvertedToEvent: true },
       })
-      await addWishUpvotersAsParticipants(wishId, createdEvent.eventId)
+      await addWishUpvotersAsParticipants(wishId, createdEvent.eventId, user.id)
     }
-
-    /*
-    const receiver = await getUser(user.id)
-    const templatePath = path.join(process.cwd(), 'public', 'emailTemplates', 'eventEmail.ejs')
-    const template = fs.readFileSync(templatePath, 'utf-8')
-    const view = ejs.render(template, { name: receiver?.name ?? '', eventTitle: title })
-
-    if (receiver) {
-      await mailer(receiver.email, view, 'Event created successfully')
-    }*/
 
     return NextResponse.json({ message: 'Event created', data: createdEvent }, { status: 201 })
   } catch (error) {

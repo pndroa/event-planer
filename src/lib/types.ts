@@ -185,5 +185,12 @@ export interface Notification {
   eventId?: string
   message: string
   read: boolean
-  created_at: string
+  createdAt: string
+}
+
+export interface dateData {
+  id: string
+  date: string
+  startTime: string
+  endTime: string
 }

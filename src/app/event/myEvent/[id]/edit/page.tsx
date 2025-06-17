@@ -6,10 +6,8 @@ import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
 import ClearIcon from '@mui/icons-material/Clear'
 import FormCard from '@/components/formCard'
-//import DatePicker from '@/components/datePicker'
-//import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
 import { useErrorBoundary } from 'react-error-boundary'
@@ -76,7 +74,7 @@ const Page = () => {
   ) => {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
-        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
           <DatePicker
             value={date}
             onChange={(newDate) => handleChange(index, 'date', newDate)}
@@ -112,7 +110,7 @@ const Page = () => {
     const room = formData.get('room') || null
 
     const finalEventDates = [
-      ...(date && startTime && endTime ? [{ date, startTime, endTime }] : []),
+      ...(date ? [{ date, startTime: startTime || null, endTime: endTime || null }] : []),
       ...eventDates,
     ]
 
@@ -124,14 +122,22 @@ const Page = () => {
       eventDates: finalEventDates.map((entry) => ({
         ...(entry.id ? { id: entry.id } : {}),
         date: format(entry.date as Date, 'yyyy-MM-dd'),
-        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
-        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
+        startTime:
+          entry.startTime != null && isValid(entry.startTime)
+            ? format(entry.startTime, 'kk:mm')
+            : null,
+        endTime:
+          entry.endTime != null && isValid(entry.endTime) ? format(entry.endTime, 'kk:mm') : null,
       })),
       eventDatesToCompare: eventDatesToCompare.map((entry) => ({
         ...(entry.id ? { id: entry.id } : {}),
         date: format(entry.date as Date, 'yyyy-MM-dd'),
-        startTime: entry.startTime ? format(entry.startTime, 'kk:mm') : null,
-        endTime: entry.endTime ? format(entry.endTime, 'kk:mm') : null,
+        startTime:
+          entry.startTime != null && isValid(entry.startTime)
+            ? format(entry.startTime, 'kk:mm')
+            : null,
+        endTime:
+          entry.endTime != null && isValid(entry.endTime) ? format(entry.endTime, 'kk:mm') : null,
       })),
     }
 
@@ -163,6 +169,7 @@ const Page = () => {
           endTime: string
           dateId: string | number
         }
+        console.log(res.data.event.eventDates)
 
         const convertedDates = res.data.event.eventDates.map((eventDate: RawEventDate) => ({
           date: new Date(eventDate.date),
@@ -189,7 +196,7 @@ const Page = () => {
         justifyContent: 'center',
       }}
     >
-      <Box sx={{ maxWidth: 850, width: '100%', p: 2 }}>
+      <Box sx={{ maxWidth: 900, width: '100%', px: 3, pt: 2, pb: 3 }}>
         <FormCard title='Edit Event'>
           <Box component='form' onSubmit={handleSubmit}>
             <TextField
@@ -227,7 +234,7 @@ const Page = () => {
               dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
             )}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
                 <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
                 <TimePicker
                   value={startTime}

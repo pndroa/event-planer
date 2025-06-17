@@ -9,12 +9,10 @@ import {
   TextField,
   Stack,
   Typography,
-  IconButton,
 } from '@mui/material'
 import Button from '@/components/button'
 import { SurveyQuestions } from '@/lib/types'
 import { api } from '@/lib/api'
-import UndoIcon from '@mui/icons-material/Undo'
 
 const SurveyAnswerCard = ({
   question,
@@ -36,8 +34,13 @@ const SurveyAnswerCard = ({
 
   const handleSave = async () => {
     if (!localAnswer) return alert('Please enter or select an answer.')
+
     setLoading(true)
     try {
+      if (typeof question.questionId == 'string') {
+        await api.delete(`/survey/surveyAnswer/${question.questionId}`)
+      }
+
       await api.post('/survey/surveyAnswer', {
         questionId: question.questionId,
         answer: localAnswer,
@@ -48,17 +51,6 @@ const SurveyAnswerCard = ({
       console.error('Failed to save answer:', err)
     }
     setLoading(false)
-  }
-
-  const handleReset = async () => {
-    try {
-      await api.delete(`/survey/surveyAnswer/${question.questionId}`)
-      setLocalAnswer('')
-      setAnswer('')
-      setIsDisabled(false)
-    } catch (err) {
-      console.error('Failed to delete answer:', err)
-    }
   }
 
   function manageSaveSurveyQuestionButton(
@@ -98,11 +90,6 @@ const SurveyAnswerCard = ({
       <Stack spacing={2}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant='subtitle1'>Answer the question:</Typography>
-          {currentAnswer && (
-            <IconButton onClick={handleReset} title='Reset answer'>
-              <UndoIcon />
-            </IconButton>
-          )}
         </Box>
 
         {(question.type === 'multiple' || question.type === 'date') && (
@@ -129,8 +116,10 @@ const SurveyAnswerCard = ({
             fullWidth
             label='Your answer'
             value={localAnswer}
-            onChange={(e) => setLocalAnswer(e.target.value)}
-            disabled={isDisabled}
+            onChange={(e) => {
+              setLocalAnswer(e.target.value)
+              enableSaveSurveyQuestionButton()
+            }}
           />
         )}
 

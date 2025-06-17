@@ -59,6 +59,28 @@ export default function Header() {
     setAnchorEl(null)
   }
 
+  const formatNotificationTime = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+
+    const isToday =
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear()
+
+    if (isToday) {
+      return date.toLocaleTimeString(navigator.language, {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } else {
+      return date.toLocaleDateString(navigator.language, {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    }
+  }
   return (
     <Box>
       <AppBar position='fixed' sx={{ zIndex: 1300, pl: 2 }}>
@@ -140,10 +162,7 @@ export default function Header() {
                           {n.message}
                         </Typography>
                       }
-                      secondary={new Date(n.created_at).toLocaleString('de-DE', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      secondary={formatNotificationTime(n.createdAt)}
                     />
                   </MenuItem>
                 ))

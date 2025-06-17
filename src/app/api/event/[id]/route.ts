@@ -8,6 +8,9 @@ import { getUser } from '@/utils/getUser'
 import ejs from 'ejs'
 import path from 'path'
 import fs from 'fs'
+import { getDatesToUpdate } from '@/lib/getDatesToUpdate'
+import { dateData } from '@/lib/types'
+import { PostEventDates } from '@/lib/types'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const { user, errorResponse } = await getServerAuth()
@@ -54,17 +57,24 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
 }
 
 export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+  const { errorResponse } = await getServerAuth()
+
+  if (errorResponse) return errorResponse
+
   const { id } = context.params
 
   try {
     const body = await req.json()
 
     const nonExistingEventDates = body.eventDates.filter((d: { id?: string }) => !d.id)
-    const eventDatesToUpdate = body.eventDates.filter((d: { id?: string }) => d.id)
+
+    const eventDatesCheckForChanges = body.eventDates.filter((d: { id?: string }) => d.id)
+    const updateEventDates: dateData[] = await getDatesToUpdate(eventDatesCheckForChanges, id)
+
     const eventDatesToDelete = body.eventDatesToCompare.filter(
       (eventDateToCompare: { id?: string }) =>
         eventDateToCompare.id &&
-        !eventDatesToUpdate.some(
+        !eventDatesCheckForChanges.some(
           (eventDateToUpdate: { id?: string }) => eventDateToUpdate.id === eventDateToCompare.id
         )
     )
@@ -82,18 +92,11 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
       },
     })
 
-    interface dateData {
-      id: string
-      date: string
-      startTime: string
-      endTime: string
-    }
-
     // create new date
-    await prisma.eventDates.createMany({
-      data: nonExistingEventDates.map((newDate: dateData) => ({
+    const createdDates = await prisma.eventDates.createMany({
+      data: nonExistingEventDates.map((newDate: PostEventDates) => ({
         eventId: id,
-        date: new Date(newDate.date),
+        date: newDate.date != null ? new Date(newDate.date) : null,
         startTime: newDate.startTime,
         endTime: newDate.endTime,
       })),
@@ -101,7 +104,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
 
     // update existing dates
     const updatedDates = await Promise.all(
-      eventDatesToUpdate.map((updatedDate: dateData) =>
+      updateEventDates.map((updatedDate: dateData) =>
         prisma.eventDates.update({
           where: { dateId: updatedDate.id },
           data: {
@@ -113,7 +116,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
       )
     )
 
-    await Promise.all(
+    const deltedDates = await Promise.all(
       eventDatesToDelete.map((deletedDate: dateData) =>
         prisma.eventDates.deleteMany({
           where: { dateId: deletedDate.id },
@@ -127,7 +130,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
       eventId: string
     }
 
-    if (updatedDates.length > 0) {
+    if (updatedDates.length > 0 || createdDates.count > 0 || deltedDates.length > 0) {
       const participants: Participant[] = await getParticipantsForEvent(id)
 
       if (participants.length > 0) {
