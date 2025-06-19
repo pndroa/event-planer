@@ -12,7 +12,7 @@ test('uset id is null', async () => {
 test('user found', async () => {
   const userId: string | undefined = process.env.DUMMY_ID
   if (userId === undefined) {
-    throw new Error('DUMMY_ID environment variable is not set')
+    throw new Error('b09b935e-9a37-48f1-bb29-e8f9698b69f5')
   }
   const user = await getUser(userId)
   expect(user).toBeDefined()
