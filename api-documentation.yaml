@@ -1,0 +1,2432 @@
+openapi: '3.0.0'
+info:
+  title: 'Event Planner API'
+  version: '1.0.0'
+  description: |
+    This OpenAPI specification documents the Event Planner application's REST API.
+    All endpoints require a valid user authentication (session) unless noted otherwise.
+
+servers:
+  - url: https://event-planer-phi.vercel.app
+
+paths:
+  /api/notifications:
+    get:
+      summary: Get all notifications for the authenticated user
+      tags:
+        - Notifications
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete all notifications for the authenticated user
+      tags:
+        - Notifications
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Notifications cleared
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/notifications/{id}:
+    patch:
+      summary: Mark a notification as read
+      tags:
+        - Notifications
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the notification
+      responses:
+        '200':
+          description: Notification updated
+
+    delete:
+      summary: Delete a notification
+      tags:
+        - Notifications
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Notification deleted
+  /api/wish:
+    get:
+      summary: 'List all wishes'
+      description: |
+        Retrieves all event wishes that have not been converted into events yet:contentReference. 
+        **Authentication:** Required (must be logged in; returns 401 if not).
+      responses:
+        '200':
+          description: 'A list of wishes.'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wish'
+              example:
+                - wishId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+                  title: 'Team Building Event'
+                  description: 'A fun team building event idea.'
+                  isConvertedToEvent: false
+                  createdAt: '2025-06-22T08:00:00Z'
+                  users:
+                    userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                    name: 'Alice'
+                  currentUpvotes: 5
+                  isUpvotedByMe: false
+                - wishId: '9c915648-efa5-4b34-9d15-466f7b8c1234'
+                  title: 'Project Kickoff Party'
+                  description: 'Kickoff event for the new project.'
+                  isConvertedToEvent: false
+                  createdAt: '2025-06-21T14:30:00Z'
+                  users:
+                    userId: '7d3a6b7c-f1c7-4d2a-9e4d-3b5fa8f5e024'
+                    name: 'Bob'
+                  currentUpvotes: 2
+                  isUpvotedByMe: true
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Not authenticated'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Wishes'
+    post:
+      summary: 'Create a new wish'
+      description: |
+        Creates a new event wish (idea). **Authentication:** Required.
+        The authenticated user becomes the creator of the wish.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Title of the wish.'
+                description:
+                  type: string
+                  description: 'Detailed description of the wish.'
+              required:
+                - title
+            example:
+              title: 'Company Hackathon'
+              description: 'A 24-hour coding hackathon event.'
+      responses:
+        '200':
+          description: 'Wish created successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'created wish'
+                  wish:
+                    $ref: '#/components/schemas/Wish'
+              example:
+                message: 'created wish'
+                wish:
+                  wishId: '3a21f1ee-1234-4b01-90e6-d701748f0abc'
+                  title: 'Company Hackathon'
+                  description: 'A 24-hour coding hackathon event.'
+                  isConvertedToEvent: false
+                  createdAt: '2025-06-22T09:00:00Z'
+                  users:
+                    userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                    name: 'Alice'
+                  currentUpvotes: 1
+                  isUpvotedByMe: true
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error (e.g., database error).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Wishes'
+  '/api/wish/{id}':
+    get:
+      summary: 'Get wish by ID'
+      description: |
+        Retrieves a specific wish by its ID. **Authentication:** Required.
+        Returns the wish details if found, including its current upvote count and whether the authenticated user has upvoted it.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the wish to retrieve.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Wish found.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wish:
+                    $ref: '#/components/schemas/Wish'
+              example:
+                wish:
+                  wishId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+                  title: 'Team Building Event'
+                  description: 'A fun team building event idea.'
+                  isConvertedToEvent: false
+                  createdAt: '2025-06-21T10:00:00Z'
+                  users:
+                    userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                    name: 'Alice'
+                  currentUpvotes: 5
+                  isUpvotedByMe: false
+        '400':
+          description: 'Bad Request – missing or invalid ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid or missing id parameter'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Wish not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Wish not found'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Wishes'
+    delete:
+      summary: 'Delete wish by ID'
+      description: |
+        Deletes an existing wish by its ID. **Authentication:** Required (must be the creator of the wish).
+        Only the user who created the wish can delete it; others receive a 403 Forbidden error).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the wish to delete.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Wish deleted successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+              example:
+                success: true
+        '400':
+          description: 'Bad Request – missing or invalid ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid or missing id parameter'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden – not allowed to delete this wish.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Not authorized to delete this wish'
+        '404':
+          description: 'Wish not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Wish not found'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Wishes'
+  '/api/wish/{id}/upvote':
+    post:
+      summary: 'Upvote or remove upvote from a wish'
+      description: |
+        Toggles an upvote for the specified wish on behalf of the authenticated user. **Authentication:** Required.
+        - If the user has not yet upvoted the wish, this will add an upvote.
+        - If the user already upvoted, this will remove their upvote.
+        The wish's creator cannot upvote their own wish.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the wish to upvote.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Upvote toggled successfully. Returns the new upvote status and total count.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upvoted:
+                    type: boolean
+                    description: 'Whether the wish is now upvoted by the user (true) or the upvote was removed (false).'
+                  count:
+                    type: integer
+                    description: 'The total number of upvotes for the wish after the operation.'
+              example:
+                upvoted: true
+                count: 6
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden – user is the wish creator or not allowed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                selfUpvote:
+                  summary: 'Wish creator attempting to upvote their own wish.'
+                  value:
+                    error: 'Cannot upvote own wish'
+        '404':
+          description: 'Wish not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Wish not found'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Wishes'
+  /api/user:
+    get:
+      summary: 'List users (with details)'
+      description: |
+        Retrieves all users in the system along with their related data (events, wishes, upvotes).
+        **Authentication:** *None required* (this endpoint is publicly accessible).
+        The returned user objects include the events they organized, their created wishes (with upvotes on those wishes), and wishes they have upvoted.
+      responses:
+        '200':
+          description: 'A list of users.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserDetailed'
+              example:
+                users:
+                  - userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                    email: 'alice@example.com'
+                    name: 'Alice'
+                    events:
+                      - eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                        title: 'Team Building Event'
+                        description: 'A fun team building event idea.'
+                        room: null
+                        createdAt: '2025-06-22T10:00:00Z'
+                        trainerId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                      # (other events organized by Alice)
+                    wishes:
+                      - wishId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+                        title: 'Team Building Event'
+                        description: 'A fun team building event idea.'
+                        isConvertedToEvent: false
+                        createdAt: '2025-06-21T10:00:00Z'
+                        wishCreator: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                        wishUpvote:
+                          - upvoteId: '11111111-2222-3333-4444-555555555555'
+                            userId: '7d3a6b7c-f1c7-4d2a-9e4d-3b5fa8f5e024'
+                            wishId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+                            created_at: '2025-06-21T10:05:00Z'
+                        # (other upvote records for this wish)
+                      # (other wishes created by Alice)
+                    wishUpvote:
+                      - upvoteId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeffffffff'
+                        wishId: '9c915648-efa5-4b34-9d15-466f7b8c1234'
+                        userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                        created_at: '2025-06-22T08:30:00Z'
+                      # (other upvotes by Alice)
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Users'
+  '/api/user/{id}':
+    get:
+      summary: 'Get user by ID'
+      description: |
+        Retrieves basic information for a specific user by their ID. **Authentication:** Required.
+        Responds with the user's ID and name. (Email and other details are not exposed in this endpoint.)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the user to retrieve.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'User found.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+              example:
+                user:
+                  userId: '7d3a6b7c-f1c7-4d2a-9e4d-3b5fa8f5e024'
+                  name: 'Bob'
+        '400':
+          description: 'Bad Request – missing or invalid user ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Missing user ID'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Users'
+  /api/event:
+    get:
+      summary: 'List all events'
+      description: |
+        Retrieves all events. Each event includes its schedule dates and indicates whether the authenticated user has joined (participating) that event.
+        **Authentication:** Required.
+      responses:
+        '200':
+          description: 'List of events.'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+              example:
+                - eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                  wishId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+                  title: 'Team Building Event'
+                  description: 'A fun team building event idea.'
+                  room: null
+                  createdAt: '2025-06-22T10:00:00Z'
+                  trainerId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                  users:
+                    userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                    name: 'Alice'
+                  eventDates:
+                    - dateId: '321f1ee-2222-4b01-90e6-d701748f0aaa'
+                      date: '2025-07-01T00:00:00Z'
+                      startTime: '09:00'
+                      endTime: '17:00'
+                      created_at: '2025-06-22T10:00:00Z'
+                    # (other dates if any)
+                  joined: false
+                # (other events)
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Events'
+    post:
+      summary: 'Create a new event'
+      description: |
+        Creates a new event. **Authentication:** Required (user becomes the event's trainer).
+        If the event is created from an existing wish (provide wishId), that wish is marked as converted and all users who upvoted the wish are added as participants.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Title of the event.'
+                description:
+                  type: string
+                  description: 'Description of the event.'
+                room:
+                  type: string
+                  description: 'Location or room for the event.'
+                eventDates:
+                  type: array
+                  description: 'List of date/time slots for the event.'
+                  items:
+                    type: object
+                    properties:
+                      date:
+                        type: string
+                        format: date-time
+                        description: 'Event date (ISO format).'
+                      startTime:
+                        type: string
+                        description: 'Start time (e.g., HH:MM).'
+                      endTime:
+                        type: string
+                        description: 'End time (e.g., HH:MM).'
+                wishId:
+                  type: string
+                  format: uuid
+                  description: 'If provided, the ID of a wish to convert into this event.'
+              required:
+                - title
+            example:
+              title: 'Team Building Event'
+              description: 'A fun team building event for the company.'
+              room: 'Conference Hall A'
+              eventDates:
+                - date: '2025-07-01T00:00:00Z'
+                  startTime: '09:00'
+                  endTime: '17:00'
+              wishId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+      responses:
+        '201':
+          description: 'Event created successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Event created'
+                  data:
+                    $ref: '#/components/schemas/Event'
+              example:
+                message: 'Event created'
+                data:
+                  eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                  wishId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+                  title: 'Team Building Event'
+                  description: 'A fun team building event idea.'
+                  room: 'Conference Hall A'
+                  createdAt: '2025-06-22T10:00:00Z'
+                  trainerId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                  users:
+                    userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                    name: 'Alice'
+                  eventDates:
+                    - dateId: '321f1ee-2222-4b01-90e6-d701748f0aaa'
+                      date: '2025-07-01T00:00:00Z'
+                      startTime: '09:00'
+                      endTime: '17:00'
+                      created_at: '2025-06-22T10:00:00Z'
+                  surveys: null
+        '400':
+          description: 'Bad Request – missing required fields.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Validation error: title is required'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error (e.g., database error).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Events'
+  '/api/event/{id}':
+    get:
+      summary: 'Get event by ID'
+      description: |
+        Retrieves details of a specific event by its ID, including all its date options and whether the current user has joined.
+        **Authentication:** Required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the event to retrieve.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Event found.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event:
+                    $ref: '#/components/schemas/Event'
+              example:
+                event:
+                  eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                  title: 'Team Building Event'
+                  description: 'A fun team building event idea.'
+                  room: 'Conference Hall A'
+                  createdAt: '2025-06-22T10:00:00Z'
+                  trainerId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                  users:
+                    userId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                    name: 'Alice'
+                  eventDates:
+                    - dateId: '321f1ee-2222-4b01-90e6-d701748f0aaa'
+                      date: '2025-07-01T00:00:00Z'
+                      startTime: '09:00'
+                      endTime: '17:00'
+                      created_at: '2025-06-22T10:00:00Z'
+                  joined: true
+        '400':
+          description: 'Bad Request – missing or invalid event ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid or missing id parameter'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Event not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Event not found'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Events'
+    patch:
+      summary: 'Update an event'
+      description: |
+        Updates an existing event's details (title, description, room) and its scheduled dates.
+        **Authentication:** Required.
+        Only the event trainer should update the event; no explicit authorization check is implemented in the API.
+        If event times are changed, all participants will be notified by email of the changes.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the event to update.'
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trainerId:
+                  type: string
+                  format: uuid
+                  description: 'UUID of the trainer (organizer) of the event.'
+                title:
+                  type: string
+                description:
+                  type: string
+                room:
+                  type: string
+                eventDates:
+                  type: array
+                  description: 'Updated list of event dates (with new or modified entries).'
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: 'The identifier of an existing date entry (omit or null for new dates).'
+                      date:
+                        type: string
+                        format: date-time
+                      startTime:
+                        type: string
+                      endTime:
+                        type: string
+                eventDatesToCompare:
+                  type: array
+                  description: 'Original list of event dates before update, for comparison to determine deletions.'
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      date:
+                        type: string
+                        format: date-time
+                      startTime:
+                        type: string
+                      endTime:
+                        type: string
+              required:
+                - trainerId
+                - title
+                - eventDates
+                - eventDatesToCompare
+            example:
+              trainerId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+              title: 'Team Building Event'
+              description: 'A fun team building event idea (updated).'
+              room: 'Conference Hall A'
+              eventDates:
+                - id: '321f1ee-2222-4b01-90e6-d701748f0aaa'
+                  date: '2025-07-01T00:00:00Z'
+                  startTime: '10:00'
+                  endTime: '18:00'
+                - date: '2025-07-02T00:00:00Z'
+                  startTime: '09:00'
+                  endTime: '12:00'
+              eventDatesToCompare:
+                - id: '321f1ee-2222-4b01-90e6-d701748f0aaa'
+                  date: '2025-07-01T00:00:00Z'
+                  startTime: '09:00'
+                  endTime: '17:00'
+              # (In this example, one existing date was modified, and one new date added.)
+      responses:
+        '200':
+          description: 'Event updated successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Event updated'
+              example:
+                message: 'Event updated'
+        '400':
+          description: 'Bad Request – invalid input data.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Events'
+    delete:
+      summary: 'Delete event'
+      description: |
+        Deletes an event by its ID. **Authentication:** Required.
+        (No explicit permission check; intended for use by the event's trainer.)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the event to delete.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Event deleted successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event:
+                    $ref: '#/components/schemas/Event'
+              example:
+                event:
+                  eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                  title: 'Team Building Event'
+                  description: 'A fun team building event idea.'
+                  room: 'Conference Hall A'
+                  createdAt: '2025-06-22T10:00:00Z'
+                  trainerId: '5e9f8f8e-4c8f-4fbe-8f4d-8d5401df5df0'
+                  # (Other fields of the deleted event)
+        '400':
+          description: 'Bad Request – missing or invalid event ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Events'
+  /api/event/participation:
+    post:
+      summary: 'Join an event'
+      description: |
+        Adds the authenticated user as a participant to the specified event. **Authentication:** Required.
+        The event's organizer cannot join their own event:contentReference.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: string
+                  format: uuid
+                  description: 'The ID of the event to join.'
+              required:
+                - eventId
+            example:
+              eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+      responses:
+        '201':
+          description: 'Joined event successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joined:
+                    type: boolean
+                    example: true
+              example:
+                joined: true
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Forbidden – event organizer cannot join their own event.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Organizer cannot join own event'
+        '404':
+          description: 'Event not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Event not found'
+        '409':
+          description: 'Conflict – user has already joined the event.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Already joined'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Events'
+    delete:
+      summary: 'Leave an event'
+      description: |
+        Removes the authenticated user from the participants of the specified event. **Authentication:** Required.
+        Also deletes any survey answers the user provided for that event when leaving.
+      parameters:
+        - name: eventId
+          in: query
+          required: true
+          description: 'The ID of the event to leave.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Left event successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  joined:
+                    type: boolean
+                    example: false
+              example:
+                joined: false
+        '400':
+          description: 'Bad Request – missing eventId query parameter.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Missing eventId'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not Found – the user was not a participant of the event.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Not joined yet'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Events'
+  /api/survey:
+    get:
+      summary: 'Get surveys for user'
+      description: |
+        Retrieves surveys related to the authenticated user. **Authentication:** Required.
+        - If a query parameter **eventId** is provided, returns the survey for that event with information about whether the user has answered its questions.
+          If the user is the event's trainer or if no survey exists for the event, the response will have `data: null` (no survey to answer).
+        - If no **eventId** is provided, returns all surveys for events the user is participating in (excluding events where the user is the trainer), along with the status of whether each survey is fully answered by the user.
+      parameters:
+        - name: eventId
+          in: query
+          required: false
+          description: 'Filter by event ID to get the survey for a specific event.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Survey information retrieved.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    oneOf:
+                      - $ref: '#/components/schemas/SurveyResponse'
+                    description: 'Survey info for a specific event (if eventId was provided).'
+                  surveys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SurveyResponse'
+                    description: 'Array of survey info objects (if eventId was not provided).'
+              examples:
+                specificSurvey:
+                  summary: 'Survey for a specific event (eventId query used).'
+                  value:
+                    data:
+                      surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                      eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                      title: 'Survey for Event: Team Building Event'
+                      createdAt: '2025-06-22T10:00:00Z'
+                      answered: false
+                      surveyQuestions:
+                        - questionText: 'What activity do you prefer?'
+                          answered: false
+                        - questionText: 'Any dietary restrictions?'
+                          answered: false
+                allSurveys:
+                  summary: 'All pending surveys for events the user joined.'
+                  value:
+                    surveys:
+                      - surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                        eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                        title: 'Survey for Event: Team Building Event'
+                        createdAt: '2025-06-22T10:00:00Z'
+                        answered: false
+                        surveyQuestions:
+                          - questionText: 'What activity do you prefer?'
+                            answered: false
+                          - questionText: 'Any dietary restrictions?'
+                            answered: false
+                      # (other surveys for other events)
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    post:
+      summary: 'Create a survey for an event'
+      description: |
+        Creates a new survey for the specified event. **Authentication:** Required.
+        Only one survey can exist per event; if a survey already exists for the event, the existing survey is returned instead of creating a new one.
+        When a survey is created, all participants of the event are notified with a notification message.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: string
+                  format: uuid
+                  description: 'The ID of the event for which to create a survey.'
+              required:
+                - eventId
+            example:
+              eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+      responses:
+        '201':
+          description: 'Survey created successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Survey created and notifications sent'
+                  data:
+                    $ref: '#/components/schemas/Survey'
+              example:
+                message: 'Survey created and notifications sent'
+                data:
+                  surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                  eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                  title: 'Survey for Event: Team Building Event'
+                  createdAt: '2025-06-22T10:00:00Z'
+        '200':
+          description: 'Survey already exists for event (no new survey created).'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Survey already exists'
+                  data:
+                    $ref: '#/components/schemas/Survey'
+              example:
+                message: 'Survey already exists'
+                data:
+                  surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                  eventId: '1c1f1ee-1111-4b01-90e6-d701748f0000'
+                  title: 'Survey for Event: Team Building Event'
+                  createdAt: '2025-06-22T10:00:00Z'
+        '400':
+          description: 'Bad Request – eventId is required.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'eventId is required'
+        '404':
+          description: 'Event not found – invalid eventId.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Event not found'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+  /api/survey/surveyQuestion:
+    get:
+      summary: 'List survey questions'
+      description: |
+        Retrieves survey questions. If **surveyId** query parameter is provided, returns questions for that survey; otherwise returns all questions.
+        Use **answerOptions=true** query parameter to include multiple-choice answer options for each question.
+        (No authentication required for this endpoint.)
+      parameters:
+        - name: surveyId
+          in: query
+          required: false
+          description: 'Filter by survey ID to get questions of a specific survey.'
+          schema:
+            type: string
+            format: uuid
+        - name: answerOptions
+          in: query
+          required: false
+          description: "If 'true', include answer options for each question in the response."
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 'Survey questions retrieved.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SurveyQuestion'
+              example:
+                data:
+                  - questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                    surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                    questionText: 'What activity do you prefer?'
+                    created_at: '2025-06-22T10:05:00Z'
+                    type: 'multiple'
+                    surveyAnswerOptions:
+                      - answerOptionsId: '11111111-2222-3333-4444-555555555555'
+                        questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                        answerText: 'Outdoor games'
+                        created_at: '2025-06-22T10:05:00Z'
+                      - answerOptionsId: '66666666-7777-8888-9999-000000000000'
+                        questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                        answerText: 'Board games'
+                        created_at: '2025-06-22T10:05:00Z'
+                  # (other questions)
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    post:
+      summary: 'Create a new survey question'
+      description: |
+        Creates a new question in a survey. **Authentication:** Required.
+        If the question is multiple-choice or date type, associated answer options can be added via separate endpoints.
+        All participants of the event are notified when a new question is added to a survey:contentReference.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                surveyId:
+                  type: string
+                  format: uuid
+                questionText:
+                  type: string
+                type:
+                  type: string
+                  description: "Question type (e.g., 'multiple', 'text', 'date')."
+              required:
+                - surveyId
+                - questionText
+            example:
+              surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+              questionText: 'What activity do you prefer?'
+              type: 'multiple'
+      responses:
+        '201':
+          description: 'Question created successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Question created'
+                  data:
+                    $ref: '#/components/schemas/SurveyQuestion'
+              example:
+                message: 'Question created'
+                data:
+                  questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                  surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                  questionText: 'What activity do you prefer?'
+                  created_at: '2025-06-22T10:05:00Z'
+                  type: 'multiple'
+        '400':
+          description: 'Bad Request – missing required fields (surveyId or questionText).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'surveyId and questionText are required'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+  '/api/survey/surveyQuestion/{id}':
+    get:
+      summary: 'Get survey question by ID'
+      description: |
+        Retrieves a specific survey question by its ID. **Authentication:** Required.
+        Use **answerOptions=true** query parameter to include answer options for the question if it is a multiple-choice question.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the survey question.'
+          schema:
+            type: string
+            format: uuid
+        - name: answerOptions
+          in: query
+          required: false
+          description: "If 'true', include answer options for the question."
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 'Survey question retrieved.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  question:
+                    $ref: '#/components/schemas/SurveyQuestion'
+              example:
+                question:
+                  questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                  surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                  questionText: 'What activity do you prefer?'
+                  created_at: '2025-06-22T10:05:00Z'
+                  type: 'multiple'
+                  surveyAnswerOptions:
+                    - answerOptionsId: '11111111-2222-3333-4444-555555555555'
+                      questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                      answerText: 'Outdoor games'
+                      created_at: '2025-06-22T10:05:00Z'
+                    - answerOptionsId: '66666666-7777-8888-9999-000000000000'
+                      questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                      answerText: 'Board games'
+                      created_at: '2025-06-22T10:05:00Z'
+        '400':
+          description: 'Bad Request – missing or invalid question ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Missing question ID'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Question not found.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    patch:
+      summary: 'Update a survey question'
+      description: |
+        Updates the text (and optionally the type) of an existing survey question. **Authentication:** Required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the survey question to update.'
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                questionText:
+                  type: string
+                type:
+                  type: string
+              required:
+                - questionText
+            example:
+              questionText: 'What activities do you prefer?'
+              type: 'multiple'
+      responses:
+        '200':
+          description: 'Question updated successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Question updated'
+                  data:
+                    $ref: '#/components/schemas/SurveyQuestion'
+              example:
+                message: 'Question updated'
+                data:
+                  questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                  surveyId: '555f1ee-1234-4b01-90e6-d701748f0aaa'
+                  questionText: 'What activities do you prefer?'
+                  created_at: '2025-06-22T10:05:00Z'
+                  type: 'multiple'
+        '400':
+          description: 'Bad Request – missing required fields.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'questionText is required'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    delete:
+      summary: 'Delete a survey question'
+      description: |
+        Deletes a survey question by its ID. **Authentication:** Required.
+        This will also remove associated answer options and answers (if any).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the survey question to delete.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Question deleted successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Successfully deleted question'
+              example:
+                message: 'Successfully deleted question'
+        '400':
+          description: 'Bad Request – missing or invalid question ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+  /api/survey/surveyAnswerOption:
+    get:
+      summary: 'List all survey answer options'
+      description: |
+        Retrieves all survey answer options (multiple-choice options for all questions). **Authentication:** Required.
+      responses:
+        '200':
+          description: 'Answer options retrieved.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  surveyAnswerOptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SurveyAnswerOption'
+              example:
+                surveyAnswerOptions:
+                  - answerOptionsId: '11111111-2222-3333-4444-555555555555'
+                    questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                    answerText: 'Outdoor games'
+                    created_at: '2025-06-22T10:05:00Z'
+                  # (other answer options)
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    post:
+      summary: 'Create a new answer option'
+      description: |
+        Adds a new answer option for a multiple-choice survey question. **Authentication:** Required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                questionId:
+                  type: string
+                  format: uuid
+                answerText:
+                  type: string
+              required:
+                - questionId
+                - answerText
+            example:
+              questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+              answerText: 'Outdoor games'
+      responses:
+        '200':
+          description: 'Answer option created successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Created answer options'
+                  data:
+                    $ref: '#/components/schemas/SurveyAnswerOption'
+              example:
+                message: 'Created answer options'
+                data:
+                  answerOptionsId: '11111111-2222-3333-4444-555555555555'
+                  questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                  answerText: 'Outdoor games'
+                  created_at: '2025-06-22T10:05:00Z'
+        '400':
+          description: 'Bad Request – missing required fields.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'QuestionId and answerText are required.'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    delete:
+      summary: 'Delete answer options by question'
+      description: |
+        Deletes all answer options for a given question. **Authentication:** Required.
+      parameters:
+        - name: questionId
+          in: query
+          required: true
+          description: 'The question ID whose answer options should be deleted.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Answer options deleted successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Successfully deleted answer option'
+                  surveyAnswerOption:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                        description: 'Number of answer options deleted.'
+              example:
+                message: 'Successfully deleted answer option'
+                surveyAnswerOption:
+                  count: 3
+        '400':
+          description: 'Bad Request – missing questionId parameter.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+  '/api/survey/surveyAnswerOption/{id}':
+    get:
+      summary: 'List answer options for a question'
+      description: |
+        Retrieves all answer options for a specific question (the **id** path parameter is interpreted as the question ID). **Authentication:** Required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the question whose answer options to retrieve.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Answer options for the question.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  question:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SurveyAnswerOption'
+              example:
+                question:
+                  - answerOptionsId: '11111111-2222-3333-4444-555555555555'
+                    questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                    answerText: 'Outdoor games'
+                    created_at: '2025-06-22T10:05:00Z'
+                  - answerOptionsId: '66666666-7777-8888-9999-000000000000'
+                    questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                    answerText: 'Board games'
+                    created_at: '2025-06-22T10:05:00Z'
+        '400':
+          description: 'Bad Request – missing or invalid question ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    patch:
+      summary: 'Update an answer option'
+      description: |
+        Updates the text of a specific answer option. **Authentication:** Required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the answer option to update.'
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answerText:
+                  type: string
+              required:
+                - answerText
+            example:
+              answerText: 'Outdoor activities'
+      responses:
+        '200':
+          description: 'Answer option updated successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'successfully updated answer option'
+                  updatedAnswerOption:
+                    $ref: '#/components/schemas/SurveyAnswerOption'
+              example:
+                message: 'successfully updated answer option'
+                updatedAnswerOption:
+                  answerOptionsId: '11111111-2222-3333-4444-555555555555'
+                  questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                  answerText: 'Outdoor activities'
+                  created_at: '2025-06-22T10:05:00Z'
+        '400':
+          description: 'Bad Request – missing answerText.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'answerText is required.'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    delete:
+      summary: 'Delete an answer option'
+      description: |
+        Deletes a specific answer option by its ID. **Authentication:** Required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the answer option to delete.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Answer option deleted successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'successfully deleted answer option'
+              example:
+                message: 'successfully deleted answer option'
+        '400':
+          description: 'Bad Request – missing or invalid answer option ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+  /api/survey/surveyAnswer:
+    post:
+      summary: 'Submit an answer to a survey question'
+      description: |
+        Submits an answer to a survey question on behalf of the authenticated user. **Authentication:** Required.
+        The event's trainer is not allowed to submit answers to their own survey.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                questionId:
+                  type: string
+                  format: uuid
+                answer:
+                  type: string
+                  description: 'The answer text. For multiple-choice questions, this may be the chosen option text.'
+              required:
+                - questionId
+                - answer
+            example:
+              questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+              answer: 'Outdoor games'
+      responses:
+        '201':
+          description: 'Answer submitted successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'successfully created answer option'
+                  surveyAnswers:
+                    $ref: '#/components/schemas/SurveyAnswer'
+              example:
+                message: 'successfully created answer option'
+                surveyAnswers:
+                  answerId: '99999999-aaaa-bbbb-cccc-ddddeeeeffff'
+                  questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                  answer: 'Outdoor games'
+                  userId: '7d3a6b7c-f1c7-4d2a-9e4d-3b5fa8f5e024'
+                  created_at: '2025-06-22T10:10:00Z'
+        '403':
+          description: 'Forbidden – trainer cannot answer their own survey.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Trainer cannot answer own survey'
+        '404':
+          description: 'Invalid question or event (survey not found).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid survey or event'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    delete:
+      summary: 'Delete all answers for a question'
+      description: |
+        Deletes all answers for a given question (removes all user responses to that survey question). **Authentication:** Required.
+        Typically used when a question is removed.
+      parameters:
+        - name: questionId
+          in: query
+          required: true
+          description: 'The question ID for which all answers should be deleted.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Answers deleted successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'successfully deleted answer option'
+                  surveyAnswers:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                        description: 'Number of answers deleted.'
+              example:
+                message: 'successfully deleted answer option'
+                surveyAnswers:
+                  count: 10
+        '400':
+          description: 'Bad Request – missing questionId parameter.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+  '/api/survey/surveyAnswer/{id}':
+    get:
+      summary: 'Get my answers for a survey'
+      description: |
+        Retrieves all answers that the authenticated user has submitted for a specific survey. **Authentication:** Required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'UUID of the survey.'
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Answers retrieved.'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    questionId:
+                      type: string
+                      format: uuid
+                    answer:
+                      type: string
+              example:
+                - questionId: 'aaaaaaaa-1234-4567-890b-bbbbbbbbbbbb'
+                  answer: 'Outdoor games'
+                - questionId: 'cccccccc-1234-4567-890b-dddddddddddd'
+                  answer: 'No specific restrictions'
+        '400':
+          description: 'Bad Request – missing or invalid survey ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Missing answer ID'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+    delete:
+      summary: 'Delete my answer for a question'
+      description: |
+        Deletes the authenticated user's answer for a specific survey question. **Authentication:** Required.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "UUID of the question for which to delete the user's answer."
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 'Answer deleted successfully (or no answer existed).'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+              example:
+                success: true
+        '400':
+          description: 'Bad Request – missing or invalid question ID.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Missing question ID'
+        '401':
+          description: 'Unauthorized – user not authenticated.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags:
+        - 'Surveys'
+
+  /auth/callback:
+    get:
+      summary: 'OAuth2 callback'
+      description: |
+        Endpoint for handling OAuth2 authentication callbacks. Exchanges an authorization code for a user session (via Supabase Auth).
+        On success, redirects the user to the specified **next** path or home page; on failure, redirects to an error page.
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: 'Authorization code returned by the OAuth2 provider.'
+          schema:
+            type: string
+        - name: next
+          in: query
+          required: false
+          description: 'Relative URL path to redirect to after successful login.'
+          schema:
+            type: string
+      responses:
+        '302':
+          description: 'Redirects the user upon authentication success or failure.'
+          headers:
+            Location:
+              description: 'The URL to which the client is redirected.'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                description: 'No response body, only redirect.'
+      tags:
+        - 'Auth'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+
+  schemas:
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        recipientId:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+          nullable: true
+        eventId:
+          type: string
+          format: uuid
+          nullable: true
+        message:
+          type: string
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    UserSummary:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    UserDetailed:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        events:
+          type: array
+          items:
+            type: object
+            properties:
+              eventId:
+                type: string
+                format: uuid
+              wishId:
+                type: string
+                format: uuid
+              title:
+                type: string
+              description:
+                type: string
+              room:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+              trainerId:
+                type: string
+                format: uuid
+        wishes:
+          type: array
+          items:
+            type: object
+            properties:
+              wishId:
+                type: string
+                format: uuid
+              title:
+                type: string
+              description:
+                type: string
+              isConvertedToEvent:
+                type: boolean
+              createdAt:
+                type: string
+                format: date-time
+              wishCreator:
+                type: string
+                format: uuid
+              wishUpvote:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    upvoteId:
+                      type: string
+                      format: uuid
+                    userId:
+                      type: string
+                      format: uuid
+                    wishId:
+                      type: string
+                      format: uuid
+                    created_at:
+                      type: string
+                      format: date-time
+        wishUpvote:
+          type: array
+          items:
+            type: object
+            properties:
+              upvoteId:
+                type: string
+                format: uuid
+              wishId:
+                type: string
+                format: uuid
+              userId:
+                type: string
+                format: uuid
+              created_at:
+                type: string
+                format: date-time
+
+    Wish:
+      type: object
+      properties:
+        wishId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        isConvertedToEvent:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        users:
+          $ref: '#/components/schemas/UserSummary'
+        currentUpvotes:
+          type: integer
+        isUpvotedByMe:
+          type: boolean
+
+    EventDates:
+      type: object
+      properties:
+        dateId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+        endTime:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Event:
+      type: object
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        wishId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        room:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        trainerId:
+          type: string
+          format: uuid
+        users:
+          $ref: '#/components/schemas/UserSummary'
+        eventDates:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDates'
+        joined:
+          type: boolean
+
+    Survey:
+      type: object
+      properties:
+        surveyId:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    SurveyResponse:
+      type: object
+      properties:
+        surveyId:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        createdAt:
+          type: string
+        answered:
+          type: boolean
+        surveyQuestions:
+          type: array
+          items:
+            type: object
+            properties:
+              questionText:
+                type: string
+              answered:
+                type: boolean
+
+    SurveyQuestion:
+      type: object
+      properties:
+        questionId:
+          type: string
+          format: uuid
+        surveyId:
+          type: string
+          format: uuid
+        questionText:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        type:
+          type: string
+        surveyAnswerOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurveyAnswerOption'
+
+    SurveyAnswerOption:
+      type: object
+      properties:
+        answerOptionsId:
+          type: string
+          format: uuid
+        questionId:
+          type: string
+          format: uuid
+        answerText:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    SurveyAnswer:
+      type: object
+      properties:
+        answerId:
+          type: string
+          format: uuid
+        questionId:
+          type: string
+          format: uuid
+        answer:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+
+        error:
+          type: string
