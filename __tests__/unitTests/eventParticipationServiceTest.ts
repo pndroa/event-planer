@@ -16,7 +16,7 @@ test('test getting participants', async () => {
 
 test('check if user participated event', async () => {
   const userId = 'b09b935e-9a37-48f1-bb29-e8f9698b69f5'
-  const eventId = '239bb18f-ef42-48ca-8e2b-3ce3874e6156'
+  const eventId = 'edffc4e6-1430-4339-accd-b73fc3f32c5e'
   const event = await getEventWithParticipation(userId, eventId)
 
   expect(event).toBeDefined()
