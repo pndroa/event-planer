@@ -7,11 +7,14 @@ on:
     branches: [main, develop]
 
 jobs:
-  unit-tests:
+  test:
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -22,7 +25,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Jest tests
+      - name: Run Jest unit tests
         run: npm run test
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}

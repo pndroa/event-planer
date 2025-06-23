@@ -22,6 +22,9 @@ const TextField = (props: TextFieldProps) => {
               e.currentTarget.setCustomValidity('')
             },
           },
+          sx: {
+            backgroundColor: 'white',
+          },
         },
       }}
       {...props}
