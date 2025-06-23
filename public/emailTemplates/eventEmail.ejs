@@ -14,12 +14,13 @@
         Dates have changed
       </h1>
       <p style="color: #333;">
-        Hallo <%= name %>,<br />
+        Hello <%= name %>,<br />
         dates for the event <strong><%= eventTitle %></strong> in which you are participating have changed
       </p>
       <p style="color: #333;">
         <strong>These is/are the current date/s for this event:</strong>
       </p>
+      <% if (eventDates.length !== 0) { %>
       <div>
         <% eventDates.forEach(function(dateObj) { %>
           <p style="color: #333;">
@@ -29,6 +30,13 @@
           </p>
         <% }) %>
       </div>
+      <% } else { %>
+        <div>
+          <p>
+            No current dates available for the event, <strong><%= eventTitle %></strong>.
+          </p>
+        </div>
+      <% } %>  
     </div>
   </body>
 </html>
