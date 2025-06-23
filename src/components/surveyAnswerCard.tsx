@@ -110,7 +110,6 @@ const SurveyAnswerCard = ({
             ))}
           </RadioGroup>
         )}
-
         {question.type === 'text' && (
           <TextField
             fullWidth
@@ -119,6 +118,14 @@ const SurveyAnswerCard = ({
             onChange={(e) => {
               setLocalAnswer(e.target.value)
               enableSaveSurveyQuestionButton()
+            }}
+            variant='outlined'
+            slotProps={{
+              input: {
+                sx: {
+                  backgroundColor: 'white',
+                },
+              },
             }}
           />
         )}
