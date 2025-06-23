@@ -16,6 +16,8 @@ const Page = () => {
   const [doMatch, setDoMatch] = useState<boolean>(true)
   const [emailError, setEmailError] = useState<string>('')
   const [passwordError, setPasswordError] = useState<string>('')
+  const [firstNameTouched, setFirstNameTouched] = useState(false)
+  const [lastNameTouched, setLastNameTouched] = useState(false)
 
   useEffect(() => {
     if (!password || !passwordVerification) {
@@ -76,7 +78,11 @@ const Page = () => {
             fullWidth
             required
             margin='normal'
+            value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
+            onBlur={() => setFirstNameTouched(true)}
+            error={firstNameTouched && !firstName.trim()}
+            helperText={firstNameTouched && !firstName.trim() ? 'First name is required' : ''}
           />
           <TextField
             label='Last Name'
@@ -84,7 +90,11 @@ const Page = () => {
             fullWidth
             required
             margin='normal'
+            value={lastName}
             onChange={(e) => setLastName(e.target.value)}
+            onBlur={() => setLastNameTouched(true)}
+            error={lastNameTouched && !lastName.trim()}
+            helperText={lastNameTouched && !lastName.trim() ? 'Last name is required' : ''}
           />
         </Box>
         <TextField
