@@ -7,6 +7,7 @@ import Button from '@/components/button'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Question, SurveyQuestions } from '@/lib/types'
+import { isValid } from 'date-fns'
 
 type QuestionType = 'multiple' | 'text' | 'date'
 
@@ -14,15 +15,14 @@ const Page = () => {
   const { id: eventId } = useParams<{ id: string }>()
   const router = useRouter()
   const [questions, setQuestions] = useState<Question[]>([])
-  const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [existingQuestions, setExistingQuestions] = useState<string[]>([])
   const [surveyId, setSurveyId] = useState<string | null>(null)
-  const [title, setTitle] = useState<string>('')
+  const [title, setTitle] = useState('')
 
   useEffect(() => {
     const fetchEvent = async () => {
       const res = await api.get(`/event/${eventId}`)
-      console.log(res)
       setTitle(res.data.event.title)
     }
     fetchEvent()
@@ -82,7 +82,6 @@ const Page = () => {
     )
   }
 
-  // Frage löschen
   const handleDeleteQuestion = (index: number) => {
     setQuestions((prev) => prev.filter((_, i) => i !== index))
   }
@@ -106,20 +105,25 @@ const Page = () => {
   }
 
   const hasDuplicateDates = () => {
-    return questions.some(
-      (q) =>
-        q.type === 'date' &&
-        q.dates!.some(
-          (d, idx, arr) =>
-            d.answerText &&
-            arr.findIndex(
-              (o) =>
-                o.answerText &&
-                new Date(o.answerText as string | Date).toISOString() ===
-                  new Date(d.answerText as string | Date).toISOString()
-            ) !== idx
-        )
-    )
+    return questions.some((q) => {
+      if (q.type !== 'date' || !q.dates) return false
+
+      const seen = new Set<string>()
+
+      for (const d of q.dates) {
+        if (!d.answerText) continue
+
+        const dateObj = typeof d.answerText === 'string' ? new Date(d.answerText) : d.answerText
+        if (!isValid(dateObj)) continue
+
+        const key = dateObj.toISOString().split('T')[0]
+
+        if (seen.has(key)) return true
+        seen.add(key)
+      }
+
+      return false
+    })
   }
 
   const hasDuplicateWithExisting = () => {
@@ -183,7 +187,7 @@ const Page = () => {
               q.dates.map((date) => {
                 const datePayload = {
                   questionId,
-                  answerText: new Date(date.answerText as string).toISOString().split('T')[0],
+                  answerText: new Date(date.answerText as Date).toISOString().split('T')[0],
                 }
                 return api.post('/survey/surveyAnswerOption', datePayload)
               })
