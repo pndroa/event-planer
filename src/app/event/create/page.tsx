@@ -113,7 +113,7 @@ const Page = () => {
         </Box>
 
         <Box>
-          <IconButton onClick={() => handleDelete(index)}>
+          <IconButton onClick={() => handleDelete(index)} sx={{ marginBottom: 2.5 }}>
             <ClearIcon />
           </IconButton>
         </Box>
@@ -179,7 +179,7 @@ const Page = () => {
   return (
     <Box
       sx={{
-        height: '75vh',
+        height: '80vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -221,7 +221,7 @@ const Page = () => {
               fullWidth
               sx={{ marginBottom: '1.5rem' }}
             />
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
               <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
                 <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
                 <TimePicker
@@ -235,8 +235,8 @@ const Page = () => {
                   label='End'
                 />
               </Box>
-              <IconButton onClick={handleAddButton}>
-                <AddIcon sx={{ marginRight: '0.2rem' }} />
+              <IconButton onClick={handleAddButton} sx={{ marginBottom: 2.5 }}>
+                <AddIcon />
               </IconButton>
             </Box>
             {eventDates.map((eventDate: PostEventDates, index) =>

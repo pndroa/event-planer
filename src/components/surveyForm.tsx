@@ -288,9 +288,6 @@ const SurveyForm = ({
                                     ? 'Duplicate date'
                                     : '',
                                 size: 'small',
-                                InputProps: {
-                                  sx: { backgroundColor: 'white' },
-                                },
                               },
                             }}
                           />
