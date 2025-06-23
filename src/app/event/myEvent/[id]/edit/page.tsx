@@ -10,9 +10,7 @@ import { PostEventDates } from '@/lib/types'
 import { format, isValid } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
-import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
-import { AxiosError } from 'axios'
 import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import dayjs from 'dayjs'
@@ -33,7 +31,6 @@ dayjs.extend(customParseFormat)
 const Page = () => {
   const router = useRouter()
   const user = useUser()
-  const { showBoundary } = useErrorBoundary()
   const [_isClient, setIsClient] = useState(false)
   const [date, setDate] = useState<Date | null>(null)
   const [startTime, setStartTime] = useState<Date | null>(null)
@@ -147,9 +144,6 @@ const Page = () => {
         router.push(`/event/${id}`)
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        showBoundary(error)
-      }
       console.error('Error updating Event:', error)
     }
   }

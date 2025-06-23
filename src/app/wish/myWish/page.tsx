@@ -18,7 +18,6 @@ import { Wishes } from '@/lib/types'
 import { useUser } from '@/hooks/useUser'
 import WishCard from '@/components/WishCard'
 import TopNavigation from '@/components/TopNavigation'
-import { useErrorBoundary } from 'react-error-boundary'
 import SelectedMyWishesCard from '@/components/SelectedMyWishesCard'
 import CloseIcon from '@mui/icons-material/Close'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
@@ -29,7 +28,6 @@ const Page = () => {
   const [sortBy, setSortBy] = useState<'date'>('date')
   const [selectedMyWishes, setSelectedMyWishes] = useState<Wishes | null>(null)
   const user = useUser()
-  const { showBoundary } = useErrorBoundary()
 
   useEffect(() => {
     const fetchWishes = async () => {
@@ -39,11 +37,10 @@ const Page = () => {
         setWishes(res.data)
       } catch (error) {
         console.error('Error loading wishes:', error)
-        showBoundary(error)
       }
     }
     fetchWishes()
-  }, [showBoundary, user])
+  }, [user])
 
   const filteredWishes: Wishes[] = wishes
     .filter((wish) => wish.title.toLowerCase().includes(searchTerm.toLowerCase()))
