@@ -3,11 +3,9 @@ import FormCard from '@/components/formCard'
 import { TextField, Grid, Box } from '@mui/material'
 import Button from '@/components/button'
 import React, { useLayoutEffect, useState, FormEvent } from 'react'
-import { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { useRouter } from 'next/navigation'
 import { PostWishes } from '@/lib/types'
-import { useErrorBoundary } from 'react-error-boundary'
 import { useUser } from '@/hooks/useUser'
 
 interface PostResponseWishes extends PostWishes {
@@ -18,7 +16,6 @@ const Page = () => {
   //Constants
   const router = useRouter()
   const user = useUser()
-  const { showBoundary } = useErrorBoundary()
   const [isClient, setIsClient] = useState(false)
   const [title, setTitle] = useState('')
   const [error, setError] = useState(false)
@@ -30,12 +27,6 @@ const Page = () => {
 
     const title = (formData.get('title') as string)?.trim()
     const description = (formData.get('description') as string)?.trim() || null
-
-    if (!title) {
-      const error = new Error('Please enter a title.')
-      showBoundary(error)
-      return
-    }
 
     const wish = {
       wishCreator: user?.id as string,
@@ -49,9 +40,6 @@ const Page = () => {
         router.push('/wish')
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        showBoundary(error)
-      }
       console.error(error)
     }
   }

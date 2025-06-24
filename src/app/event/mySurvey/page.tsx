@@ -25,7 +25,6 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Button from '@/components/button'
 import SearchBar from '@/components/SearchBar'
-import { useErrorBoundary } from 'react-error-boundary'
 import { useUser } from '@/hooks/useUser'
 import { useRouter } from 'next/navigation'
 
@@ -37,7 +36,6 @@ const Page = () => {
 
   const user = useUser()
   const route = useRouter()
-  const { showBoundary } = useErrorBoundary()
 
   useEffect(() => {
     const fetchSurveys = async () => {
@@ -47,11 +45,10 @@ const Page = () => {
         setSurveys(res.data.surveys)
       } catch (error) {
         console.error('Error loading surveys:', error)
-        showBoundary(error)
       }
     }
     fetchSurveys()
-  }, [showBoundary, user])
+  }, [user])
 
   const filteredSurveys = surveys
     .filter((survey) => survey?.title.toLowerCase().includes(searchTerm.toLowerCase()))

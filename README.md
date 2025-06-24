@@ -1,42 +1,101 @@
-# SWT Project
+# 📅 Event Planner
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a web-based event planning tool built with [Next.js](https://nextjs.org/), [Prisma](https://www.prisma.io/), [Supabase](https://supabase.com/), and TypeScript.
 
-## Getting Started
+The application can be run either locally or fully containerized via Docker.
 
-First, run the development server:
+---
+
+## ✅ Local Setup (without Docker)
+
+### Requirements
+
+- Node.js (v18 or later recommended)
+- npm or yarn
+- Supabase or any PostgreSQL-compatible database
+- A `.env` file with required environment variables  
+  (see `.env.template` for reference)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/pndroa/event-planer
+cd event-planer/
+npm install
+npx prisma generate
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running the App
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev        # Development mode with hot reload
+npm run build      # Build for production
+npm start          # Start in production mode
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Admin Commands (Prisma)
 
-## Learn More
+- `npx prisma generate` – regenerate Prisma client
+- `npx prisma migrate dev` – run development migrations
+- `npx prisma migrate deploy` – apply production migrations
+- `npx prisma studio` – open browser-based DB UI
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🐳 Docker Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Requirements
 
-## Deploy on Vercel
+- Docker
+- Docker Compose
+- A valid `.env` file at the root of the project
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Prisma requires OpenSSL to be installed inside the Docker image.  
+  This is already handled in the `Dockerfile` with:
 
-## API-Documentation
+  ```Dockerfile
+  RUN apt-get update && apt-get install -y openssl
+  ```
 
-[**Show OpenAPI-Documentation**](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/pndroa/event-planer/main/api-documentation.yaml)
+- The app uses Supabase's **IPv4-compatible Session Pooler** for database access:
+  ```
+  postgresql://postgres.<project-id>:<password>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require
+  ```
+
+### Usage
+
+```bash
+docker-compose up --build
+```
+
+To run Prisma commands inside the container:
+
+```bash
+docker-compose exec web npx prisma generate
+docker-compose exec web npx prisma migrate deploy
+docker-compose exec web npx prisma studio
+```
+
+To stop and clean up:
+
+```bash
+docker-compose down --volumes --remove-orphans
+```
+
+---
+
+## 📁 Project Structure
+
+- `.env.template` – placeholder for required secrets
+- `Dockerfile` – production-ready with OpenSSL
+- `docker-compose.yml` – container orchestration
+- `prisma/` – schema and migration definitions
+- `pages/`, `components/` – Next.js app source
+- `README.md` – this file
+
+---
+
+📬 **Questions or feedback?**  
+Feel free to open an issue or reach out.

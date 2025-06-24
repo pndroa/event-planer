@@ -11,14 +11,11 @@ import TimePicker from '@/components/timePicker'
 import { PostEventDates } from '@/lib/types'
 import { format, isValid } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useErrorBoundary } from 'react-error-boundary'
 import { api } from '@/lib/api'
-import { AxiosError } from 'axios'
 
 const Page = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { showBoundary } = useErrorBoundary()
 
   const [isClient, setIsClient] = useState(false)
   const [date, setDate] = useState<Date | null>(null)
@@ -169,9 +166,6 @@ const Page = () => {
         router.push(`/event`)
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        showBoundary(error)
-      }
       console.error('Error creating Event:', error)
     }
   }
