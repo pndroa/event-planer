@@ -10,21 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: testdb
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
@@ -43,12 +28,8 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Push schema to local PostgreSQL
-        run: npx prisma db push
-
-      - name: Seed database
-        run: npx ts-node prisma/seed.ts
-        if: hashFiles('prisma/seed.ts') != ''
+      - name: Deploy migrations to Supabase
+        run: npx prisma migrate deploy
 
       - name: Run tests
         run: npm run test

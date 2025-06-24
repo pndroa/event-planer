@@ -1,37 +1,28 @@
-# --- STAGE 1: Build ---
-FROM node:20 AS builder
+# 1. Build Stage
+FROM node:20-slim AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and lock file
+# Install dependencies & Prisma prerequisites
 COPY package*.json ./
 COPY prisma ./prisma
-COPY tsconfig.json .        
-COPY src ./src
+RUN apt-get update && apt-get install -y openssl
+RUN npm install
 
-# Install dependencies
-RUN npm ci
-
-# Copy all project files
 COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build the Next.js app
 RUN npm run build
 
-# --- STAGE 2: Run ---
-FROM node:20
+# 2. Run Stage
+FROM node:20-slim
 
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Copy only the built output + node_modules
+# Install OpenSSL for Prisma runtime
+RUN apt-get update && apt-get install -y openssl
+
 COPY --from=builder /app ./
+COPY .env .env
 
-# Expose Next.js default port
 EXPOSE 3000
-
-# Start the app
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]
