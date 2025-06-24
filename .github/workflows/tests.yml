@@ -23,13 +23,10 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma client
         run: npx prisma generate
-
-      - name: Deploy migrations to Supabase
-        run: npx prisma migrate deploy
 
       - name: Run tests
         run: npm run test
