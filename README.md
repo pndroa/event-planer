@@ -59,9 +59,15 @@ npm start          # Start in production mode
   RUN apt-get update && apt-get install -y openssl
   ```
 
-- The app uses Supabase's **IPv4-compatible Session Pooler** for database access:
+- The app uses Supabase’s **IPv4-compatible session pooler** for database access _inside Docker_:
+
   ```
   postgresql://postgres.<project-id>:<password>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require
+  ```
+
+- **Outside of Docker**, the **IPv6-only session endpoint** must be used:
+  ```
+  postgresql://postgres:<password>@<project-id>:5432/postgres
   ```
 
 ### Usage

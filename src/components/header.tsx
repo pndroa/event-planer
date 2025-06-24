@@ -85,9 +85,20 @@ export default function Header() {
     <Box>
       <AppBar position='fixed' sx={{ zIndex: 1300, pl: 2 }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant='h6' sx={{ flexGrow: 1, textAlign: 'start', color: 'white' }}>
+          <Typography
+            variant='h6'
+            sx={{
+              flexGrow: 1,
+              textAlign: {
+                xs: 'center',
+                sm: 'end',
+              },
+              color: 'white',
+            }}
+          >
             Event Planner
           </Typography>
+
           <Box sx={{ display: 'flex', gap: 1 }}>
             <IconButton component={Link} href='/' sx={{ color: 'white' }}>
               {/* Home Icon */}
@@ -114,8 +125,8 @@ export default function Header() {
                 paper: {
                   sx: {
                     width: 300,
-                    maxHeight: 400, // max. Höhe
-                    overflowY: 'auto', // vertikales Scrollen aktivieren
+                    maxHeight: 400,
+                    overflowY: 'auto',
                   },
                 },
               }}
