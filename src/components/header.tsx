@@ -51,7 +51,7 @@ export default function Header() {
 
   const handleClearAll = async () => {
     await fetch('/api/notifications', { method: 'DELETE' })
-    mutate([]) // leere Liste anzeigen
+    mutate([])
     setAnchorEl(null)
   }
 
@@ -91,12 +91,12 @@ export default function Header() {
               flexGrow: 1,
               textAlign: {
                 xs: 'center',
-                sm: 'end',
+                sm: 'start',
               },
               color: 'white',
             }}
           >
-            Event Planner
+            Event Planer
           </Typography>
 
           <Box sx={{ display: 'flex', gap: 1 }}>
