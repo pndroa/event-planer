@@ -12,7 +12,7 @@ const AuthForm = ({ title, children }: AuthFormProps) => {
     <Box
       sx={{
         width: '100%',
-        minHeight: '90vh',
+        minHeight: { xs: '75vh', sm: '90vh' },
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
