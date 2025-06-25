@@ -1,5 +1,5 @@
 'use client'
-import { FormEvent, useLayoutEffect, useState } from 'react'
+import { FormEvent, useLayoutEffect, useMemo, useState } from 'react'
 import { Box, Divider, IconButton } from '@mui/material'
 import Button from '@/components/button'
 import TextField from '@/components/textfield'
@@ -16,15 +16,8 @@ import { useParams } from 'next/navigation'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { PostEventDatesUpdate } from '@/lib/types'
-import dynamic from 'next/dynamic'
-
-const DatePicker = dynamic(() => import('@/components/datePicker'), {
-  ssr: false,
-})
-
-const TimePicker = dynamic(() => import('@/components/timePicker'), {
-  ssr: false,
-})
+import DatePicker from '@/components/datePicker'
+import TimePicker from '@/components/timePicker'
 
 dayjs.extend(customParseFormat)
 
@@ -80,11 +73,18 @@ const Page = () => {
               flexDirection: { xs: 'column', sm: 'row' },
             }}
           >
-            <DatePicker
-              value={date}
-              onChange={(newDate) => handleChange(index, 'date', newDate)}
-              label='Date'
-            />
+            <Box>
+              <DatePicker
+                value={date}
+                onChange={(newDate) => handleChange(index, 'date', newDate)}
+                label='Date'
+              />
+              {!date || !isValid(date) ? (
+                <Box sx={{ color: 'error.main', fontSize: '0.75rem', mt: '4px', ml: '14px' }}>
+                  Required
+                </Box>
+              ) : null}
+            </Box>
             <TimePicker
               value={startTime}
               onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
@@ -98,7 +98,7 @@ const Page = () => {
           </Box>
 
           <Box>
-            <IconButton onClick={() => handleDelete(index)}>
+            <IconButton onClick={() => handleDelete(index)} sx={{ mb: 3 }}>
               <ClearIcon />
             </IconButton>
           </Box>
@@ -107,21 +107,13 @@ const Page = () => {
     )
   }
 
-  const isFormValid = () => {
+  const isFormValid = useMemo(() => {
     if (!title.trim()) return false
 
-    if (eventDates.length === 0) return false
+    if (eventDates.length === 0) return true
 
-    return eventDates.every(
-      (entry) =>
-        entry.date &&
-        entry.startTime &&
-        entry.endTime &&
-        isValid(entry.date) &&
-        isValid(entry.startTime) &&
-        isValid(entry.endTime)
-    )
-  }
+    return eventDates.every((entry) => entry.date && isValid(entry.date))
+  }, [title, eventDates])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -256,7 +248,7 @@ const Page = () => {
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button type='submit' disabled={!isFormValid()}>
+              <Button type='submit' disabled={!isFormValid}>
                 Save changes
               </Button>
             </Box>
