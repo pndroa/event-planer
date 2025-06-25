@@ -48,7 +48,7 @@ const DatePicker = ({
   const externalHelperText = 'helperText' in textFieldProps ? textFieldProps.helperText : undefined
 
   return (
-    <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: { xs: -3 } }}>
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={language}>
         <MuiDatePicker
           minDate={MIN_DATE}
@@ -72,16 +72,17 @@ const DatePicker = ({
                     ? 'Duplicate date'
                     : 'Valid date range: 2000–2099'
                   : ' '),
-              sx: { width: '250px' },
+              fullWidth: false,
+              sx: {
+                width: { xs: '245px', sm: '250px' },
+              },
               InputProps: {
                 sx: {
-                  width: '250px',
                   backgroundColor: 'white',
                 },
               },
             } as TextFieldProps,
           }}
-          sx={{ maxWidth: '250px' }}
         />
       </LocalizationProvider>
     </Box>

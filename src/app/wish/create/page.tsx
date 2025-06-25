@@ -65,10 +65,21 @@ const Page = () => {
   }
 
   return (
-    <Grid container minHeight='80vh' justifyContent='center' alignItems='center' margin='auto'>
+    <Grid
+      container
+      minHeight='80vh'
+      justifyContent='center'
+      alignItems='center'
+      px={{ xs: 2, sm: 4 }}
+    >
       <Grid
         sx={{
-          width: '50%',
+          width: {
+            xs: '90%',
+            sm: '70%',
+            md: '50%',
+          },
+          mx: 'auto',
         }}
       >
         <FormCard title='Create Wish'>

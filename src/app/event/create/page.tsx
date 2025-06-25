@@ -91,7 +91,15 @@ const Page = () => {
   ) => {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
-        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexGrow: 1,
+            flexWrap: 'wrap',
+            flexDirection: { xs: 'column', sm: 'row' },
+          }}
+        >
           <DatePicker
             value={date}
             onChange={(newDate) => handleChange(index, 'date', newDate)}
@@ -110,7 +118,7 @@ const Page = () => {
         </Box>
 
         <Box>
-          <IconButton onClick={() => handleDelete(index)} sx={{ marginBottom: 2.5 }}>
+          <IconButton onClick={() => handleDelete(index)}>
             <ClearIcon />
           </IconButton>
         </Box>
@@ -215,8 +223,16 @@ const Page = () => {
               fullWidth
               sx={{ marginBottom: '1.5rem' }}
             />
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: { xs: 3.5, sm: 2 },
+                  flexGrow: 1,
+                  flexWrap: 'wrap',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                }}
+              >
                 <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
                 <TimePicker
                   value={startTime}
@@ -229,7 +245,7 @@ const Page = () => {
                   label='End'
                 />
               </Box>
-              <IconButton onClick={handleAddButton} sx={{ marginBottom: 2.5 }}>
+              <IconButton onClick={handleAddButton}>
                 <AddIcon />
               </IconButton>
             </Box>

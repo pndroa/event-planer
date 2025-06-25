@@ -40,28 +40,43 @@ export default function WishCard({
     <Card
       onClick={onClick}
       sx={{
-        p: 2,
+        p: { xs: 1.5, sm: 2 },
         backgroundColor: '#f0f4ff',
         borderRadius: 3,
         boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-        '&:hover': { backgroundColor: '#e0eaff', transform: 'scale(1.01)' },
+        '&:hover': {
+          backgroundColor: '#e0eaff',
+          transform: { xs: 'none', sm: 'scale(1.01)' },
+        },
         transition: '0.2s',
         cursor: 'pointer',
       }}
     >
-      <Box display='flex' justifyContent='space-between' alignItems='flex-start'>
-        <Box display='flex' alignItems='center' gap={1}>
-          <Typography variant='body2' color='text.secondary'>
-            @{username}
-          </Typography>
-        </Box>
+      <Box
+        display='flex'
+        justifyContent='space-between'
+        alignItems='flex-start'
+        flexDirection={{ xs: 'column', sm: 'row' }}
+        gap={0.5}
+      >
+        <Typography variant='body2' color='text.secondary'>
+          @{username}
+        </Typography>
+
         <Typography variant='body2' color='text.secondary' sx={{ whiteSpace: 'nowrap' }}>
           {formatTimeAgo(createdAt)}
         </Typography>
       </Box>
+
       <Typography
         variant='h6'
-        sx={{ mt: 1, fontWeight: 700, color: grey[900], wordBreak: 'break-word' }}
+        sx={{
+          mt: 1,
+          fontWeight: 700,
+          color: grey[900],
+          wordBreak: 'break-word',
+          fontSize: { xs: '1rem', sm: '1.25rem' },
+        }}
       >
         {title}
       </Typography>
@@ -90,7 +105,14 @@ export default function WishCard({
           {currentUpvotes}
         </Typography>
       </Box>
-      <Box display='flex' justifyContent='flex-end'>
+
+      <Box
+        display='flex'
+        justifyContent='flex-end'
+        mt={1}
+        flexDirection={{ xs: 'column', sm: 'row' }}
+        gap={1}
+      >
         {deleteButton && (
           <Button
             onClick={(e) => {
@@ -100,8 +122,6 @@ export default function WishCard({
             Delete
           </Button>
         )}
-      </Box>
-      <Box display='flex' justifyContent='flex-end'>
         {actionButton}
       </Box>
     </Card>

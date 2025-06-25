@@ -270,30 +270,52 @@ const SurveyForm = ({
                           sx={{
                             display: 'flex',
                             flexDirection: 'row',
-                            alignItems: 'flex-start',
+                            alignItems: 'center',
                             gap: 1,
-                            marginY: 1,
+                            mb: 2,
+                            mt: 2,
+                            transform: { xs: 'scale(0.8)', sm: 'none' },
+                            transformOrigin: 'left',
+                            width: { sx: '80%', sm: '100%' },
                           }}
                         >
-                          <Radio value={j} />
-                          <DatePicker
-                            value={date.answerText ? new Date(date.answerText) : null}
-                            onChange={(newDate) => updateDate(i, j, newDate)}
-                            slotProps={{
-                              textField: {
-                                error: !date.answerText || isDuplicate,
-                                helperText: !date.answerText
-                                  ? 'Required'
-                                  : isDuplicate
-                                    ? 'Duplicate date'
-                                    : '',
-                                size: 'small',
-                              },
+                          <Radio
+                            value={j}
+                            sx={{
+                              alignSelf: 'center',
+                              mt: { xs: 0.5, sm: 0 },
                             }}
                           />
+                          <Box sx={{ flexGrow: 1 }}>
+                            <DatePicker
+                              value={date.answerText ? new Date(date.answerText) : null}
+                              onChange={(newDate) => updateDate(i, j, newDate)}
+                              slotProps={{
+                                textField: {
+                                  error: !date.answerText || isDuplicate,
+                                  helperText: !date.answerText
+                                    ? 'Required'
+                                    : isDuplicate
+                                      ? 'Duplicate date'
+                                      : '',
+                                  fullWidth: true,
+                                  size: 'small',
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    width: '160px',
+                                    minWidth: '140px',
+                                    fontSize: '0.875rem',
+                                  },
+                                },
+                              }}
+                            />
+                          </Box>
                           <IconButton
                             onClick={() => removeDateField(i, j)}
                             disabled={q.dates!.length <= 2}
+                            sx={{
+                              alignSelf: 'center',
+                            }}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -305,7 +327,13 @@ const SurveyForm = ({
                     startIcon={<AddIcon />}
                     onClick={() => addDateField(i)}
                     size='small'
-                    sx={{ mt: 1 }}
+                    sx={{
+                      mt: 3,
+                      fontSize: '0.75rem',
+                      minHeight: '32px',
+                      width: { xs: '60%', sm: 'auto' },
+                      ml: { xs: 4.4, sm: 0 },
+                    }}
                   >
                     Add date
                   </Button>

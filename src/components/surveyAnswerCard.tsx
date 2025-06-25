@@ -13,6 +13,8 @@ import {
 import Button from '@/components/button'
 import { SurveyQuestions } from '@/lib/types'
 import { api } from '@/lib/api'
+import { format } from 'date-fns'
+import { de } from 'date-fns/locale'
 
 const SurveyAnswerCard = ({
   question,
@@ -100,16 +102,25 @@ const SurveyAnswerCard = ({
               enableSaveSurveyQuestionButton()
             }}
           >
-            {question.surveyAnswerOptions?.map((opt) => (
-              <FormControlLabel
-                key={opt.answerOptionsId}
-                value={opt.answerText}
-                control={<Radio />}
-                label={opt.answerText}
-              />
-            ))}
+            {question.surveyAnswerOptions?.map((opt) => {
+              const raw = opt.answerText
+              const formatted =
+                question.type === 'date' && raw
+                  ? format(new Date(raw), 'dd.MM.yyyy', { locale: de })
+                  : raw
+
+              return (
+                <FormControlLabel
+                  key={opt.answerOptionsId}
+                  value={opt.answerText}
+                  control={<Radio />}
+                  label={formatted}
+                />
+              )
+            })}
           </RadioGroup>
         )}
+
         {question.type === 'text' && (
           <TextField
             fullWidth
