@@ -45,7 +45,7 @@ const Page = () => {
           setExistingQuestions(questionsFromDB)
         }
       } catch (err) {
-        console.error('Fehler beim Laden der bestehenden Fragen:', err)
+        console.error('Error Loading Questions:', err)
       }
     }
 
@@ -54,11 +54,11 @@ const Page = () => {
 
   const handleAddQuestion = () => {
     setQuestions((prev) => [
-      ...prev,
       {
         type: null,
         question: '',
       },
+      ...prev,
     ])
   }
 
@@ -213,7 +213,7 @@ const Page = () => {
   }
 
   return (
-    <Box sx={{ px: 2, py: 4, ml: { md: '160px' } }}>
+    <Box sx={{ px: 2, py: 4, mx: 'auto' }}>
       <Box
         sx={{
           maxWidth: 800,

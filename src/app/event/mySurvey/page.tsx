@@ -63,7 +63,7 @@ const Page = () => {
         alignItems='center'
         justifyContent='space-between'
         gap={1.5}
-        mb={1}
+        mb={1.5}
       >
         <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
         <FormControl size='small' sx={{ minWidth: 140 }}>

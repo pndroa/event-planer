@@ -78,7 +78,14 @@ export default function WishFeed() {
   return (
     <Box>
       <Box sx={{ maxWidth: 700, mx: 'auto' }}>
-        <Box display='flex' gap={1.5} flexWrap='wrap' mb={3}>
+        <Box
+          display='flex'
+          flexWrap='wrap'
+          alignItems='center'
+          justifyContent='space-between'
+          gap={1.5}
+          mb={1.5}
+        >
           <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
           <FormControl size='small' sx={{ minWidth: 140 }}>
             <InputLabel id='sort-label'>Sort by</InputLabel>
@@ -93,7 +100,7 @@ export default function WishFeed() {
             </Select>
           </FormControl>
           <Link href='/wish/create' passHref>
-            <Button>+ create wish</Button>
+            <Button sx={{ width: '160px' }}>+ create wish</Button>
           </Link>
         </Box>
 

@@ -66,7 +66,7 @@ export default function EventFeed() {
           alignItems='center'
           justifyContent='space-between'
           gap={1.5}
-          mb={3}
+          mb={1.5}
         >
           <SearchBar searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
           <FormControl size='small' sx={{ minWidth: 140 }}>
@@ -81,7 +81,7 @@ export default function EventFeed() {
             </Select>
           </FormControl>
           <Link href='/event/create' passHref>
-            <Button>+ create event</Button>
+            <Button sx={{ width: '160px' }}>+ create event</Button>
           </Link>
         </Box>
 

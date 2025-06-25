@@ -87,7 +87,7 @@ const Page = () => {
   }
 
   return (
-    <Box sx={{ px: 4, py: 4, ml: { md: '200px' } }}>
+    <Box sx={{ px: 4, py: 4, mx: 'auto' }}>
       <Box sx={{ maxWidth: 800, mx: 'auto' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Typography variant='h5' gutterBottom>
@@ -97,7 +97,14 @@ const Page = () => {
             <Button
               startIcon={<AddIcon />}
               onClick={() => router.push(`/event/create/${id}/survey`)}
-              sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                padding: { xs: '2px 8px', sm: '6px 12px' },
+                minWidth: { xs: 'auto', sm: '84px' },
+              }}
             >
               {surveyQuestions.length === 0 ? 'Add first Question' : 'Add Question'}
             </Button>

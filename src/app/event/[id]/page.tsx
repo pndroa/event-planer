@@ -134,8 +134,6 @@ export default function EventDetailPage() {
         width: '100%',
         maxWidth: 800,
         mx: 'auto',
-        mt: 6,
-        mb: 6,
         p: 4,
         backgroundColor: '#fff',
         borderRadius: 3,

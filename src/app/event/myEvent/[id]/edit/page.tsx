@@ -1,6 +1,6 @@
 'use client'
 import { FormEvent, useLayoutEffect, useState } from 'react'
-import { Box, IconButton } from '@mui/material'
+import { Box, Divider, IconButton } from '@mui/material'
 import Button from '@/components/button'
 import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
@@ -32,9 +32,6 @@ const Page = () => {
   const router = useRouter()
   const user = useUser()
   const [_isClient, setIsClient] = useState(false)
-  const [date, setDate] = useState<Date | null>(null)
-  const [startTime, setStartTime] = useState<Date | null>(null)
-  const [endTime, setEndTime] = useState<Date | null>(null)
   const [eventDates, setEventDates] = useState<PostEventDatesUpdate[]>([])
   const [eventDatesToCompare, setEventDatesToCompare] = useState<PostEventDatesUpdate[]>([])
   const { id } = useParams()
@@ -70,31 +67,59 @@ const Page = () => {
     index: number
   ) => {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
-        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
-          <DatePicker
-            value={date}
-            onChange={(newDate) => handleChange(index, 'date', newDate)}
-            label='Date'
-          />
-          <TimePicker
-            value={startTime}
-            onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
-            label='Start'
-          />
-          <TimePicker
-            value={endTime}
-            onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime)}
-            label='End'
-          />
-        </Box>
+      <>
+        <Divider />
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 3 }} key={index}>
+          <Divider />
+          <Box
+            sx={{
+              display: 'flex',
+              gap: { xs: 3.5, sm: 2 },
+              flexGrow: 1,
+              flexWrap: 'wrap',
+              flexDirection: { xs: 'column', sm: 'row' },
+            }}
+          >
+            <DatePicker
+              value={date}
+              onChange={(newDate) => handleChange(index, 'date', newDate)}
+              label='Date'
+            />
+            <TimePicker
+              value={startTime}
+              onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
+              label='Start'
+            />
+            <TimePicker
+              value={endTime}
+              onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime)}
+              label='End'
+            />
+          </Box>
 
-        <Box>
-          <IconButton onClick={() => handleDelete(index)}>
-            <ClearIcon />
-          </IconButton>
+          <Box>
+            <IconButton onClick={() => handleDelete(index)}>
+              <ClearIcon />
+            </IconButton>
+          </Box>
         </Box>
-      </Box>
+      </>
+    )
+  }
+
+  const isFormValid = () => {
+    if (!title.trim()) return false
+
+    if (eventDates.length === 0) return false
+
+    return eventDates.every(
+      (entry) =>
+        entry.date &&
+        entry.startTime &&
+        entry.endTime &&
+        isValid(entry.date) &&
+        isValid(entry.startTime) &&
+        isValid(entry.endTime)
     )
   }
 
@@ -106,10 +131,7 @@ const Page = () => {
     const description = formData.get('description') || null
     const room = formData.get('room') || null
 
-    const finalEventDates = [
-      ...(date ? [{ date, startTime: startTime || null, endTime: endTime || null }] : []),
-      ...eventDates,
-    ]
+    const finalEventDates = [...eventDates]
 
     const payload = {
       trainerId: user?.id as string,
@@ -184,9 +206,8 @@ const Page = () => {
   return (
     <Box
       sx={{
-        height: '75vh',
+        height: '80vh',
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'center',
       }}
     >
@@ -227,26 +248,17 @@ const Page = () => {
             {eventDates.map((eventDate: PostEventDates, index) =>
               dateElements(eventDate.date, eventDate.startTime, eventDate.endTime, index)
             )}
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, flexWrap: 'nowrap' }}>
-                <DatePicker value={date} onChange={(newDate) => setDate(newDate)} label='Date' />
-                <TimePicker
-                  value={startTime}
-                  onChange={(newStartTime) => setStartTime(newStartTime)}
-                  label='Start'
-                />
-                <TimePicker
-                  value={endTime}
-                  onChange={(newEndTime) => setEndTime(newEndTime)}
-                  label='End'
-                />
-              </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, mb: 2 }}>
               <IconButton onClick={handleAddButton}>
-                <AddIcon sx={{ marginRight: '0.2rem' }} />
+                <AddIcon />
               </IconButton>
             </Box>
+
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button type='submit'>Save changes</Button>
+              <Button type='submit' disabled={!isFormValid()}>
+                Save changes
+              </Button>
             </Box>
           </Box>
         </FormCard>

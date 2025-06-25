@@ -18,11 +18,11 @@ const ContentWrapper = ({
         marginLeft: showNavigation && !IsMobile() ? `${drawerWidth}px` : 0,
         overflowY: 'auto',
         overflowX: 'hidden',
-        scrollbarGutter: 'stable',
         px: IsMobile() ? 2 : 4,
-        pt: 2,
+        pt: 4,
         pb: 8,
         flexGrow: 1,
+        height: '100%',
         minHeight: 0,
       }}
     >

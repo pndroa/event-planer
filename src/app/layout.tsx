@@ -10,8 +10,8 @@ import MuiThemeProvider from '@/providers/theme-provider'
 import { Box } from '@mui/material'
 
 export const metadata: Metadata = {
-  title: 'Event Planer',
-  description: 'Pep Digital - Event Planer',
+  title: 'Event-Planer',
+  description: 'pep.digital - Event-Planer',
 }
 
 export default async function RootLayout({
@@ -27,17 +27,23 @@ export default async function RootLayout({
   const showNavigation = !!session
 
   return (
-    <html lang='en'>
-      <body style={{ margin: 0 }}>
+    <html lang='en' style={{ height: '100%', overflow: 'hidden' }}>
+      <body style={{ margin: 0, height: '100%', overflow: 'hidden' }}>
         <MuiThemeProvider>
-          {showNavigation && <Header />}
-          <Box sx={{ display: 'flex', width: '100%', height: 'calc(100vh - 64px)', mt: '64px' }}>
-            {showNavigation && <Sidebar />}
-            <ContentWrapper showNavigation={showNavigation}>
-              <ErrorBoundaryWrapper>
-                <NuqsAdapter>{children}</NuqsAdapter>
-              </ErrorBoundaryWrapper>
-            </ContentWrapper>
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            {showNavigation && (
+              <Box sx={{ height: '64px', flexShrink: 0 }}>
+                <Header />
+              </Box>
+            )}
+            <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
+              {showNavigation && <Sidebar />}
+              <ContentWrapper showNavigation={showNavigation}>
+                <ErrorBoundaryWrapper>
+                  <NuqsAdapter>{children}</NuqsAdapter>
+                </ErrorBoundaryWrapper>
+              </ContentWrapper>
+            </Box>
           </Box>
         </MuiThemeProvider>
       </body>

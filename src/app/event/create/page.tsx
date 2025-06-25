@@ -1,6 +1,6 @@
 'use client'
 import { FormEvent, useLayoutEffect, useState, useEffect } from 'react'
-import { Box, IconButton } from '@mui/material'
+import { Box, Divider, IconButton } from '@mui/material'
 import Button from '@/components/button'
 import TextField from '@/components/textfield'
 import AddIcon from '@mui/icons-material/Add'
@@ -90,39 +90,42 @@ const Page = () => {
     index: number
   ) => {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }} key={index}>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 2,
-            flexGrow: 1,
-            flexWrap: 'wrap',
-            flexDirection: { xs: 'column', sm: 'row' },
-          }}
-        >
-          <DatePicker
-            value={date}
-            onChange={(newDate) => handleChange(index, 'date', newDate)}
-            label='Date'
-          />
-          <TimePicker
-            value={startTime}
-            onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
-            label='Start'
-          />
-          <TimePicker
-            value={endTime}
-            onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime)}
-            label='End'
-          />
-        </Box>
+      <>
+        <Divider />
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 3 }} key={index}>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: { xs: 3.5, sm: 2 },
+              flexGrow: 1,
+              flexWrap: 'wrap',
+              flexDirection: { xs: 'column', sm: 'row' },
+            }}
+          >
+            <DatePicker
+              value={date}
+              onChange={(newDate) => handleChange(index, 'date', newDate)}
+              label='Date'
+            />
+            <TimePicker
+              value={startTime}
+              onChange={(newStartTime) => handleChange(index, 'startTime', newStartTime)}
+              label='Start'
+            />
+            <TimePicker
+              value={endTime}
+              onChange={(newEndTime) => handleChange(index, 'endTime', newEndTime)}
+              label='End'
+            />
+          </Box>
 
-        <Box>
-          <IconButton onClick={() => handleDelete(index)}>
-            <ClearIcon />
-          </IconButton>
+          <Box>
+            <IconButton onClick={() => handleDelete(index)}>
+              <ClearIcon />
+            </IconButton>
+          </Box>
         </Box>
-      </Box>
+      </>
     )
   }
 
@@ -183,7 +186,6 @@ const Page = () => {
       sx={{
         height: '80vh',
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'center',
       }}
     >
