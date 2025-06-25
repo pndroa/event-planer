@@ -167,7 +167,7 @@ const SurveyForm = ({
                 value={q.question}
                 onChange={(e) => updateQuestionText(i, e.target.value)}
                 error={isDuplicateQuestion(q.question, i)}
-                helperText={isDuplicateQuestion(q.question, i) ? 'Duplicate question!' : ''}
+                helperText={isDuplicateQuestion(q.question, i) ? 'Duplicate question!' : ' '}
                 sx={{ mb: 2 }}
                 slotProps={{
                   input: {
@@ -214,7 +214,7 @@ const SurveyForm = ({
                                 ? 'Required'
                                 : isDuplicate
                                   ? 'Duplicate'
-                                  : ''
+                                  : ' '
                             }
                             size='small'
                             slotProps={{
@@ -297,7 +297,7 @@ const SurveyForm = ({
                                     ? 'Required'
                                     : isDuplicate
                                       ? 'Duplicate date'
-                                      : '',
+                                      : ' ',
                                   fullWidth: true,
                                   size: 'small',
                                   sx: {
