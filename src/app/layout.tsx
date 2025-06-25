@@ -2,7 +2,6 @@ import React from 'react'
 import type { Metadata } from 'next'
 import { createClientForServer } from '@/utils/supabase/server'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import ErrorBoundaryWrapper from '@/components/errorBoundaryWrapper'
 import Header from '@/components/header'
 import Sidebar from '@/components/sidebar'
 import ContentWrapper from '@/components/layoutContentWrapper'
@@ -39,9 +38,7 @@ export default async function RootLayout({
             <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
               {showNavigation && <Sidebar />}
               <ContentWrapper showNavigation={showNavigation}>
-                <ErrorBoundaryWrapper>
-                  <NuqsAdapter>{children}</NuqsAdapter>
-                </ErrorBoundaryWrapper>
+                <NuqsAdapter>{children}</NuqsAdapter>
               </ContentWrapper>
             </Box>
           </Box>
